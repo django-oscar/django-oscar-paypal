@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.db.models import get_model
 
 from oscar.apps.checkout.views import PaymentDetailsView
-from oscar.apps.payment.exceptions import PaymentError
+from oscar.apps.payment.exceptions import PaymentError, UnableToTakePayment
 from oscar.apps.payment.models import SourceType, Source
 
 from paypal.express.facade import get_paypal_url, fetch_transaction_details, complete
@@ -166,8 +166,12 @@ class SuccessResponseView(PaymentDetailsView):
             token = self.request.POST['token']
         except KeyError:
             raise PaymentError("Unable to determine PayPal transaction details")
-        txn = complete(payer_id, token, amount=self.txn.amount,
-                       currency=self.txn.currency)
+
+        try:
+            txn = complete(payer_id, token, amount=self.txn.amount,
+                        currency=self.txn.currency)
+        except PayPalError:
+            raise UnableToTakePayment()
 
         # Record payment source
         source_type, is_created = SourceType.objects.get_or_create(name='PayPal')

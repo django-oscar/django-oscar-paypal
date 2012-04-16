@@ -46,7 +46,11 @@ def _fetch_response(method, extra_params):
     # Make request
     logger.debug("Making request: %s" % payload)
     start_time = time.time()
-    response = requests.post(settings.PAYPAL_API_URL, payload)
+    if getattr(settings, 'PAYPAL_SANDBOX_MODE', True):
+        url = 'https://api-3t.sandbox.paypal.com/nvp'
+    else:
+        url = 'https://www.paypal.com/nvp'
+    response = requests.post(url, payload)
     if response.status_code != 200:
         logger.error("Received status code %s from PayPal",
                      response.status_code)
@@ -56,7 +60,8 @@ def _fetch_response(method, extra_params):
     response_dict = urlparse.parse_qs(response.content)
     logger.debug("Received response: %s" % response.content)
 
-    # Record transaction data
+    # Record transaction data - we save this model whether the txn
+    # was successful or not
     txn = models.Transaction(
         method=method,
         version=API_VERSION,

@@ -1,50 +1,24 @@
-=================================
+===============================
 PayPal package for django-oscar
-=================================
+===============================
 
 This is a work in progress...
-
-Requirements
-============
-
-Express checkout from basket page
-Express checkout as payment method
-
 
 Installation
 ============
 
-Add following settings::
+Add following settings for which you'll need to create a sandbox account with
+PayPal::
 
-    PAYPAL_API_URL = ''
-    ...
+    PAYPAL_API_USERNAME = 'test_xxxx.gmail.com'
+    PAYPAL_API_PASSWORD = '123456789'
+    PAYPAL_API_SIGNATURE = '...'
+
+Augment your ``INSTALLED_APPS`` to include ``paypal.express``.
 
 Settings
 --------
 
-* ``PAYPAL_CURRENCY`` - the default currency to use for transactions.
-* ``PAYPAL_API_URL`` - the URL
-* ``PAYPAL_API_VERSION`` - the version of API used (defaults to 60.0)
-
-
-Notes
-=====
-
-Express checkout
-----------------
-
-Customer bypasses shipping address and goes straight to Express checkout from 
-the basket page.
-
-Supports pre-auth model
-
-Gotchas:
-- don't know who customer is until they return from paypal express - voucher may
-  not be valid at that point (eg used, expired)
-- can't validate country of shipping address until you hear back from PayPal
--
-
-Getting set-up:
-- Need a merchant account
-
-test@gmail.com / 332777704
+* ``PAYPAL_SANDBOX_MODE`` - whether to use PayPal's sandbox.  Defaults to ``True``.
+* ``PAYPAL_CURRENCY`` - the currency to use for transactions.  Defaults to ``GBP``.
+* ``PAYPAL_API_VERSION`` - the version of API used (defaults to ``60.0``)
