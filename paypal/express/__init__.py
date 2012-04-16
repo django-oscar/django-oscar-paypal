@@ -3,6 +3,7 @@ import urlparse
 import time
 import logging
 import requests
+from decimal import Decimal as D
 from django.conf import settings
 from oscar.apps.payment.exceptions import PaymentError
 from paypal.express import models
@@ -65,18 +66,19 @@ def _fetch_response(method, extra_params):
         response_time=response_time,
     )
     if txn.is_successful:
+        txn.correlation_id = response_dict['CORRELATIONID'][0]
         if method == SET_EXPRESS_CHECKOUT:
             txn.amount = params['AMT']
             txn.currency = params['CURRENCYCODE']
-            txn.correlation_id = response_dict['CORRELATIONID'][0]
             txn.token = response_dict['TOKEN'][0]
         elif method == GET_EXPRESS_CHECKOUT:
             txn.token = params['TOKEN']
+            txn.amount = D(response_dict['AMT'][0])
+            txn.currency = response_dict['CURRENCYCODE'][0]
         elif method == DO_EXPRESS_CHECKOUT:
             txn.token = params['TOKEN']
             txn.amount = params['AMT']
             txn.currency = response_dict['CURRENCYCODE'][0]
-            txn.correlation_id = response_dict['CORRELATIONID'][0]
     else:
         if 'L_ERRORCODE0' in response_dict:
             txn.error_code = response_dict['L_ERRORCODE0'][0]

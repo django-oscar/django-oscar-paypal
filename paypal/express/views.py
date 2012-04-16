@@ -21,7 +21,7 @@ Country = get_model('address', 'Country')
 class RedirectView(RedirectView):
     """
     Initiate the transaction with Paypal and redirect the user 
-    to PayPal's Express Checkout.
+    to PayPal's Express Checkout to perform the transaction.
     """
     permanent = False
 
@@ -77,11 +77,13 @@ class SuccessResponseView(PaymentDetailsView):
             payer_id = request.POST['payer_id']
             token = request.POST['token']
         except KeyError:
+            # Probably suspicious manipulation if we get here
             messages.error(self.request, "A problem occurred communicating with PayPal - please try again later")
             return HttpResponseRedirect(reverse('basket:summary'))
         try:
             self.fetch_paypal_data(payer_id, token)
         except PayPalError:
+            # Unable to fetch txn details from PayPal - we have to bail out
             messages.error(self.request, "A problem occurred communicating with PayPal - please try again later")
             return HttpResponseRedirect(reverse('basket:summary'))
         return super(SuccessResponseView, self).post(request, *args, **kwargs)
@@ -92,8 +94,12 @@ class SuccessResponseView(PaymentDetailsView):
         self.txn = fetch_transaction_details(token)
 
     def get_error_response(self):
-        # We bypass the normal session checks for shipping address
-        pass
+        # We bypass the normal session checks for shipping address and shipping
+        # method as they don't apply here.
+
+        # We do check that the order total is still the same as when we redirected 
+        # off to PayPal
+        assert False
 
     def get_txn_value(self, key):
         if not hasattr(self, 'txn_ctx'):

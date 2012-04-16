@@ -6,7 +6,7 @@ from django.contrib.sites.models import Site
 
 from paypal import express
 from paypal.express.models import Transaction
-from paypal.express.facade import get_paypal_url
+from paypal.express.facade import get_paypal_url, fetch_transaction_details
 
 
 class ExpressTests(TestCase):
@@ -86,3 +86,50 @@ class SuccessResponseTests(TestCase):
         self.assertEqual('60.0', txn.version)
         self.assertEqual('EC-6469953681606921P', txn.token)
             
+
+class MockedResponseTests(TestCase):
+    token = ''
+    response_body = ''
+
+    def setUp(self):
+        response = Mock()
+        response.content = self.response_body
+        response.status_code = 200
+        with patch('requests.post') as post:
+            post.return_value = response
+            self.txn = fetch_transaction_details(self.token)
+
+    def tearDown(self):
+        Transaction.objects.all().delete()
+
+
+class SuccessfulGetExpressCheckoutTests(MockedResponseTests):
+    token = 'EC-9LW34435GU332960W'
+    response_body = 'TOKEN=EC%2d9LW34435GU332960W&CHECKOUTSTATUS=PaymentActionNotInitiated&TIMESTAMP=2012%2d04%2d13T15%3a19%3a25Z&CORRELATIONID=83bda082c24d4&ACK=Success&VERSION=60%2e0&BUILD=2808426&EMAIL=david%2e_1332854868_per%40gmail%2ecom&PAYERID=7ZTRBDFYYA47W&PAYERSTATUS=verified&FIRSTNAME=David&LASTNAME=Winterbottom&COUNTRYCODE=GB&SHIPTONAME=David%20Winterbottom&SHIPTOSTREET=1%20Main%20Terrace&SHIPTOCITY=Wolverhampton&SHIPTOSTATE=West%20Midlands&SHIPTOZIP=W12%204LQ&SHIPTOCOUNTRYCODE=GB&SHIPTOCOUNTRYNAME=United%20Kingdom&ADDRESSSTATUS=Confirmed&CURRENCYCODE=GBP&AMT=6%2e99&SHIPPINGAMT=0%2e00&HANDLINGAMT=0%2e00&TAXAMT=0%2e00&INSURANCEAMT=0%2e00&SHIPDISCAMT=0%2e00'
+
+    def test_token_is_extracted(self):
+        self.assertEqual(self.token, self.txn.token)
+
+    def test_is_successful(self):
+        self.assertTrue(self.txn.is_successful)
+
+    def test_ack(self):
+        self.assertEqual('Success', self.txn.ack)
+
+    def test_amount_is_saved(self):
+        self.assertEqual(D('6.99'), self.txn.amount)
+
+    def test_currency_is_saved(self):
+        self.assertEqual('GBP', self.txn.currency)
+
+    def test_correlation_id_is_saved(self):
+        self.assertEqual('83bda082c24d4', self.txn.correlation_id)
+
+    def test_context(self):
+        ctx = self.txn.context
+        values = [
+            ('ACK', ['Success']),
+            ('LASTNAME', ['Winterbottom']),
+        ]
+        for k, v in values:
+            self.assertEqual(v, ctx[k])
