@@ -26,6 +26,14 @@ class RedirectView(RedirectView):
     permanent = False
 
     def get_redirect_url(self, **kwargs):
+        try:
+            return self._get_redirect_url(**kwargs)
+        except PayPalError, e:
+            messages.error(self.request, 
+                           "You are unable to use PayPal for this order: %s" % e)
+            return reverse('basket:summary')
+
+    def _get_redirect_url(self, **kwargs):
         basket = self.request.basket
         if basket.is_empty:
             messages.error(self.request, "Your basket is empty")
