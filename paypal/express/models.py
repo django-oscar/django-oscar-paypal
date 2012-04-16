@@ -48,3 +48,7 @@ class Transaction(models.Model):
     @property
     def context(self):
         return urlparse.parse_qs(self.raw_response)
+
+    def __unicode__(self):
+        return u'<Transaction method: %s: token: %s>' % (
+            self.method, self.token)

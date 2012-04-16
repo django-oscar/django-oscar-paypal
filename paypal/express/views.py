@@ -29,7 +29,7 @@ class RedirectView(RedirectView):
         basket = self.request.basket
         if basket.is_empty:
             messages.error(self.request, "Your basket is empty")
-            return HttpResponseRedirect(reverse('basket:summary'))
+            return reverse('basket:summary')
         if settings.DEBUG:
             # Determine the localserver's hostname to use when 
             # in testing mode
@@ -61,10 +61,9 @@ class SuccessResponseView(PaymentDetailsView):
             # Manipulation - redirect to basket page with warning message
             messages.error(self.request, "Unable to determine PayPal transaction details")
             return HttpResponseRedirect(reverse('basket:summary'))
-        self.fetch_paypal_data(payer_id, token)
 
         try:
-            self.txn = fetch_transaction_details(self.token)
+            self.fetch_paypal_data(payer_id, token)
         except PayPalError:
             messages.error(self.request, "A problem occurred communicating with PayPal - please try again later")
             return HttpResponseRedirect(reverse('basket:summary'))
@@ -90,6 +89,10 @@ class SuccessResponseView(PaymentDetailsView):
             # Unable to fetch txn details from PayPal - we have to bail out
             messages.error(self.request, "A problem occurred communicating with PayPal - please try again later")
             return HttpResponseRedirect(reverse('basket:summary'))
+
+        # Pass the user email so it can be stored with the order
+        kwargs['guest_email'] = self.txn.context['EMAIL'][0]
+
         return super(SuccessResponseView, self).post(request, *args, **kwargs)
 
     def fetch_paypal_data(self, payer_id, token):
@@ -120,14 +123,15 @@ class SuccessResponseView(PaymentDetailsView):
         return self.txn_ctx[key][0]
 
     def get_context_data(self, **kwargs):
+        ctx = super(SuccessResponseView, self).get_context_data(**kwargs)
         if not hasattr(self, 'payer_id'):
-            return {}
-        ctx = {
+            return ctx
+        ctx.update({
             'payer_id': self.payer_id,
             'token': self.token,
             'paypal_user_email': self.get_txn_value('EMAIL'),
             'paypal_amount': D(self.get_txn_value('AMT')),
-        }
+        })
         # We convert the PayPal response values into those that match Oscar's normal
         # context so we can re-use the preview template as is
         shipping_address_fields = [
@@ -161,7 +165,8 @@ class SuccessResponseView(PaymentDetailsView):
             token = self.request.POST['token']
         except KeyError:
             raise PaymentError("Unable to determine PayPal transaction details")
-        txn = complete(payer_id, token)
+        txn = complete(payer_id, token, amount=self.txn.amount,
+                       currency=self.txn.currency)
 
         # Record payment source
         source_type, is_created = SourceType.objects.get_or_create(name='PayPal')

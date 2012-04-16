@@ -30,13 +30,6 @@ def fetch_transaction_details(token):
     return get_txn(token)
 
 
-def complete(payer_id, token, amount=None, currency=None):
-    if amount is None or currency is None:
-        try:
-            txn = Transaction.objects.get(token=token, method=SET_EXPRESS_CHECKOUT)
-        except Transaction.DoesNotExist:
-            raise PaymentError("Unable to find SetExpressCheckout transaction for token %s" % token)
-        amount = txn.amount
-        currency = txn.currency
+def complete(payer_id, token, amount, currency):
     return do_txn(payer_id, token, amount, currency)
 
