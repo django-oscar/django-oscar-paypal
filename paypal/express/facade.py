@@ -4,7 +4,7 @@ from django.conf import settings
 
 from oscar.apps.payment.exceptions import PaymentError
 
-from paypal.express import set, get, do, SET_EXPRESS_CHECKOUT
+from paypal.express import set_txn, get_txn, do_txn, SET_EXPRESS_CHECKOUT
 from paypal.express.models import Transaction
 
 
@@ -20,14 +20,14 @@ def get_paypal_url(basket, host=None, scheme='https'):
         host = Site.objects.get_current().domain
     return_url = '%s://%s%s' % (scheme, host, reverse('paypal-success-response'))
     cancel_url = '%s://%s%s' % (scheme, host, reverse('paypal-cancel-response'))
-    return set(amount=basket.total_incl_tax,
-               currency=currency,
-               return_url=return_url,
-               cancel_url=cancel_url)
+    return set_txn(amount=basket.total_incl_tax,
+                   currency=currency,
+                   return_url=return_url,
+                   cancel_url=cancel_url)
 
 
 def fetch_transaction_details(token):
-    return get(token)
+    return get_txn(token)
 
 
 def complete(payer_id, token, amount=None, currency=None):
@@ -38,5 +38,5 @@ def complete(payer_id, token, amount=None, currency=None):
             raise PaymentError("Unable to find SetExpressCheckout transaction for token %s" % token)
         amount = txn.amount
         currency = txn.currency
-    return do(payer_id, token, amount, currency)
+    return do_txn(payer_id, token, amount, currency)
 

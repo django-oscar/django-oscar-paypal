@@ -92,7 +92,7 @@ def _fetch_response(method, extra_params):
     return txn
 
 
-def set(amount, currency, return_url, cancel_url, action=SALE):
+def set_txn(amount, currency, return_url, cancel_url, action=SALE):
     """
     Register the transaction with PayPal to get a token which we use in the
     redirect URL.  This is the 'SetExpressCheckout' from their documentation.
@@ -116,7 +116,7 @@ def set(amount, currency, return_url, cancel_url, action=SALE):
     return '%s?%s' % (settings.PAYPAL_EXPRESS_URL, urllib.urlencode(params))
 
 
-def get(token):
+def get_txn(token):
     """
     Fetch details of a transaction from PayPal using the token as
     an identifier.
@@ -124,7 +124,7 @@ def get(token):
     return _fetch_response(GET_EXPRESS_CHECKOUT, {'TOKEN': token})
 
 
-def do(payer_id, token, amount, currency, action=SALE):
+def do_txn(payer_id, token, amount, currency, action=SALE):
     """
     DoExpressCheckoutPayment
     """
