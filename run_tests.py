@@ -7,6 +7,28 @@ from optparse import OptionParser
 from django.conf import settings, global_settings
 
 if not settings.configured:
+    extra_settings = {
+        'PAYPAL_EXPRESS_URL': 'https://www.sandbox.paypal.com/webscr',
+    }
+    try:
+        from integration import *
+    except ImportError:
+        extra_settings.update({
+            'PAYPAL_API_USERNAME': '',
+            'PAYPAL_API_PASSWORD': '',
+            'PAYPAL_API_SIGNATURE': '',
+        })
+    else:
+        for key, value in locals().items():
+            if key.startswith('PAYPAL'):
+                extra_settings[key] = value
+
+    from oscar.defaults import *
+    for key, value in locals().items():
+        if key.startswith('OSCAR'):
+            extra_settings[key] = value
+    extra_settings['OSCAR_ALLOW_ANON_CHECKOUT'] = True
+
     settings.configure(
             DATABASES={
                 'default': {
@@ -19,11 +41,25 @@ if not settings.configured:
                 'django.contrib.contenttypes',
                 'django.contrib.sessions',
                 'django.contrib.sites',
-                'paypal',
+                'oscar.apps.checkout',
+                'oscar.apps.partner',
+                'oscar.apps.customer',
+                'oscar.apps.shipping',
+                'oscar.apps.offer',
+                'oscar.apps.catalogue',
+                'oscar.apps.payment',
+                'oscar.apps.voucher',
+                'oscar.apps.basket',
+                'oscar.apps.order',
+                'oscar.apps.address',
+                'paypal.express',
                 'south',
                 ],
             DEBUG=False,
+            SOUTH_TESTS_MIGRATE=False,
             SITE_ID=1,
+            ROOT_URLCONF='tests.urls',
+            **extra_settings
         )
 
 from django.test.simple import DjangoTestSuiteRunner
@@ -35,10 +71,10 @@ def run_tests(*test_args):
         patch_for_test_db_setup()
 
     if not test_args:
-        test_args = ['paypal']
+        test_args = ['express']
 
     # Run tests
-    test_runner = DjangoTestSuiteRunner(verbosity=2)
+    test_runner = DjangoTestSuiteRunner(verbosity=1)
 
     c = coverage(source=['paypal'], omit=['*migrations*', '*tests*'])
     c.start()
