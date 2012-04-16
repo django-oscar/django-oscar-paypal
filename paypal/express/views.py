@@ -99,7 +99,14 @@ class SuccessResponseView(PaymentDetailsView):
 
         # We do check that the order total is still the same as when we redirected 
         # off to PayPal
-        assert False
+        txn_amount = self.txn.amount
+        order_total = self.request.basket.total_incl_tax
+
+        if txn_amount != order_total:
+            messages.error(self.request, 
+                           "Your order total (%s) differs from the total PayPal authorised (%s) - aborting" % (
+                               order_total, txn_amount))
+            return HttpResponseRedirect(reverse('basket:summary'))
 
     def get_txn_value(self, key):
         if not hasattr(self, 'txn_ctx'):
