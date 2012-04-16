@@ -26,6 +26,10 @@ class RedirectView(RedirectView):
     permanent = False
 
     def get_redirect_url(self, **kwargs):
+        basket = self.request.basket
+        if basket.is_empty:
+            messages.error(self.request, "Your basket is empty")
+            return HttpResponseRedirect(reverse('basket:summary'))
         if settings.DEBUG:
             # Determine the localserver's hostname to use when 
             # in testing mode
