@@ -62,7 +62,8 @@ if not settings.configured:
             **extra_settings
         )
 
-from django.test.simple import DjangoTestSuiteRunner
+#from django.test.simple import DjangoTestSuiteRunner
+from django_nose import NoseTestSuiteRunner
 
 
 def run_tests(*test_args):
@@ -71,10 +72,10 @@ def run_tests(*test_args):
         patch_for_test_db_setup()
 
     if not test_args:
-        test_args = ['express']
+        test_args = ['tests']
 
     # Run tests
-    test_runner = DjangoTestSuiteRunner(verbosity=1)
+    test_runner = NoseTestSuiteRunner(verbosity=1)
 
     c = coverage(source=['paypal'], omit=['*migrations*', '*tests*'])
     c.start()
