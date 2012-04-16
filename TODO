@@ -1,7 +1,6 @@
 Validate currency code
 Validate max value isn't > 10k 
-Start using purl for URL manipulation
 Different transaction types / payment actions
-Freezing basket issues?
-Tests for get transaction
 Used as a payment option
+
+How to whitelist countries?
