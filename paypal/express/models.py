@@ -52,3 +52,7 @@ class Transaction(models.Model):
     def __unicode__(self):
         return u'<Transaction method: %s: token: %s>' % (
             self.method, self.token)
+
+    def value(self, key):
+        ctx = self.context
+        return ctx[key][0] if key in ctx else None

@@ -91,7 +91,7 @@ class SuccessResponseView(PaymentDetailsView):
             return HttpResponseRedirect(reverse('basket:summary'))
 
         # Pass the user email so it can be stored with the order
-        kwargs['guest_email'] = self.txn.context['EMAIL'][0]
+        kwargs['guest_email'] = self.txn.value('EMAIL')
 
         return super(SuccessResponseView, self).post(request, *args, **kwargs)
 
@@ -115,13 +115,6 @@ class SuccessResponseView(PaymentDetailsView):
                                order_total, txn_amount))
             return HttpResponseRedirect(reverse('basket:summary'))
 
-    def get_txn_value(self, key):
-        if not hasattr(self, 'txn_ctx'):
-            self.txn_ctx = self.txn.context
-        if key not in self.txn_ctx:
-            return None
-        return self.txn_ctx[key][0]
-
     def get_context_data(self, **kwargs):
         ctx = super(SuccessResponseView, self).get_context_data(**kwargs)
         if not hasattr(self, 'payer_id'):
@@ -129,23 +122,23 @@ class SuccessResponseView(PaymentDetailsView):
         ctx.update({
             'payer_id': self.payer_id,
             'token': self.token,
-            'paypal_user_email': self.get_txn_value('EMAIL'),
-            'paypal_amount': D(self.get_txn_value('AMT')),
+            'paypal_user_email': self.txn.value('EMAIL'),
+            'paypal_amount': D(self.txn.value('AMT')),
         })
         # We convert the PayPal response values into those that match Oscar's normal
         # context so we can re-use the preview template as is
         shipping_address_fields = [
-            self.get_txn_value('SHIPTONAME'),
-            self.get_txn_value('SHIPTOSTREET'),
-            self.get_txn_value('SHIPTOCITY'),
-            self.get_txn_value('SHIPTOSTATE'),
-            self.get_txn_value('SHIPTOZIP'),
-            self.get_txn_value('SHIPTOCOUNTRYNAME'),
+            self.txn.value('SHIPTONAME'),
+            self.txn.value('SHIPTOSTREET'),
+            self.txn.value('SHIPTOCITY'),
+            self.txn.value('SHIPTOSTATE'),
+            self.txn.value('SHIPTOZIP'),
+            self.txn.value('SHIPTOCOUNTRYNAME'),
         ]
         ctx['shipping_address'] = {
             'active_address_fields': filter(bool, shipping_address_fields)
         }
-        shipping_charge = D(self.get_txn_value('SHIPPINGAMT'))
+        shipping_charge = D(self.txn.value('SHIPPINGAMT'))
         ctx['shipping_method'] = {
             'name': 'PayPal delivery',
             'description': 'Some description here',
@@ -182,7 +175,7 @@ class SuccessResponseView(PaymentDetailsView):
         the data returned by PayPal.
         """
         # Determine names - PayPal uses a single field
-        ship_to_name = self.get_txn_value('SHIPTONAME')
+        ship_to_name = self.txn.value('SHIPTONAME')
         first_name = last_name = None
         parts = ship_to_name.split()
         if len(parts) == 1:
@@ -194,9 +187,9 @@ class SuccessResponseView(PaymentDetailsView):
         return ShippingAddress.objects.create(
             first_name=first_name,
             last_name=last_name,
-            line1=self.get_txn_value('SHIPTOSTREET'),
-            line4=self.get_txn_value('SHIPTOCITY'),
-            state=self.get_txn_value('SHIPTOSTATE'),
-            postcode=self.get_txn_value('SHIPTOZIP'),
-            country=Country.objects.get(iso_3166_1_a2=self.get_txn_value('COUNTRYCODE'))
+            line1=self.txn.value('SHIPTOSTREET'),
+            line4=self.txn.value('SHIPTOCITY'),
+            state=self.txn.value('SHIPTOSTATE'),
+            postcode=self.txn.value('SHIPTOZIP'),
+            country=Country.objects.get(iso_3166_1_a2=self.txn.value('COUNTRYCODE'))
         )
