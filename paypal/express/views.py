@@ -11,7 +11,7 @@ from oscar.apps.checkout.views import PaymentDetailsView
 from oscar.apps.payment.exceptions import PaymentError, UnableToTakePayment
 from oscar.apps.payment.models import SourceType, Source
 
-from paypal.express.facade import get_paypal_url, fetch_transaction_details, complete
+from paypal.express.facade import get_paypal_url, fetch_transaction_details, confirm_transaction
 from paypal.express import PayPalError
 
 ShippingAddress = get_model('order', 'ShippingAddress')
@@ -175,8 +175,8 @@ class SuccessResponseView(PaymentDetailsView):
             raise PaymentError("Unable to determine PayPal transaction details")
 
         try:
-            txn = complete(payer_id, token, amount=self.txn.amount,
-                        currency=self.txn.currency)
+            txn = confirm_transaction(payer_id, token, amount=self.txn.amount,
+                                      currency=self.txn.currency)
         except PayPalError:
             raise UnableToTakePayment()
 

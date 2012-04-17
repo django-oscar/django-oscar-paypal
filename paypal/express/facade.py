@@ -1,8 +1,21 @@
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
-from paypal.express import set_txn, get_txn, do_txn, PayPalError, SALE
+from paypal.express.models import Transaction
+from paypal.express import (
+    set_txn, get_txn, do_txn, SALE, AUTHORIZATION, ORDER,
+    do_capture, DO_EXPRESS_CHECKOUT, do_void
+)
+
+
+def _get_payment_action():
+    # PayPal supports 3 actions: 'Sale', 'Authorization', 'Order'
+    action = getattr(settings, 'PAYPAL_PAYMENT_ACTION', SALE)
+    if action not in (SALE, AUTHORIZATION, ORDER):
+        raise ImproperlyConfigured("'%s' is not a valid payment action" % action)
+    return action
 
 
 def get_paypal_url(basket, user=None, host=None, scheme='https'):
@@ -18,9 +31,6 @@ def get_paypal_url(basket, user=None, host=None, scheme='https'):
     return_url = '%s://%s%s' % (scheme, host, reverse('paypal-success-response'))
     cancel_url = '%s://%s%s' % (scheme, host, reverse('paypal-cancel-response'))
 
-    # PayPal supports 3 actions: 'Sale', 'Authorization', 'Order'
-    action = getattr(settings, 'PAYPAL_PAYMENT_ACTION', SALE)
-
     # Pass a default billing address is there is one
     address = None
     if user:
@@ -31,7 +41,7 @@ def get_paypal_url(basket, user=None, host=None, scheme='https'):
                    currency=currency,
                    return_url=return_url,
                    cancel_url=cancel_url,
-                   action=action,
+                   action=_get_payment_action(),
                    user=user,
                    address=address)
 
@@ -43,10 +53,29 @@ def fetch_transaction_details(token):
     return get_txn(token)
 
 
-def complete(payer_id, token, amount, currency):
+def confirm_transaction(payer_id, token, amount, currency):
     """
     Confirm the payment action.
     """
-    action = getattr(settings, 'PAYPAL_PAYMENT_ACTION', SALE)
-    return do_txn(payer_id, token, amount, currency, action=action)
+    return do_txn(payer_id, token, amount, currency, 
+                  action=_get_payment_action())
 
+
+def capture_authorization(token, note=None):
+    """
+    Capture a previous authorization.
+    """
+    txn = Transaction.objects.get(token=token,
+                                  method=DO_EXPRESS_CHECKOUT)
+    return do_capture(txn.value('TRANSACTIONID'), 
+                      txn.amount, txn.currency, note=note)
+
+
+def void_authorization(token, note=None):
+    """
+    Void a previous authorization.
+    """
+    txn = Transaction.objects.get(token=token,
+                                  method=DO_EXPRESS_CHECKOUT)
+    return do_void(txn.value('TRANSACTIONID'), note=note)
+    

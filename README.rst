@@ -25,7 +25,7 @@ See the `PDF documentation`_ for the gory details.
 Installation
 ============
 
-First, you'll need to create a 
+First, you'll need to create a Sandbox account with PayPal.
 
 Fetch package (not ready just yet)::
 

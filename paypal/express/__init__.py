@@ -12,6 +12,8 @@ from paypal.express import models
 SET_EXPRESS_CHECKOUT = 'SetExpressCheckout'
 GET_EXPRESS_CHECKOUT = 'GetExpressCheckoutDetails'
 DO_EXPRESS_CHECKOUT = 'DoExpressCheckoutPayment'
+DO_CAPTURE = 'DoCapture'
+DO_VOID = 'DoVoid'
 
 SALE, AUTHORIZATION, ORDER = 'Sale', 'Authorization', 'Order'
 API_VERSION = getattr(settings, 'PAYPAL_API_VERSION', '60.0')
@@ -136,11 +138,6 @@ def set_txn(basket, currency, return_url, cancel_url, action=SALE, user=None,
     params['ITEMAMT'] = basket.total_incl_tax
     params['TAXAMT'] = D('0.00')
 
-    # Generic order description - this isn't shown if two of L_DESC, L_NAME,
-    # L_NUMBER are included (which they are above).  Included here for reference
-    # in case I ever make this method customisable.
-    params['DESC'] = 'Submitted from django-oscar'
-
     # Customer services number
     customer_service_num = getattr(settings, 'PAYPAL_CUSTOMER_SERVICES_NUMBER', None)
     if customer_service_num:
@@ -225,3 +222,31 @@ def do_txn(payer_id, token, amount, currency, action=SALE):
         'PAYMENTACTION': action,
     }
     return _fetch_response(DO_EXPRESS_CHECKOUT, params)
+
+
+def do_capture(txn_id, amount, currency, complete_type='Complete',
+               note=None):
+    """
+    Capture payment from a previous transaction
+
+    See https://cms.paypal.com/uk/cgi-bin/?&cmd=_render-content&content_ID=developer/e_howto_api_soap_r_DoCapture
+    """
+    params = {
+        'AUTHORIZATIONID': txn_id,
+        'AMT': amount,
+        'CURRENCYCODE': currency,
+        'COMPLETETYPE': complete_type,
+    }
+    if note:
+        params['NOTE'] = note
+    return _fetch_response(DO_CAPTURE, params)
+
+
+def do_void(txn_id, note=None):
+    params = {
+        'AUTHORIZATIONID': txn_id,
+    }
+    if note:
+        params['NOTE'] = note
+    return _fetch_response(DO_VOID, params)
+
