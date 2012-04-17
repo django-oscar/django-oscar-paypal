@@ -13,11 +13,16 @@ class MockedResponseTests(TestCase):
         response = Mock()
         response.content = response_body
         response.status_code = 200
+
+        basket = Mock()
+        basket.total_incl_tax = D('10.00')
+        basket.all_lines = Mock(return_value=[])
+
         with patch('requests.post') as post:
             post.return_value = response
             with self.assertRaises(express.PayPalError):
-                express.set_txn(D('10.00'), 'GBP', 'http://localhost:8000/success',
-                                  'http://localhost:8000/error')
+                express.set_txn(basket, 'GBP', 'http://localhost:8000/success',
+                                'http://localhost:8000/error')
 
 
 class SuccessResponseTests(TestCase):
@@ -27,10 +32,15 @@ class SuccessResponseTests(TestCase):
         response = Mock()
         response.content = response_body
         response.status_code = 200
+
+        basket = Mock()
+        basket.total_incl_tax = D('10.00')
+        basket.all_lines = Mock(return_value=[])
+
         with patch('requests.post') as post:
             post.return_value = response
-            self.url = express.set_txn(D('10.00'), 'GBP', 'http://localhost:8000/success',
-                                   'http://localhost:8000/error')
+            self.url = express.set_txn(basket, 'GBP', 'http://localhost:8000/success',
+                                       'http://localhost:8000/error')
 
     def tearDown(self):
         Transaction.objects.all().delete()

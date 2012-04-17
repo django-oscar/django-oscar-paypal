@@ -34,6 +34,7 @@ class SuccessfulSetExpressCheckoutTests(MockedResponseTests):
     def perform_action(self):
         basket = Mock()
         basket.total_incl_tax = D('200')
+        basket.all_lines = Mock(return_value=[])
         url_str = get_paypal_url(basket)
         self.url = URL.from_string(url_str)
 
