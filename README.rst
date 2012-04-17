@@ -22,3 +22,4 @@ Settings
 * ``PAYPAL_SANDBOX_MODE`` - whether to use PayPal's sandbox.  Defaults to ``True``.
 * ``PAYPAL_CURRENCY`` - the currency to use for transactions.  Defaults to ``GBP``.
 * ``PAYPAL_API_VERSION`` - the version of API used (defaults to ``60.0``)
+* ``PAYPAL_ALLOW_NOTE`` - whether to allow the customer to enter a note (defaults to ``True``)

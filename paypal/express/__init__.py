@@ -132,6 +132,15 @@ def set_txn(basket, currency, return_url, cancel_url, action=SALE):
     params['ITEMAMT'] = basket.total_incl_tax
     params['TAXAMT'] = D('0.00')
 
+    # Generic order description - this isn't shown if two of L_DESC, L_NAME,
+    # L_NUMBER are included (which they are above).  Included here for reference
+    # in case I ever make this method customisable.
+    params['DESC'] = 'Submitted from django-oscar'
+    
+    allow_note = getattr(settings, 'PAYPAL_ALLOW_NOTE', True)
+    if allow_note:
+        params['ALLOWNOTE'] = 1
+
     params['SHIPPINGAMT'] = D('0.00')
     params['HANDLINGAMT'] = D('0.00')
 

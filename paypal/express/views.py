@@ -144,7 +144,8 @@ class SuccessResponseView(PaymentDetailsView):
             self.txn.value('SHIPTOCOUNTRYNAME'),
         ]
         ctx['shipping_address'] = {
-            'active_address_fields': filter(bool, shipping_address_fields)
+            'active_address_fields': filter(bool, shipping_address_fields),
+            'notes': self.txn.value('NOTETEXT'),
         }
         shipping_charge = D(self.txn.value('SHIPPINGAMT'))
         ctx['shipping_method'] = {
