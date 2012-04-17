@@ -97,11 +97,18 @@ def _fetch_response(method, extra_params):
     return txn
 
 
-def set_txn(amount, currency, return_url, cancel_url, action=SALE):
+def set_txn(basket, currency, return_url, cancel_url, action=SALE):
     """
     Register the transaction with PayPal to get a token which we use in the
     redirect URL.  This is the 'SetExpressCheckout' from their documentation.
     """
+    # PayPal have an upper limit on transactions.  It's in dollars which is 
+    # a fiddly to work with.  Lazy solution - only check when dollars are used as
+    # the PayPal currency.
+    amount = basket.total_incl_tax
+    if currency == 'USD' and amount > 10000:
+        raise PayPalError('PayPal can only be used for orders up to 10000 USD')
+
     params = {
         'AMT': amount,
         'CURRENCYCODE': currency,
@@ -109,6 +116,25 @@ def set_txn(amount, currency, return_url, cancel_url, action=SALE):
         'CANCELURL': cancel_url,
         'PAYMENTACTION': action,
     }
+
+    # Add item details
+    for index, line in enumerate(basket.all_lines()):
+        product = line.product
+        params['L_NAME%d' % index] = product.get_title()
+        params['L_NUMBER%d' % index] = product.upc
+        params['L_DESC%d' % index] = product.description
+        params['L_AMT%d' % index] = line.unit_price_incl_tax
+        params['L_QTY%d' % index] = line.quantity
+
+    # We include tax in the prices rather than separately as that's how it's
+    # done on most British/Australian sites.  Will need to refactor in the
+    # future no doubt
+    params['ITEMAMT'] = basket.total_incl_tax
+    params['TAXAMT'] = D('0.00')
+
+    params['SHIPPINGAMT'] = D('0.00')
+    params['HANDLINGAMT'] = D('0.00')
+
     txn = _fetch_response(SET_EXPRESS_CHECKOUT, params)
 
     # Construct return URL

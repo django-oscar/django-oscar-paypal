@@ -18,17 +18,10 @@ def get_paypal_url(basket, host=None, scheme='https'):
     return_url = '%s://%s%s' % (scheme, host, reverse('paypal-success-response'))
     cancel_url = '%s://%s%s' % (scheme, host, reverse('paypal-cancel-response'))
 
-    # PayPal have an upper limit on transactions.  It's in dollars which is 
-    # a fiddly to work with.  Lazy solution - only check when dollars are used as
-    # the PayPal currency.
-    amount = basket.total_incl_tax
-    if currency == 'USD' and amount > 10000:
-        raise PayPalError('PayPal can only be used for orders up to 10000 USD')
-
     # PayPal supports 3 actions: 'Sale', 'Authorization', 'Order'
     action = getattr(settings, 'PAYPAL_PAYMENT_ACTION', SALE)
 
-    return set_txn(amount=amount,
+    return set_txn(basket=basket,
                    currency=currency,
                    return_url=return_url,
                    cancel_url=cancel_url,
