@@ -38,13 +38,19 @@ class RedirectView(RedirectView):
         if basket.is_empty:
             messages.error(self.request, "Your basket is empty")
             return reverse('basket:summary')
+
+        params = {'basket': self.request.basket}
         if settings.DEBUG:
             # Determine the localserver's hostname to use when 
             # in testing mode
-            return get_paypal_url(self.request.basket, 
-                                  host=self.request.META['HTTP_HOST'],
-                                  scheme='http')
-        return get_paypal_url(self.request.basket)
+            params['host'] = self.request.META['HTTP_HOST']
+            params['scheme'] = 'http'
+
+        user = self.request.user
+        if user.is_authenticated():
+            params['user'] = user
+
+        return get_paypal_url(**params)
 
 
 class CancelResponseView(RedirectView):

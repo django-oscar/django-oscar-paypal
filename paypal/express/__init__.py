@@ -97,7 +97,8 @@ def _fetch_response(method, extra_params):
     return txn
 
 
-def set_txn(basket, currency, return_url, cancel_url, action=SALE):
+def set_txn(basket, currency, return_url, cancel_url, action=SALE, user=None,
+            address=None):
     """
     Register the transaction with PayPal to get a token which we use in the
     redirect URL.  This is the 'SetExpressCheckout' from their documentation.
@@ -166,6 +167,18 @@ def set_txn(basket, currency, return_url, cancel_url, action=SALE):
         if locale not in valid_choices:
             raise ImproperlyConfigured("'%s' is not a valid locale code" % locale)
         params['LOCALECODE'] = locale
+
+    # Contact details and address details - we provide these as it would make the PayPal
+    # registration process smoother is the user doesn't already have an account.
+    if user:
+        params['EMAIL'] = user.email
+    if address:
+        params['SHIPTOSTREET'] = address.line1
+        params['SHIPTOSTREET2'] = address.line2
+        params['SHIPTOCITY'] = address.line4
+        params['SHIPTOSTATE'] = address.state
+        params['SHIPTOZIP'] = address.postcode
+        params['SHIPTOCOUNTRYCODE'] = address.country.iso_3166_1_a2
 
     # Confirmed shipping address
     confirm_shipping_addr = getattr(settings, 'PAYPAL_CONFIRM_SHIPPING', None)

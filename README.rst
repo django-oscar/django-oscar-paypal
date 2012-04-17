@@ -34,8 +34,8 @@ Not included
 ------------
 
 The following options are part of the PayPal Express API but are not handled
-within this implementation - mainly as there's nowhere in oscar to store the
-return value.
+within this implementation - mainly as there's not obvious how you can handle
+these in a 'generic' way within oscar:
 
 * Gift wrapping
 * Buyer consent to receive promotional emails
@@ -43,3 +43,5 @@ return value.
 * Not using shipping address from PayPal
 * Shipping address overrides
 * User confirming order on PayPal (bypassing review stage)
+* Instant update API (for dynamically setting shipping methods based on entered
+  address on PayPal's side)
