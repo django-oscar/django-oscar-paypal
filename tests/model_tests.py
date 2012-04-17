@@ -17,3 +17,11 @@ class TransactionTests(TestCase):
                                          raw_response=response,
                                          response_time=0)
         self.assertEqual('PaymentActionNotInitiated', txn.value('CHECKOUTSTATUS'))
+
+    def test_warnings_are_successful(self):
+        txn = Transaction.objects.create(raw_request='',
+                                         raw_response='',
+                                         ack='SuccessWithWarning',
+                                         response_time=0)
+        self.assertTrue(txn.is_successful)
+

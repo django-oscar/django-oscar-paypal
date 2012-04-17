@@ -1,3 +1,4 @@
+import re
 from django.db import models
 import urlparse
 import urllib
@@ -15,7 +16,7 @@ class Transaction(models.Model):
     currency = models.CharField(max_length=8, null=True, blank=True)
 
     # Response params
-    SUCCESS, FAILURE = 'Success', 'Failure'
+    SUCCESS, SUCCESS_WITH_WARNING, FAILURE = 'Success', 'SuccessWithWarning', 'Failure'
     ack = models.CharField(max_length=32)
 
     correlation_id = models.CharField(max_length=32, null=True, blank=True)
@@ -36,18 +37,31 @@ class Transaction(models.Model):
         ordering = ('-date_created',)
 
     def save(self, *args, **kwargs):
-        params = urlparse.parse_qs(self.raw_request)
-        params['PWD'] = 'XXXXXXX'
-        self.raw_request = urllib.urlencode(params)
+        self.raw_request = re.sub(r'PWD=\d+&', 'PWD=XXXXXX&', self.raw_request)
         return super(Transaction, self).save(*args, **kwargs)
 
     @property
     def is_successful(self):
-        return self.ack == self.SUCCESS
+        return self.ack in (self.SUCCESS, self.SUCCESS_WITH_WARNING)
 
     @property
     def context(self):
         return urlparse.parse_qs(self.raw_response)
+
+    def request(self):
+        request_params = urlparse.parse_qs(self.raw_request)
+        return self._as_table(request_params)
+    request.allow_tags = True
+
+    def response(self):
+        return self._as_table(self.context)
+    response.allow_tags = True
+
+    def _as_table(self, params):
+        rows = []
+        for k, v in sorted(params.items()):
+            rows.append('<tr><th>%s</th><td>%s</td></tr>' % (k, v[0]))
+        return '<table>%s</table>' % ''.join(rows)
 
     def __unicode__(self):
         return u'<Transaction method: %s: token: %s>' % (
