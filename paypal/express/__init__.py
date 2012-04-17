@@ -136,7 +136,22 @@ def set_txn(basket, currency, return_url, cancel_url, action=SALE):
     # L_NUMBER are included (which they are above).  Included here for reference
     # in case I ever make this method customisable.
     params['DESC'] = 'Submitted from django-oscar'
-    
+
+    # Customer services number
+    customer_service_num = getattr(settings, 'PAYPAL_CUSTOMER_SERVICES_NUMBER', None)
+    if customer_service_num:
+        params['CUSTOMERSERVICENUMBER'] = customer_service_num
+
+    # Page styles
+    page_style = getattr(settings, 'PAYPAL_PAGESTYLE', None)
+    if page_style:
+        params['PAGESTYLE'] = page_style
+    else:
+        display_params = {
+            'HDRIMG': getattr(settings, 'PAYPAL_HEADER_IMG', None)
+        }
+        params.update(x for x in display_params.items() if bool(x[1]))
+
     allow_note = getattr(settings, 'PAYPAL_ALLOW_NOTE', True)
     if allow_note:
         params['ALLOWNOTE'] = 1

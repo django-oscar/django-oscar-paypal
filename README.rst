@@ -23,3 +23,17 @@ Settings
 * ``PAYPAL_CURRENCY`` - the currency to use for transactions.  Defaults to ``GBP``.
 * ``PAYPAL_API_VERSION`` - the version of API used (defaults to ``60.0``)
 * ``PAYPAL_ALLOW_NOTE`` - whether to allow the customer to enter a note (defaults to ``True``)
+* ``PAYPAL_CUSTOMER_SERVICES_NUMBER`` - customer services number to display on
+  the PayPal review page.
+* ``PAYPAL_HEADER_IMG`` - the absolute path to a header image 
+
+Not included
+------------
+
+The following options are part of the PayPal Express API but are not handled
+within this implementation - mainly as there's nowhere in oscar to store the
+return value.
+
+* Gift wrapping
+* Buyer consent to receive promotional emails
+* Survey questions
