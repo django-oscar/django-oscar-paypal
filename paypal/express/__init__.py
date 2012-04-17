@@ -142,15 +142,27 @@ def set_txn(basket, currency, return_url, cancel_url, action=SALE):
     if customer_service_num:
         params['CUSTOMERSERVICENUMBER'] = customer_service_num
 
-    # Page styles
+    # Display settings
     page_style = getattr(settings, 'PAYPAL_PAGESTYLE', None)
+    header_image = getattr(settings, 'PAYPAL_HEADER_IMG', None)
     if page_style:
         params['PAGESTYLE'] = page_style
+    elif header_image:
+        params['HDRIMG'] = header_image
     else:
         display_params = {
-            'HDRIMG': getattr(settings, 'PAYPAL_HEADER_IMG', None)
+            'HDRBACKCOLOR': getattr(settings, 'PAYPAL_HEADER_BACK_COLOR', None),
+            'HDRBORDERCOLOR': getattr(settings, 'PAYPAL_HEADER_BORDER_COLOR', None),
         }
         params.update(x for x in display_params.items() if bool(x[1]))
+
+    # Locale
+    locale = getattr(settings, 'PAYPAL_LOCALE', None)
+    if locale:
+        valid_choices = ('AU', 'DE', 'FR', 'GB', 'IT', 'ES', 'JP', 'US')
+        if locale not in valid_choices:
+            raise ImproperlyConfigured("'%s' is not a valid locale code" % locale)
+        params['LOCALECODE'] = locale
 
     allow_note = getattr(settings, 'PAYPAL_ALLOW_NOTE', True)
     if allow_note:
