@@ -101,6 +101,9 @@ def set_txn(basket, currency, return_url, cancel_url, action=SALE):
     """
     Register the transaction with PayPal to get a token which we use in the
     redirect URL.  This is the 'SetExpressCheckout' from their documentation.
+
+    There are quite a few options that can be passed to PayPal to configure this
+    request - most are controlled by PAYPAL_* settings.
     """
     # PayPal have an upper limit on transactions.  It's in dollars which is 
     # a fiddly to work with.  Lazy solution - only check when dollars are used as
@@ -164,6 +167,12 @@ def set_txn(basket, currency, return_url, cancel_url, action=SALE):
             raise ImproperlyConfigured("'%s' is not a valid locale code" % locale)
         params['LOCALECODE'] = locale
 
+    # Confirmed shipping address
+    confirm_shipping_addr = getattr(settings, 'PAYPAL_CONFIRM_SHIPPING', None)
+    if confirm_shipping_addr:
+        params['REQCONFIRMSHIPPING'] = 1
+
+    # Allow customer to specify a shipping note
     allow_note = getattr(settings, 'PAYPAL_ALLOW_NOTE', True)
     if allow_note:
         params['ALLOWNOTE'] = 1

@@ -26,6 +26,9 @@ Settings
 * ``PAYPAL_CUSTOMER_SERVICES_NUMBER`` - customer services number to display on
   the PayPal review page.
 * ``PAYPAL_HEADER_IMG`` - the absolute path to a header image 
+* ``PAYPAL_HEADER_BACK_COLOR`` - background color (6-char hex value) for header
+  background
+* ``PAYPAL_HEADER_BORDER_COLOR`` - background color (6-char hex value) for header border
 
 Not included
 ------------
@@ -37,3 +40,6 @@ return value.
 * Gift wrapping
 * Buyer consent to receive promotional emails
 * Survey questions
+* Not using shipping address from PayPal
+* Shipping address overrides
+* User confirming order on PayPal (bypassing review stage)
