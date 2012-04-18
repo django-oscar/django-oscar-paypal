@@ -220,7 +220,7 @@ INSTALLED_APPS = (
     'oscar.apps.dashboard.promotions',
     'oscar.apps.dashboard.catalogue',
     'sorl.thumbnail',
-    'paypal.express',
+    'paypal',
 )
 
 AUTHENTICATION_BACKENDS = (

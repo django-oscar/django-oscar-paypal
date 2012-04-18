@@ -2,11 +2,14 @@ import urllib
 import urlparse
 import time
 import logging
-import requests
 from decimal import Decimal as D
+
+import requests
 from django.conf import settings
 from oscar.apps.payment.exceptions import PaymentError
-from paypal.express import models
+
+from paypal import models
+
 
 # PayPal methods
 SET_EXPRESS_CHECKOUT = 'SetExpressCheckout'
@@ -65,7 +68,7 @@ def _fetch_response(method, extra_params):
 
     # Record transaction data - we save this model whether the txn
     # was successful or not
-    txn = models.Transaction(
+    txn = models.ExpressTransaction(
         method=method,
         version=API_VERSION,
         ack=response_dict['ACK'][0],

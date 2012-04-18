@@ -3,7 +3,7 @@ from unittest import TestCase
 from mock import patch, Mock
 
 from paypal import express
-from paypal.express.models import Transaction
+from paypal.models import ExpressTransaction as Transaction
 
 
 class MockedResponseTests(TestCase):

@@ -4,7 +4,7 @@ from mock import patch, Mock
 from purl import URL
 from django.contrib.sites.models import Site
 
-from paypal.express.models import Transaction
+from paypal.models import ExpressTransaction as Transaction
 from paypal.express.facade import get_paypal_url, fetch_transaction_details
 
 

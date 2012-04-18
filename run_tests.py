@@ -61,7 +61,7 @@ if not settings.configured:
                 'oscar.apps.dashboard.orders',
                 'oscar.apps.dashboard.orders',
                 'oscar.apps.dashboard.promotions',
-                'paypal.express',
+                'paypal',
                 'south',
                 ],
             MIDDLEWARE_CLASSES=(

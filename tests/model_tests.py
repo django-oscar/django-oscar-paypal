@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from paypal.express.models import Transaction
+from paypal.models import ExpressTransaction as Transaction
 
 
 class TransactionTests(TestCase):

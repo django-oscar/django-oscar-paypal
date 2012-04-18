@@ -1,8 +1,8 @@
 from django.contrib import admin
-from paypal.express import models
+from paypal import models
 
 
-class TransactionAdmin(admin.ModelAdmin):
+class ExpressTransactionAdmin(admin.ModelAdmin):
     list_display = ['method', 'amount', 'currency', 'correlation_id', 'ack', 'token',
                     'date_created']
     readonly_fields = [
@@ -23,4 +23,4 @@ class TransactionAdmin(admin.ModelAdmin):
         'response']
 
 
-admin.site.register(models.Transaction, TransactionAdmin)
+admin.site.register(models.ExpressTransaction, ExpressTransactionAdmin)
