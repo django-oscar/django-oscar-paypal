@@ -1,0 +1,9 @@
+{% extends 'templates/checkout/payment_details.html' %}
+{% load url from future %}
+
+{% block payment_details %}
+    <div class="sub-header">
+        <h2>How would you like to pay?</h2>
+    </div>
+    <a href="{% url 'paypal-direct-payment' %}" title="Pay with PayPal" class="btn btn-large btn-primary">Pay with PayPal</a>
+{% endblock %}

@@ -11,7 +11,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.db.models import get_model
 
-from oscar.apps.checkout.views import PaymentDetailsView
+from oscar.apps.checkout.views import PaymentDetailsView, CheckoutSessionMixin
 from oscar.apps.payment.exceptions import PaymentError, UnableToTakePayment
 from oscar.apps.payment.models import SourceType, Source
 from oscar.core.loading import get_class
@@ -25,17 +25,18 @@ Basket = get_model('basket', 'Basket')
 Repository = get_class('shipping.repository', 'Repository')
 
 
-class RedirectView(RedirectView):
+class RedirectView(CheckoutSessionMixin, RedirectView):
     """
     Initiate the transaction with Paypal and redirect the user 
     to PayPal's Express Checkout to perform the transaction.
     """
     permanent = False
+    as_payment_method = False
 
     def get_redirect_url(self, **kwargs):
         try:
             return self._get_redirect_url(**kwargs)
-        except PayPalError, e:
+        except PayPalError:
             messages.error(self.request, "An error occurred communicating with PayPal")
             return reverse('basket:summary')
 
@@ -47,18 +48,33 @@ class RedirectView(RedirectView):
 
         params = {'basket': self.request.basket}
 
+        user = self.request.user
+        if self.as_payment_method:
+            shipping_addr = self.get_shipping_address()
+            if not shipping_addr:
+                messages.error(self.request,
+                               "A shipping address must be specified")
+                return reverse('checkout:shipping-address')
+            shipping_method = self.get_shipping_method()
+            if not shipping_method:
+                messages.error(self.request,
+                               "A shipping method must be specified")
+                return reverse('checkout:shipping-method')
+            params['shipping_address'] = shipping_addr
+            params['shipping_method'] = shipping_method
+            params['shipping_methods'] = []
+        else:
+            shipping_methods = Repository().get_shipping_methods(user, basket)
+            params['shipping_methods'] = shipping_methods
+
         if settings.DEBUG:
             # Determine the localserver's hostname to use when 
             # in testing mode
             params['host'] = self.request.META['HTTP_HOST']
             params['scheme'] = 'http'
 
-        user = self.request.user
         if user.is_authenticated():
             params['user'] = user
-
-        shipping_methods = Repository().get_shipping_methods(user, basket)
-        params['shipping_methods'] = shipping_methods
 
         return get_paypal_url(**params)
 

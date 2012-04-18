@@ -35,6 +35,7 @@ class SuccessfulSetExpressCheckoutTests(MockedResponseTests):
 
     def perform_action(self):
         basket = Mock()
+        basket.id = 1
         basket.total_incl_tax = D('200')
         basket.all_lines = Mock(return_value=[])
         methods = [Free()]

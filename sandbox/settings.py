@@ -245,5 +245,4 @@ HAYSTACK_SEARCH_ENGINE = 'dummy'
 
 # Paypal settings
 from integration import *
-PAYPAL_EXPRESS_URL = 'https://www.sandbox.paypal.com/webscr'
 

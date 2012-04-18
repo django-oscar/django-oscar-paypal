@@ -105,8 +105,9 @@ def _fetch_response(method, extra_params):
     return txn
 
 
-def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_url,
-            action=SALE, user=None, address=None):
+def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_url=None,
+            action=SALE, user=None, user_address=None, shipping_method=None,
+            shipping_address=None):
     """
     Register the transaction with PayPal to get a token which we use in the
     redirect URL.  This is the 'SetExpressCheckout' from their documentation.
@@ -171,26 +172,41 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
             raise ImproperlyConfigured("'%s' is not a valid locale code" % locale)
         params['LOCALECODE'] = locale
 
-    # Contact details and address details - we provide these as it would make the PayPal
-    # registration process smoother is the user doesn't already have an account.
-    if user:
-        params['EMAIL'] = user.email
-    if address:
-        params['SHIPTOSTREET'] = address.line1
-        params['SHIPTOSTREET2'] = address.line2
-        params['SHIPTOCITY'] = address.line4
-        params['SHIPTOSTATE'] = address.state
-        params['SHIPTOZIP'] = address.postcode
-        params['SHIPTOCOUNTRYCODE'] = address.country.iso_3166_1_a2
-
     # Confirmed shipping address
     confirm_shipping_addr = getattr(settings, 'PAYPAL_CONFIRM_SHIPPING', None)
     if confirm_shipping_addr:
         params['REQCONFIRMSHIPPING'] = 1
 
     # Instant update callback information
-    params['CALLBACK'] = update_url
-    params['CALLBACKTIMEOUT'] = getattr(settings, 'PAYPAL_CALLBACK_TIMEOUT', 3)
+    if update_url:
+        params['CALLBACK'] = update_url
+        params['CALLBACKTIMEOUT'] = getattr(settings, 'PAYPAL_CALLBACK_TIMEOUT', 3)
+
+    # Contact details and address details - we provide these as it would make the PayPal
+    # registration process smoother is the user doesn't already have an account.
+    if user:
+        params['EMAIL'] = user.email
+    if user_address:
+        params['SHIPTOSTREET'] = user_address.line1
+        params['SHIPTOSTREET2'] = user_address.line2
+        params['SHIPTOCITY'] = user_address.line4
+        params['SHIPTOSTATE'] = user_address.state
+        params['SHIPTOZIP'] = user_address.postcode
+        params['SHIPTOCOUNTRYCODE'] = user_address.country.iso_3166_1_a2
+
+    # Shipping details (if already set) - we override the SHIPTO* fields
+    # and set a flag to indicate that these can't be altered on the PayPal side.
+    if shipping_method and shipping_address:
+        params['ADDROVERRIDE'] = 1
+        # It's recommend not to set 'confirmed shipping' if supplying the shipping
+        # address directly.
+        params['REQCONFIRMSHIPPING'] = 0
+        params['SHIPTOSTREET'] = shipping_address.line1
+        params['SHIPTOSTREET2'] = shipping_address.line2
+        params['SHIPTOCITY'] = shipping_address.line4
+        params['SHIPTOSTATE'] = shipping_address.state
+        params['SHIPTOZIP'] = shipping_address.postcode
+        params['SHIPTOCOUNTRYCODE'] = shipping_address.country.iso_3166_1_a2
 
     # Allow customer to specify a shipping note
     allow_note = getattr(settings, 'PAYPAL_ALLOW_NOTE', True)
@@ -212,20 +228,28 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
 
     params['MAXAMT'] = params['AMT'] + max_charge
 
+    # Set shipping charge explicitly if it has been passed
+    if shipping_method:
+        params['SHIPPINGAMT'] = shipping_method.basket_charge_incl_tax()
 
-    # Not sure what to do with handling amount
+    # Handling set to zero for now - I've never worked on a site that needed a
+    # handling charge.
     params['HANDLINGAMT'] = D('0.00')
 
     txn = _fetch_response(SET_EXPRESS_CHECKOUT, params)
 
     # Construct return URL
+    if getattr(settings, 'PAYPAL_SANDBOX_MODE', True):
+        url = 'https://www.sandbox.paypal.com/webscr'
+    else:
+        url = 'https://www.paypal.com/webscr'
     params = (('cmd', '_express-checkout'),
               ('token', txn.token),
               ('AMT', amount),
               ('CURRENCYCODE', currency),
               ('RETURNURL', return_url),
               ('CANCELURL', cancel_url))
-    return '%s?%s' % (settings.PAYPAL_EXPRESS_URL, urllib.urlencode(params))
+    return '%s?%s' % (url, urllib.urlencode(params))
 
 
 def get_txn(token):

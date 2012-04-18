@@ -18,12 +18,15 @@ def _get_payment_action():
     return action
 
 
-def get_paypal_url(basket, shipping_methods, user=None, host=None, scheme='https'):
+def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
+                   shipping_method=None, host=None, scheme='https'):
     """
     Return the URL for PayPal Express transaction.
 
     This involves registering the txn with PayPal to get a one-time
-    URL.
+    URL.  If a shipping method and shipping address are passed, then these are
+    given to PayPal directly - this is used within when using PayPal as a
+    payment method.
     """
     currency = getattr(settings, 'PAYPAL_CURRENCY', 'GBP')
     if host is None:
@@ -50,8 +53,10 @@ def get_paypal_url(basket, shipping_methods, user=None, host=None, scheme='https
                    cancel_url=cancel_url,
                    update_url=update_url,
                    action=_get_payment_action(),
+                   shipping_method=shipping_method,
+                   shipping_address=shipping_address,
                    user=user,
-                   address=address)
+                   user_address=address)
 
 
 def fetch_transaction_details(token):
