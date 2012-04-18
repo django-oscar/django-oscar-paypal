@@ -2,7 +2,8 @@
 PayPal package for django-oscar
 ===============================
 
-This is a work in progress - not ready for production yet.
+This is a work in progress - not ready for production yet.  It also depends on
+the forthcoming version of oscar (0.2) which hasn't been released yet.
 
 Overview
 ========
@@ -102,26 +103,24 @@ settings.
 * ``PAYPAL_HEADER_BACK_COLOR`` - background color (6-char hex value) for header
   background
 * ``PAYPAL_HEADER_BORDER_COLOR`` - background color (6-char hex value) for header border
+* ``PAYPAL_CALLBACK_TIMEOUT`` - timeout in seconds for the instant update
+  callback
 
-Not included (yet)
-------------------
+Not included
+------------
 
 The following options are part of the PayPal Express API but are not handled
-within this implementation - mainly as there's not obvious how you can handle
+within this implementation - mainly as it's not obvious how you can handle
 these in a 'generic' way within oscar:
 
 * Gift wrapping
 * Buyer consent to receive promotional emails
 * Survey questions
-* Not using shipping address from PayPal
-* Shipping address overrides
 * User confirming order on PayPal (bypassing review stage)
-* Instant update API (for dynamically setting shipping methods based on entered
-  address on PayPal's side)
 * Recurring payments
 
-Known issues (eg. to-do list)
------------------------------
+Known issues
+------------
 
 * Hasn't been adapted to work with offers and vouchers (yet).  The discounts are
   not passed to PayPal at the moment.
@@ -153,6 +152,7 @@ and run it::
 
     ./manage.py runserver
 
-Use the Github issue tracker for any problems.
+Use the `Github issue tracker`_ for any problems.
 
+.. _`Github issue tracker`: https://github.com/tangentlabs/django-oscar-paypal/issues
 

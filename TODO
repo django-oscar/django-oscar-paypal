@@ -1,3 +1,2 @@
 Check request is from PayPal
-Put URL in set request
-Provide flat rate shipping options
+Check new syntax (eg payment_0_..)
