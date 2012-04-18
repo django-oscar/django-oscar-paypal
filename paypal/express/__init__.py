@@ -98,7 +98,9 @@ def _fetch_response(method, extra_params):
     txn.save()
 
     if not txn.is_successful:
-        raise PayPalError("Error %s - %s" % (txn.error_code, txn.error_message))
+        msg = "Error %s - %s" % (txn.error_code, txn.error_message)
+        logger.error(msg)
+        raise PayPalError(msg)
 
     return txn
 
@@ -192,13 +194,20 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, action=S
         params['ALLOWNOTE'] = 1
 
     # Shipping charges
+    max_charge = D('0.00')
     for index, method in enumerate(shipping_methods):
         is_default = index == 0
         params['L_SHIPPINGOPTIONISDEFAULT%d' % index] = 'true' if is_default else 'false'
+        charge = method.basket_charge_incl_tax()
+        if charge > max_charge:
+            max_charge = charge
         if is_default:
-            params['SHIPPINGAMT'] = method.basket_charge_incl_tax()
+            params['SHIPPINGAMT'] = charge
         params['L_SHIPPINGOPTIONNAME%d' % index] = method.name
-        params['L_SHIPPINGOPTIONAMOUNT%d' % index] = method.basket_charge_incl_tax()
+        params['L_SHIPPINGOPTIONAMOUNT%d' % index] = charge
+
+    params['MAXAMT'] = params['AMT'] + max_charge
+
 
     # Not sure what to do with handling amount
     params['HANDLINGAMT'] = D('0.00')

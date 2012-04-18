@@ -31,8 +31,7 @@ class RedirectView(RedirectView):
         try:
             return self._get_redirect_url(**kwargs)
         except PayPalError, e:
-            messages.error(self.request, 
-                           "You are unable to use PayPal for this order: %s" % e)
+            messages.error(self.request, "An error occurred communicating with PayPal")
             return reverse('basket:summary')
 
     def _get_redirect_url(self, **kwargs):

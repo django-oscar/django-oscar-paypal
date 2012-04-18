@@ -7,4 +7,5 @@ class Repository(CoreRepository):
 
     def get_shipping_methods(self, user, basket, shipping_addr=None, **kwargs):
         methods = [Free(), FixedPrice(D('10.00')), FixedPrice(D('20.00'))]
+        methods = [Free()]
         return self.add_basket_to_methods(basket, methods)
