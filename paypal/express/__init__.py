@@ -14,6 +14,7 @@ GET_EXPRESS_CHECKOUT = 'GetExpressCheckoutDetails'
 DO_EXPRESS_CHECKOUT = 'DoExpressCheckoutPayment'
 DO_CAPTURE = 'DoCapture'
 DO_VOID = 'DoVoid'
+REFUND_TRANSACTION = 'RefundTransaction'
 
 SALE, AUTHORIZATION, ORDER = 'Sale', 'Authorization', 'Order'
 API_VERSION = getattr(settings, 'PAYPAL_API_VERSION', '60.0')
@@ -250,3 +251,15 @@ def do_void(txn_id, note=None):
         params['NOTE'] = note
     return _fetch_response(DO_VOID, params)
 
+
+FULL_REFUND = 'Full'
+PARTIAL_REFUND = 'Partial'
+def refund_txn(txn_id, is_partial=False, amount=None, currency=None):
+    params = {
+        'TRANSACTIONID': txn_id,
+        'REFUNDTYPE': refund_type,
+    }
+    if is_partial:
+        params['AMT'] = amount
+        params['CURRENCYCODE'] = currency
+    return _fetch_response(REFUND_TRANSACTION, params)

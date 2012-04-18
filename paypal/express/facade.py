@@ -6,7 +6,7 @@ from django.core.exceptions import ImproperlyConfigured
 from paypal.express.models import Transaction
 from paypal.express import (
     set_txn, get_txn, do_txn, SALE, AUTHORIZATION, ORDER,
-    do_capture, DO_EXPRESS_CHECKOUT, do_void
+    do_capture, DO_EXPRESS_CHECKOUT, do_void, refund_txn
 )
 
 
@@ -59,6 +59,13 @@ def confirm_transaction(payer_id, token, amount, currency):
     """
     return do_txn(payer_id, token, amount, currency, 
                   action=_get_payment_action())
+
+
+def refund_transaction(token, amount, currency, note=None):
+    txn = Transaction.objects.get(token=token,
+                                  method=DO_EXPRESS_CHECKOUT)
+    is_partial = amount < txn.amount
+    return refund_txn(txn.value('TRANSACTIONID'), is_partial, amount, currency)
 
 
 def capture_authorization(token, note=None):

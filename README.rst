@@ -2,9 +2,7 @@
 PayPal package for django-oscar
 ===============================
 
-.. warning::
-
-    This is a work in progress - not ready for production yet.
+This is a work in progress - not ready for production yet.
 
 Overview
 ========
@@ -25,23 +23,74 @@ See the `PDF documentation`_ for the gory details.
 Installation
 ============
 
-First, you'll need to create a Sandbox account with PayPal.
+First, you'll need to create a sandbox merchant account with PayPal - this will
+provide a username, password and 'signature' which are used to authenticate API
+requests.
+
+If you want to test your installation in a browser (which you should), then
+you'll need to also create a sandbox buyer account so you can checkout.
 
 Fetch package (not ready just yet)::
 
     pip install django-oscar-paypal
 
-Add following settings for which you'll need to create a sandbox account with
-PayPal::
+Add following settings using the details from your sandbox buyer account::
 
     PAYPAL_API_USERNAME = 'test_xxxx.gmail.com'
     PAYPAL_API_PASSWORD = '123456789'
     PAYPAL_API_SIGNATURE = '...'
 
-Augment your ``INSTALLED_APPS`` to include ``paypal.express``.
+Augment your ``INSTALLED_APPS`` to include ``paypal.express`` and run syncdb to
+create the appropriate models.
+
+Next, you need to add the PayPal URLs to your URL config.  This can be done as
+follows::
+
+    from django.contrib import admin
+    from oscar.app import shop
+
+    urlpatterns = patterns('',
+        (r'^admin/', include(admin.site.urls)),
+        (r'^checkout/paypal/', include('paypal.express.urls')),
+        (r'', include(shop.urls)),
+
+Finally, you need to modify oscar's basket template to include the button that
+links to PayPal.  This can be done by creating a new template
+``templates/basket/basket.html`` with content::
+
+    {% extends 'templates/basket/basket.html' %}
+
+    {% block formactions %}
+    <div class="form-actions">
+        <a href="{% url paypal-redirect %}"><img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"></a>
+        <a href="{% url checkout:index %}" class="pull-right btn btn-large btn-primary">Proceed to checkout</a>
+    </div>
+    {% endblock %}
+
+Note that we extending the ``basket/basket.html`` template from oscar and
+overriding the ``formactions`` block.  For this trick to work, you need to
+ensure that you have ``OSCAR_PARENT_TEMPLATE_DIR`` in your ``TEMPLATE_DIRS``
+setting::
+
+    import os
+    location = lambda x: os.path.join(os.path.dirname(os.path.realpath(__file__)), x)
+    from oscar import OSCAR_PARENT_TEMPLATE_DIR
+    TEMPLATE_DIRS = (
+        location('templates'),
+        os.path.join(OSCAR_PARENT_TEMPLATE_DIR, 'templates'),
+        OSCAR_PARENT_TEMPLATE_DIR,
+    )
+
+If anything is unclear or not workin as expected then review how the 'sandbox`
+installation is set-up.  This is a working oscar install that uses PayPal
+Express.
 
 Settings
 --------
+
+There's a smorgasboard of options that can be used, as there's many ways to
+customised the Express Checkout experience.  Most of these are handled by simple
+settings.
 
 * ``PAYPAL_SANDBOX_MODE`` - whether to use PayPal's sandbox.  Defaults to ``True``.
 * ``PAYPAL_CURRENCY`` - the currency to use for transactions.  Defaults to ``GBP``.
@@ -69,6 +118,7 @@ these in a 'generic' way within oscar:
 * User confirming order on PayPal (bypassing review stage)
 * Instant update API (for dynamically setting shipping methods based on entered
   address on PayPal's side)
+* Recurring payments
 
 Known issues (eg. to-do list)
 -----------------------------
