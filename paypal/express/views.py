@@ -1,8 +1,12 @@
 from decimal import Decimal as D
+import urllib
 
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, View
 from django.conf import settings
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.db.models import get_model
@@ -17,6 +21,7 @@ from paypal.express import PayPalError
 
 ShippingAddress = get_model('order', 'ShippingAddress')
 Country = get_model('address', 'Country')
+Basket = get_model('basket', 'Basket')
 Repository = get_class('shipping.repository', 'Repository')
 
 
@@ -217,3 +222,58 @@ class SuccessResponseView(PaymentDetailsView):
             postcode=self.txn.value('SHIPTOZIP'),
             country=Country.objects.get(iso_3166_1_a2=self.txn.value('COUNTRYCODE'))
         )
+
+
+class ShippingOptionsView(View):
+
+    def get(self, request, *args, **kwargs):
+        """
+        We use the shipping address given to use by PayPal to
+        determine the available shipping method
+        """
+        # Basket ID is passed within the URL path.  We need to do this as some
+        # shipping options depend on the user and basket contents.  PayPal do
+        # pass back details of the basket contents but it would be royal pain to
+        # reconstitute the basket based on those - easier to just to piggy-back
+        # the basket ID in the callback URL.
+        basket = get_object_or_404(Basket, id=kwargs['basket_id'])
+        user = basket.owner
+        if not user:
+            user = AnonymousUser()
+
+        # Create a shipping address instance using the data passed back
+        shipping_address = ShippingAddress(
+            line1=self.request.GET.get('SHIPTOSTREET', None),
+            line2=self.request.GET.get('SHIPTOSTREET2', None),
+            line4=self.request.GET.get('SHIPTOCITY', None),
+            state=self.request.GET.get('SHIPTOSTATE', None),
+            postcode=self.request.GET.get('SHIPTOZIP', None),
+            country=Country.objects.get(iso_3166_1_a2=self.txn.value('SHIPTOCOUNTRY'))
+        )
+        methods = self.get_shipping_methods(user, basket, shipping_address)
+        return self.render_to_response(methods)
+
+    def render_to_response(self, methods):
+        pairs = [
+            ('METHOD', 'CallbackResponse'),
+        ]
+        for index, method in enumerate(methods):
+            pairs.append(('L_SHIPPINGOPTIONNAME%d' % index, method.name))
+            pairs.append(('L_SHIPPINGOPTIONAMOUNT%d' % index,
+                          method.basket_charge_incl_tax()))
+            # For now, we assume tax and insurance to be zero
+            pairs.append(('L_TAXAMT%d' % index, D('0.00')))
+            pairs.append(('L_INSURANCEAMT%d' % index, D('0.00')))
+            # We assume that the first returned method is the default one
+            pairs.append(('L_SHIPPINGOPTIONISDEFAULT%d' % index, 1 if index == 0 else 0))
+        else:
+            # No shipping methods available - we flag this up to PayPal indicating that we
+            # do not ship to the shipping address.
+            pairs.append(('NO_SHIPPING_OPTION_DETAILS', 1))
+        payload = urllib.urlencode(pairs)
+        return HttpResponse(payload)
+
+    def get_shipping_methods(self, user, basket, shipping_address):
+        repo = Repository()
+        return repo.get_shipping_methods(user, basket,
+                                         shipping_addr=shipping_address)

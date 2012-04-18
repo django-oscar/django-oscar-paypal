@@ -11,4 +11,7 @@ urlpatterns = patterns('',
         name='paypal-cancel-response'),
     url(r'^place-order/', views.SuccessResponseView.as_view(),
         name='paypal-place-order'),
+    # Callback for getting shipping options for a specific basket
+    url(r'^shipping-options/(?P<basket_id>\d+)/', views.ShippingOptionsView.as_view(),
+        name='paypal-shipping-options'),
 )
