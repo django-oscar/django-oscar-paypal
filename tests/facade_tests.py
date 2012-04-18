@@ -1,8 +1,10 @@
 from decimal import Decimal as D
 from unittest import TestCase
+
 from mock import patch, Mock
 from purl import URL
 from django.contrib.sites.models import Site
+from oscar.apps.shipping.methods import Free
 
 from paypal.models import ExpressTransaction as Transaction
 from paypal.express.facade import get_paypal_url, fetch_transaction_details
@@ -35,7 +37,8 @@ class SuccessfulSetExpressCheckoutTests(MockedResponseTests):
         basket = Mock()
         basket.total_incl_tax = D('200')
         basket.all_lines = Mock(return_value=[])
-        url_str = get_paypal_url(basket)
+        methods = [Free()]
+        url_str = get_paypal_url(basket, methods)
         self.url = URL.from_string(url_str)
 
     def test_domain_in_return_url_defaults_to_current_site(self):

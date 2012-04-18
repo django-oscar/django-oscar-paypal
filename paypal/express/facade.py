@@ -18,7 +18,7 @@ def _get_payment_action():
     return action
 
 
-def get_paypal_url(basket, user=None, host=None, scheme='https'):
+def get_paypal_url(basket, shipping_methods, user=None, host=None, scheme='https'):
     """
     Return the URL for PayPal Express transaction.
 
@@ -31,13 +31,16 @@ def get_paypal_url(basket, user=None, host=None, scheme='https'):
     return_url = '%s://%s%s' % (scheme, host, reverse('paypal-success-response'))
     cancel_url = '%s://%s%s' % (scheme, host, reverse('paypal-cancel-response'))
 
-    # Pass a default billing address is there is one
+    # Pass a default billing address is there is one.  This means PayPal can
+    # pre-fill the registration form.
     address = None
     if user:
         addresses = user.addresses.all().order_by('-is_default_for_billing')
         if len(addresses):
             address = addresses[0]
+
     return set_txn(basket=basket,
+                   shipping_methods=shipping_methods,
                    currency=currency,
                    return_url=return_url,
                    cancel_url=cancel_url,

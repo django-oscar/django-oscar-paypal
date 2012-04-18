@@ -201,7 +201,6 @@ INSTALLED_APPS = (
     'oscar.apps.discount',
     'oscar.apps.order',
     'oscar.apps.checkout',
-    'oscar.apps.shipping',
     'oscar.apps.catalogue',
     'oscar.apps.catalogue.reviews',
     'oscar.apps.basket',
@@ -221,6 +220,7 @@ INSTALLED_APPS = (
     'oscar.apps.dashboard.catalogue',
     'sorl.thumbnail',
     'paypal',
+    'apps.shipping',
 )
 
 AUTHENTICATION_BACKENDS = (

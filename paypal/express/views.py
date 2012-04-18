@@ -10,12 +10,14 @@ from django.db.models import get_model
 from oscar.apps.checkout.views import PaymentDetailsView
 from oscar.apps.payment.exceptions import PaymentError, UnableToTakePayment
 from oscar.apps.payment.models import SourceType, Source
+from oscar.core.loading import get_class
 
 from paypal.express.facade import get_paypal_url, fetch_transaction_details, confirm_transaction
 from paypal.express import PayPalError
 
 ShippingAddress = get_model('order', 'ShippingAddress')
 Country = get_model('address', 'Country')
+Repository = get_class('shipping.repository', 'Repository')
 
 
 class RedirectView(RedirectView):
@@ -40,6 +42,7 @@ class RedirectView(RedirectView):
             return reverse('basket:summary')
 
         params = {'basket': self.request.basket}
+
         if settings.DEBUG:
             # Determine the localserver's hostname to use when 
             # in testing mode
@@ -49,6 +52,9 @@ class RedirectView(RedirectView):
         user = self.request.user
         if user.is_authenticated():
             params['user'] = user
+
+        shipping_methods = Repository().get_shipping_methods(user, basket)
+        params['shipping_methods'] = shipping_methods
 
         return get_paypal_url(**params)
 

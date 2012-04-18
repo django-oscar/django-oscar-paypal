@@ -103,7 +103,7 @@ def _fetch_response(method, extra_params):
     return txn
 
 
-def set_txn(basket, currency, return_url, cancel_url, action=SALE, user=None,
+def set_txn(basket, shipping_methods, currency, return_url, cancel_url, action=SALE, user=None,
             address=None):
     """
     Register the transaction with PayPal to get a token which we use in the
@@ -191,7 +191,16 @@ def set_txn(basket, currency, return_url, cancel_url, action=SALE, user=None,
     if allow_note:
         params['ALLOWNOTE'] = 1
 
-    params['SHIPPINGAMT'] = D('0.00')
+    # Shipping charges
+    for index, method in enumerate(shipping_methods):
+        is_default = index == 0
+        params['L_SHIPPINGOPTIONISDEFAULT%d' % index] = 'true' if is_default else 'false'
+        if is_default:
+            params['SHIPPINGAMT'] = method.basket_charge_incl_tax()
+        params['L_SHIPPINGOPTIONNAME%d' % index] = method.name
+        params['L_SHIPPINGOPTIONAMOUNT%d' % index] = method.basket_charge_incl_tax()
+
+    # Not sure what to do with handling amount
     params['HANDLINGAMT'] = D('0.00')
 
     txn = _fetch_response(SET_EXPRESS_CHECKOUT, params)

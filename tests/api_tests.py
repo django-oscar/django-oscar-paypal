@@ -2,6 +2,8 @@ from decimal import Decimal as D
 from unittest import TestCase
 from mock import patch, Mock
 
+from oscar.apps.shipping.methods import Free
+
 from paypal import express
 from paypal.models import ExpressTransaction as Transaction
 
@@ -18,10 +20,12 @@ class MockedResponseTests(TestCase):
         basket.total_incl_tax = D('10.00')
         basket.all_lines = Mock(return_value=[])
 
+        methods = [Free()]
+
         with patch('requests.post') as post:
             post.return_value = response
             with self.assertRaises(express.PayPalError):
-                express.set_txn(basket, 'GBP', 'http://localhost:8000/success',
+                express.set_txn(basket, methods, 'GBP', 'http://localhost:8000/success',
                                 'http://localhost:8000/error')
 
 
@@ -37,9 +41,11 @@ class SuccessResponseTests(TestCase):
         basket.total_incl_tax = D('10.00')
         basket.all_lines = Mock(return_value=[])
 
+        methods = [Free()]
+
         with patch('requests.post') as post:
             post.return_value = response
-            self.url = express.set_txn(basket, 'GBP', 'http://localhost:8000/success',
+            self.url = express.set_txn(basket, methods, 'GBP', 'http://localhost:8000/success',
                                        'http://localhost:8000/error')
 
     def tearDown(self):
