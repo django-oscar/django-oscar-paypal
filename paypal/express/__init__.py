@@ -105,8 +105,8 @@ def _fetch_response(method, extra_params):
     return txn
 
 
-def set_txn(basket, shipping_methods, currency, return_url, cancel_url, action=SALE, user=None,
-            address=None):
+def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_url,
+            action=SALE, user=None, address=None):
     """
     Register the transaction with PayPal to get a token which we use in the
     redirect URL.  This is the 'SetExpressCheckout' from their documentation.
@@ -187,6 +187,10 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, action=S
     confirm_shipping_addr = getattr(settings, 'PAYPAL_CONFIRM_SHIPPING', None)
     if confirm_shipping_addr:
         params['REQCONFIRMSHIPPING'] = 1
+
+    # Instant update callback information
+    params['CALLBACK'] = update_url
+    params['CALLBACKTIMEOUT'] = getattr(settings, 'PAYPAL_CALLBACK_TIMEOUT', 3)
 
     # Allow customer to specify a shipping note
     allow_note = getattr(settings, 'PAYPAL_ALLOW_NOTE', True)

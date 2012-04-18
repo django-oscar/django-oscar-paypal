@@ -31,6 +31,10 @@ def get_paypal_url(basket, shipping_methods, user=None, host=None, scheme='https
     return_url = '%s://%s%s' % (scheme, host, reverse('paypal-success-response'))
     cancel_url = '%s://%s%s' % (scheme, host, reverse('paypal-cancel-response'))
 
+    # URL for updating shipping methods
+    update_url = '%s://%s%s' % (scheme, host, reverse('paypal-shipping-options',
+                                                      kwargs={'basket_id': basket.id}))
+
     # Pass a default billing address is there is one.  This means PayPal can
     # pre-fill the registration form.
     address = None
@@ -44,6 +48,7 @@ def get_paypal_url(basket, shipping_methods, user=None, host=None, scheme='https
                    currency=currency,
                    return_url=return_url,
                    cancel_url=cancel_url,
+                   update_url=update_url,
                    action=_get_payment_action(),
                    user=user,
                    address=address)
