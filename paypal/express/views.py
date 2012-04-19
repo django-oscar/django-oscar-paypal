@@ -38,7 +38,11 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
             return self._get_redirect_url(**kwargs)
         except PayPalError:
             messages.error(self.request, "An error occurred communicating with PayPal")
-            return reverse('basket:summary')
+            if self.as_payment_method:
+                url = reverse('checkout:payment-details')
+            else:
+                url = reverse('basket:summary')
+            return url
 
     def _get_redirect_url(self, **kwargs):
         basket = self.request.basket
