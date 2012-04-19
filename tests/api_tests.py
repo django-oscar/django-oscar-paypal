@@ -73,5 +73,4 @@ class SuccessResponseTests(MockedResponseTestCase):
         self.assertEqual(D('10.00'), txn.amount)
         self.assertEqual('GBP', txn.currency)
         self.assertEqual('Success', txn.ack)
-        self.assertEqual('60.0', txn.version)
         self.assertEqual('EC-6469953681606921P', txn.token)

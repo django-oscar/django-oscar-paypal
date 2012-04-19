@@ -15,6 +15,7 @@ from oscar.apps.checkout.views import PaymentDetailsView, CheckoutSessionMixin
 from oscar.apps.payment.exceptions import PaymentError, UnableToTakePayment
 from oscar.apps.payment.models import SourceType, Source
 from oscar.core.loading import get_class
+from oscar.apps.shipping.methods import FixedPrice
 
 from paypal.express.facade import get_paypal_url, fetch_transaction_details, confirm_transaction
 from paypal.express import PayPalError
@@ -147,17 +148,7 @@ class SuccessResponseView(PaymentDetailsView):
     def get_error_response(self):
         # We bypass the normal session checks for shipping address and shipping
         # method as they don't apply here.
-
-        # We do check that the order total is still the same as when we redirected 
-        # off to PayPal
-        txn_amount = self.txn.amount
-        order_total = self.request.basket.total_incl_tax
-
-        if txn_amount != order_total:
-            messages.error(self.request, 
-                           "Your order total (%s) differs from the total PayPal authorised (%s) - aborting" % (
-                               order_total, txn_amount))
-            return HttpResponseRedirect(reverse('basket:summary'))
+        pass
 
     def get_context_data(self, **kwargs):
         ctx = super(SuccessResponseView, self).get_context_data(**kwargs)
@@ -172,24 +163,23 @@ class SuccessResponseView(PaymentDetailsView):
         # We convert the PayPal response values into those that match Oscar's normal
         # context so we can re-use the preview template as is
         shipping_address_fields = [
-            self.txn.value('SHIPTONAME'),
-            self.txn.value('SHIPTOSTREET'),
-            self.txn.value('SHIPTOCITY'),
-            self.txn.value('SHIPTOSTATE'),
-            self.txn.value('SHIPTOZIP'),
-            self.txn.value('SHIPTOCOUNTRYNAME'),
+            self.txn.value('PAYMENTREQUEST_0_SHIPTONAME'),
+            self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET'),
+            self.txn.value('PAYMENTREQUEST_0_SHIPTOCITY'),
+            self.txn.value('PAYMENTREQUEST_0_SHIPTOSTATE'),
+            self.txn.value('PAYMENTREQUEST_0_SHIPTOZIP'),
+            self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME'),
         ]
         ctx['shipping_address'] = {
             'active_address_fields': filter(bool, shipping_address_fields),
             'notes': self.txn.value('NOTETEXT'),
         }
-        shipping_charge = D(self.txn.value('SHIPPINGAMT'))
         ctx['shipping_method'] = {
-            'name': 'PayPal delivery',
-            'description': 'Some description here',
-            'basket_charge_incl_tax': shipping_charge,
+            'name': self.txn.value('SHIPPINGOPTIONNAME'),
+            'description': '',
+            'basket_charge_incl_tax': D(self.txn.value('SHIPPINGAMT')),
         }
-        ctx['order_total_incl_tax'] = self.request.basket.total_incl_tax + shipping_charge
+        ctx['order_total_incl_tax'] = D(self.txn.value('PAYMENTREQUEST_0_AMT'))
 
         return ctx
 
@@ -224,7 +214,7 @@ class SuccessResponseView(PaymentDetailsView):
         the data returned by PayPal.
         """
         # Determine names - PayPal uses a single field
-        ship_to_name = self.txn.value('SHIPTONAME')
+        ship_to_name = self.txn.value('PAYMENTREQUEST_0_SHIPTONAME')
         first_name = last_name = None
         parts = ship_to_name.split()
         if len(parts) == 1:
@@ -236,12 +226,23 @@ class SuccessResponseView(PaymentDetailsView):
         return ShippingAddress.objects.create(
             first_name=first_name,
             last_name=last_name,
-            line1=self.txn.value('SHIPTOSTREET'),
-            line4=self.txn.value('SHIPTOCITY'),
-            state=self.txn.value('SHIPTOSTATE'),
-            postcode=self.txn.value('SHIPTOZIP'),
-            country=Country.objects.get(iso_3166_1_a2=self.txn.value('COUNTRYCODE'))
+            line1=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET'),
+            line4=self.txn.value('PAYMENTREQUEST_0_SHIPTOCITY'),
+            state=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTATE'),
+            postcode=self.txn.value('PAYMENTREQUEST_0_SHIPTOZIP'),
+            country=Country.objects.get(iso_3166_1_a2=self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'))
         )
+
+    def get_shipping_method(self, basket=None):
+        """
+        Return the shipping method used
+        """
+        charge = D(self.txn.value('PAYMENTREQUEST_0_SHIPPINGAMT'))
+        method = FixedPrice(charge)
+        basket = basket if basket else self.request.basket
+        method.set_basket(basket)
+        method.name = self.txn.value('SHIPPINGOPTIONNAME')
+        return method
 
 
 class ShippingOptionsView(View):
@@ -263,12 +264,12 @@ class ShippingOptionsView(View):
 
         # Create a shipping address instance using the data passed back
         shipping_address = ShippingAddress(
-            line1=self.request.GET.get('SHIPTOSTREET', None),
-            line2=self.request.GET.get('SHIPTOSTREET2', None),
-            line4=self.request.GET.get('SHIPTOCITY', None),
-            state=self.request.GET.get('SHIPTOSTATE', None),
-            postcode=self.request.GET.get('SHIPTOZIP', None),
-            country=Country.objects.get(iso_3166_1_a2=self.txn.value('SHIPTOCOUNTRY'))
+            line1=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOSTREET', None),
+            line2=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOSTREET2', None),
+            line4=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOCITY', None),
+            state=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOSTATE', None),
+            postcode=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOZIP', None),
+            country=Country.objects.get(iso_3166_1_a2=self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRY'))
         )
         methods = self.get_shipping_methods(user, basket, shipping_address)
         return self.render_to_response(methods)

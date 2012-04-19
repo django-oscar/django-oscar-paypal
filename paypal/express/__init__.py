@@ -6,6 +6,7 @@ from decimal import Decimal as D
 
 import requests
 from django.conf import settings
+from django.template.defaultfilters import truncatewords
 from oscar.apps.payment.exceptions import PaymentError
 
 from paypal import models
@@ -20,7 +21,11 @@ DO_VOID = 'DoVoid'
 REFUND_TRANSACTION = 'RefundTransaction'
 
 SALE, AUTHORIZATION, ORDER = 'Sale', 'Authorization', 'Order'
-API_VERSION = getattr(settings, 'PAYPAL_API_VERSION', '60.0')
+
+# It's quite difficult to work out what the latest version of the PayPal Express
+# API is.  The best way is to look for the 'web version: ...' string in the
+# source of https://www.sandbox.paypal.com/
+API_VERSION = getattr(settings, 'PAYPAL_API_VERSION', '88.0')
 
 # Anonymous checkout must be abled
 if not settings.OSCAR_ALLOW_ANON_CHECKOUT:
@@ -79,17 +84,17 @@ def _fetch_response(method, extra_params):
     if txn.is_successful:
         txn.correlation_id = response_dict['CORRELATIONID'][0]
         if method == SET_EXPRESS_CHECKOUT:
-            txn.amount = params['AMT']
-            txn.currency = params['CURRENCYCODE']
+            txn.amount = params['PAYMENTREQUEST_0_AMT']
+            txn.currency = params['PAYMENTREQUEST_0_CURRENCYCODE']
             txn.token = response_dict['TOKEN'][0]
         elif method == GET_EXPRESS_CHECKOUT:
             txn.token = params['TOKEN']
-            txn.amount = D(response_dict['AMT'][0])
-            txn.currency = response_dict['CURRENCYCODE'][0]
+            txn.amount = D(response_dict['PAYMENTREQUEST_0_AMT'][0])
+            txn.currency = response_dict['PAYMENTREQUEST_0_CURRENCYCODE'][0]
         elif method == DO_EXPRESS_CHECKOUT:
             txn.token = params['TOKEN']
-            txn.amount = params['AMT']
-            txn.currency = response_dict['CURRENCYCODE'][0]
+            txn.amount = D(response_dict['PAYMENTINFO_0_AMT'][0])
+            txn.currency = response_dict['PAYMENTINFO_0_CURRENCYCODE'][0]
     else:
         if 'L_ERRORCODE0' in response_dict:
             txn.error_code = response_dict['L_ERRORCODE0'][0]
@@ -123,27 +128,27 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         raise PayPalError('PayPal can only be used for orders up to 10000 USD')
 
     params = {
-        'AMT': amount,
-        'CURRENCYCODE': currency,
+        'PAYMENTREQUEST_0_AMT': amount,
+        'PAYMENTREQUEST_0_CURRENCYCODE': currency,
         'RETURNURL': return_url,
         'CANCELURL': cancel_url,
-        'PAYMENTACTION': action,
+        'PAYMENTREQUEST_0_PAYMENTACTION': action,
     }
 
     # Add item details
     for index, line in enumerate(basket.all_lines()):
         product = line.product
-        params['L_NAME%d' % index] = product.get_title()
-        params['L_NUMBER%d' % index] = product.upc
-        params['L_DESC%d' % index] = product.description
-        params['L_AMT%d' % index] = line.unit_price_incl_tax
-        params['L_QTY%d' % index] = line.quantity
+        params['L_PAYMENTREQUEST_0_NAME%d' % index] = product.get_title()
+        params['L_PAYMENTREQUEST_0_NUMBER%d' % index] = product.upc
+        params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(product.description, 12)
+        params['L_PAYMENTREQUEST_0_AMT%d' % index] = line.unit_price_incl_tax
+        params['L_PAYMENTREQUEST_0_QTY%d' % index] = line.quantity
 
     # We include tax in the prices rather than separately as that's how it's
     # done on most British/Australian sites.  Will need to refactor in the
     # future no doubt
-    params['ITEMAMT'] = basket.total_incl_tax
-    params['TAXAMT'] = D('0.00')
+    params['PAYMENTREQUEST_0_ITEMAMT'] = basket.total_incl_tax
+    params['PAYMENTREQUEST_0_TAXAMT'] = D('0.00')
 
     # Customer services number
     customer_service_num = getattr(settings, 'PAYPAL_CUSTOMER_SERVICES_NUMBER', None)
@@ -156,8 +161,9 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     if page_style:
         params['PAGESTYLE'] = page_style
     elif header_image:
-        params['HDRIMG'] = header_image
+        params['LOGOIMG'] = header_image
     else:
+        # Think these settings maybe deprecated in latest version of PayPal's API
         display_params = {
             'HDRBACKCOLOR': getattr(settings, 'PAYPAL_HEADER_BACK_COLOR', None),
             'HDRBORDERCOLOR': getattr(settings, 'PAYPAL_HEADER_BORDER_COLOR', None),
@@ -214,6 +220,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['ALLOWNOTE'] = 1
 
     # Shipping charges
+    params['PAYMENTREQUEST_0_SHIPPINGAMT'] = D('0.00')
     max_charge = D('0.00')
     for index, method in enumerate(shipping_methods):
         is_default = index == 0
@@ -222,19 +229,22 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         if charge > max_charge:
             max_charge = charge
         if is_default:
-            params['SHIPPINGAMT'] = charge
+            params['PAYMENTREQUEST_0_SHIPPINGAMT'] = charge
         params['L_SHIPPINGOPTIONNAME%d' % index] = method.name
         params['L_SHIPPINGOPTIONAMOUNT%d' % index] = charge
 
-    params['MAXAMT'] = params['AMT'] + max_charge
+    # Both the old version (MAXAMT) and the new version (PAYMENT...) are needed
+    # here - think it's a problem with the API.
+    params['PAYMENTREQUEST_0_MAXAMT'] = amount + max_charge
+    params['MAXAMT'] = amount + max_charge
 
     # Set shipping charge explicitly if it has been passed
     if shipping_method:
-        params['SHIPPINGAMT'] = shipping_method.basket_charge_incl_tax()
+        params['PAYMENTREQUEST_0_SHIPPINGAMT'] = shipping_method.basket_charge_incl_tax()
 
     # Handling set to zero for now - I've never worked on a site that needed a
     # handling charge.
-    params['HANDLINGAMT'] = D('0.00')
+    params['PAYMENTREQUEST_0_HANDLINGAMT'] = D('0.00')
 
     txn = _fetch_response(SET_EXPRESS_CHECKOUT, params)
 
@@ -244,11 +254,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     else:
         url = 'https://www.paypal.com/webscr'
     params = (('cmd', '_express-checkout'),
-              ('token', txn.token),
-              ('AMT', amount),
-              ('CURRENCYCODE', currency),
-              ('RETURNURL', return_url),
-              ('CANCELURL', cancel_url))
+              ('token', txn.token),)
     return '%s?%s' % (url, urllib.urlencode(params))
 
 
@@ -267,9 +273,9 @@ def do_txn(payer_id, token, amount, currency, action=SALE):
     params = {
         'PAYERID': payer_id,
         'TOKEN': token,
-        'AMT': amount,
-        'CURRENCYCODE': currency,
-        'PAYMENTACTION': action,
+        'PAYMENTREQUEST_0_AMT': amount,
+        'PAYMENTREQUEST_0_CURRENCYCODE': currency,
+        'PAYMENTREQUEST_0_PAYMENTACTION': action,
     }
     return _fetch_response(DO_EXPRESS_CHECKOUT, params)
 

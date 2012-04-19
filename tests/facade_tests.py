@@ -42,15 +42,14 @@ class SuccessfulSetExpressCheckoutTests(MockedResponseTests):
         url_str = get_paypal_url(basket, methods)
         self.url = URL.from_string(url_str)
 
-    def test_domain_in_return_url_defaults_to_current_site(self):
-        return_url = self.url.query_param('RETURNURL')
-        site = Site.objects.get_current()
-        self.assertTrue(site.domain in return_url)
+    def test_url_has_correct_keys(self):
+        self.assertTrue(self.url.has_query_param('token'))
+        self.assertTrue('_express-checkout', self.url.query_param('cmd'))
 
 
 class SuccessfulGetExpressCheckoutTests(MockedResponseTests):
     token = 'EC-9LW34435GU332960W'
-    response_body = 'TOKEN=EC%2d9LW34435GU332960W&CHECKOUTSTATUS=PaymentActionNotInitiated&TIMESTAMP=2012%2d04%2d13T15%3a19%3a25Z&CORRELATIONID=83bda082c24d4&ACK=Success&VERSION=60%2e0&BUILD=2808426&EMAIL=david%2e_1332854868_per%40gmail%2ecom&PAYERID=7ZTRBDFYYA47W&PAYERSTATUS=verified&FIRSTNAME=David&LASTNAME=Winterbottom&COUNTRYCODE=GB&SHIPTONAME=David%20Winterbottom&SHIPTOSTREET=1%20Main%20Terrace&SHIPTOCITY=Wolverhampton&SHIPTOSTATE=West%20Midlands&SHIPTOZIP=W12%204LQ&SHIPTOCOUNTRYCODE=GB&SHIPTOCOUNTRYNAME=United%20Kingdom&ADDRESSSTATUS=Confirmed&CURRENCYCODE=GBP&AMT=6%2e99&SHIPPINGAMT=0%2e00&HANDLINGAMT=0%2e00&TAXAMT=0%2e00&INSURANCEAMT=0%2e00&SHIPDISCAMT=0%2e00'
+    response_body = 'TOKEN=EC%2d6WY34243AN3588740&CHECKOUTSTATUS=PaymentActionCompleted&TIMESTAMP=2012%2d04%2d19T10%3a07%3a46Z&CORRELATIONID=7e9c5efbda3c0&ACK=Success&VERSION=88%2e0&BUILD=2808426&EMAIL=david%2e_1332854868_per%40gmail%2ecom&PAYERID=7ZTRBDFYYA47W&PAYERSTATUS=verified&FIRSTNAME=David&LASTNAME=Winterbottom&COUNTRYCODE=GB&SHIPTONAME=David%20Winterbottom&SHIPTOSTREET=1%20Main%20Terrace&SHIPTOCITY=Wolverhampton&SHIPTOSTATE=West%20Midlands&SHIPTOZIP=W12%204LQ&SHIPTOCOUNTRYCODE=GB&SHIPTOCOUNTRYNAME=United%20Kingdom&ADDRESSSTATUS=Confirmed&CURRENCYCODE=GBP&AMT=33%2e98&SHIPPINGAMT=0%2e00&HANDLINGAMT=0%2e00&TAXAMT=0%2e00&INSURANCEAMT=0%2e00&SHIPDISCAMT=0%2e00&PAYMENTREQUEST_0_CURRENCYCODE=GBP&PAYMENTREQUEST_0_AMT=33%2e98&PAYMENTREQUEST_0_SHIPPINGAMT=0%2e00&PAYMENTREQUEST_0_HANDLINGAMT=0%2e00&PAYMENTREQUEST_0_TAXAMT=0%2e00&PAYMENTREQUEST_0_INSURANCEAMT=0%2e00&PAYMENTREQUEST_0_SHIPDISCAMT=0%2e00&PAYMENTREQUEST_0_TRANSACTIONID=51963679RW630412N&PAYMENTREQUEST_0_INSURANCEOPTIONOFFERED=false&PAYMENTREQUEST_0_SHIPTONAME=David%20Winterbottom&PAYMENTREQUEST_0_SHIPTOSTREET=1%20Main%20Terrace&PAYMENTREQUEST_0_SHIPTOCITY=Wolverhampton&PAYMENTREQUEST_0_SHIPTOSTATE=West%20Midlands&PAYMENTREQUEST_0_SHIPTOZIP=W12%204LQ&PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE=GB&PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME=United%20Kingdom&PAYMENTREQUESTINFO_0_TRANSACTIONID=51963679RW630412N&PAYMENTREQUESTINFO_0_ERRORCODE=0'
 
     def perform_action(self):
         self.txn = fetch_transaction_details(self.token)
@@ -65,13 +64,13 @@ class SuccessfulGetExpressCheckoutTests(MockedResponseTests):
         self.assertEqual('Success', self.txn.ack)
 
     def test_amount_is_saved(self):
-        self.assertEqual(D('6.99'), self.txn.amount)
+        self.assertEqual(D('33.98'), self.txn.amount)
 
     def test_currency_is_saved(self):
         self.assertEqual('GBP', self.txn.currency)
 
     def test_correlation_id_is_saved(self):
-        self.assertEqual('83bda082c24d4', self.txn.correlation_id)
+        self.assertEqual('7e9c5efbda3c0', self.txn.correlation_id)
 
     def test_context(self):
         ctx = self.txn.context

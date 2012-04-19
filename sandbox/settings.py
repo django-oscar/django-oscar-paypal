@@ -246,3 +246,9 @@ HAYSTACK_SEARCH_ENGINE = 'dummy'
 # Paypal settings
 from integration import *
 
+# Taken from PayPal's documentation - these should always work in the sandbox
+PAYPAL_SANDBOX_MODE = True
+#PAYPAL_API_USERNAME = 'sdk-three_api1.sdk.com'
+#PAYPAL_API_PASSWORD = 'QFZCWN5HZM8VBG7Q'
+#PAYPAL_API_SIGNATURE = 'A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU'
+
