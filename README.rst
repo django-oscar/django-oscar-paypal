@@ -3,7 +3,8 @@ PayPal package for django-oscar
 ===============================
 
 This is a work in progress - not ready for production yet.  It also depends on
-the forthcoming version of oscar (0.2) which hasn't been released yet.
+the forthcoming version of oscar (0.2) which hasn't been released yet.  It's 99%
+ready though.
 
 Overview
 ========
@@ -11,11 +12,12 @@ Overview
 `PayPal Express` is an API for integrating PayPal payments into an ecommerce
 site.  A typical implementation involves redirecting the user to PayPal's site
 where they enter their shipping and billing information before arriving back on
-the merchant site to confirm the order.
+the merchant site to confirm the order.  It can also be used purely for payment,
+with shipping details being collected on the merchant site.
 
 This library provides integration between PayPal Express and `django-oscar`_.
 
-See the `PDF documentation`_ for the gory details.
+See the `PDF documentation`_ for the gory details of PayPal Express.
 
 .. _`PayPal Express`: https://www.paypal.com/uk/cgi-bin/webscr?cmd=_additional-payment-ref-impl1
 .. _`PDF documentation`: https://cms.paypal.com/cms_content/US/en_US/files/developer/PP_ExpressCheckout_IntegrationGuide.pdf
@@ -26,7 +28,7 @@ Installation
 
 First, you'll need to create a sandbox merchant account with PayPal - this will
 provide a username, password and 'signature' which are used to authenticate API
-requests.
+requests.  I
 
 If you want to test your installation in a browser (which you should), then
 you'll need to also create a sandbox buyer account so you can checkout.
@@ -35,7 +37,7 @@ Fetch package (not ready just yet)::
 
     pip install django-oscar-paypal
 
-Add following settings using the details from your sandbox buyer account::
+Add the following settings using the details from your sandbox buyer account::
 
     PAYPAL_API_USERNAME = 'test_xxxx.gmail.com'
     PAYPAL_API_PASSWORD = '123456789'
@@ -106,6 +108,9 @@ settings.
 * ``PAYPAL_CALLBACK_TIMEOUT`` - timeout in seconds for the instant update
   callback
 
+Some of these options, like the display ones, can be set in your PayPal merchant
+profile.
+
 Not included
 ------------
 
@@ -118,6 +123,7 @@ these in a 'generic' way within oscar:
 * Survey questions
 * User confirming order on PayPal (bypassing review stage)
 * Recurring payments
+* Fraud management
 
 Known issues
 ------------
