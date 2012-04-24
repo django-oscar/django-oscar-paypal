@@ -13,7 +13,6 @@ setup(name='django-oscar-paypal',
       platforms=['linux'],
       packages=find_packages(),
       include_package_data = True,
-      install_requires=['django-oscar',],
       # See http://pypi.python.org/pypi?%3Aaction=list_classifiers
       classifiers=['Environment :: Web Environment',
                    'Framework :: Django',
@@ -21,4 +20,7 @@ setup(name='django-oscar-paypal',
                    'License :: OSI Approved :: BSD License',
                    'Operating System :: Unix',
                    'Programming Language :: Python']
+      install_requires=['django-oscar>=0.2',
+                        'requests',
+                        'purl'],
       )

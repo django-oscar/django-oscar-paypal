@@ -4,11 +4,13 @@ import os
 from coverage import coverage
 from optparse import OptionParser
 
-from django.conf import settings, global_settings
+from django.conf import settings
 
 if not settings.configured:
     extra_settings = {
         'PAYPAL_EXPRESS_URL': 'https://www.sandbox.paypal.com/webscr',
+        'PAYPAL_SANDBOX_MODE': True,
+        'PAYPAL_VERSION': '88.0',
     }
     try:
         from integration import *
@@ -61,7 +63,7 @@ if not settings.configured:
                 'oscar.apps.dashboard.orders',
                 'oscar.apps.dashboard.orders',
                 'oscar.apps.dashboard.promotions',
-                'paypal.express',
+                'paypal',
                 'south',
                 ],
             MIDDLEWARE_CLASSES=(
