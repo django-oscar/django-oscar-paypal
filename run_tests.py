@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys
-import os
 from coverage import coverage
 from optparse import OptionParser
 
@@ -85,7 +84,6 @@ if not settings.configured:
             **extra_settings
         )
 
-#from django.test.simple import DjangoTestSuiteRunner
 from django_nose import NoseTestSuiteRunner
 
 
