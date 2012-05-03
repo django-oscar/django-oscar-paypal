@@ -19,7 +19,7 @@ setup(name='django-oscar-paypal',
                    'Intended Audience :: Developers',
                    'License :: OSI Approved :: BSD License',
                    'Operating System :: Unix',
-                   'Programming Language :: Python']
+                   'Programming Language :: Python'],
       install_requires=['django-oscar>=0.2',
                         'requests',
                         'purl'],
