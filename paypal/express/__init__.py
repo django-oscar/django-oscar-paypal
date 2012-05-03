@@ -52,6 +52,9 @@ def _fetch_response(method, extra_params):
         'SIGNATURE': settings.PAYPAL_API_SIGNATURE,
     }
     params.update(extra_params)
+    for k in params.keys():
+        if type(params[k]) == unicode:
+            params[k] = params[k].encode('utf-8')
     payload = urllib.urlencode(params.items())
 
     # Make request
@@ -233,14 +236,17 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['L_SHIPPINGOPTIONNAME%d' % index] = method.name
         params['L_SHIPPINGOPTIONAMOUNT%d' % index] = charge
 
+    # Set shipping charge explicitly if it has been passed
+    if shipping_method:
+        shipping_method.set_shipping_addr( shipping_address )
+        max_charge = charge = shipping_method.basket_charge_incl_tax()
+        params['PAYMENTREQUEST_0_SHIPPINGAMT'] = charge
+        params['PAYMENTREQUEST_0_AMT'] += charge
+        
     # Both the old version (MAXAMT) and the new version (PAYMENT...) are needed
     # here - think it's a problem with the API.
     params['PAYMENTREQUEST_0_MAXAMT'] = amount + max_charge
     params['MAXAMT'] = amount + max_charge
-
-    # Set shipping charge explicitly if it has been passed
-    if shipping_method:
-        params['PAYMENTREQUEST_0_SHIPPINGAMT'] = shipping_method.basket_charge_incl_tax()
 
     # Handling set to zero for now - I've never worked on a site that needed a
     # handling charge.
