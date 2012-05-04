@@ -238,7 +238,6 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
 
     # Set shipping charge explicitly if it has been passed
     if shipping_method:
-        shipping_method.set_shipping_addr( shipping_address )
         max_charge = charge = shipping_method.basket_charge_incl_tax()
         params['PAYMENTREQUEST_0_SHIPPINGAMT'] = charge
         params['PAYMENTREQUEST_0_AMT'] += charge
