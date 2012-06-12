@@ -2,10 +2,6 @@
 PayPal package for django-oscar
 ===============================
 
-This is a work in progress - not ready for production yet.  It also depends on
-the forthcoming version of oscar (0.2) which hasn't been released yet.  It's 99%
-ready though.
-
 Overview
 ========
 
