@@ -107,7 +107,8 @@ class SubmitOrderTests(MockedPayPalTests):
     def perform_action(self):
         self.add_product_to_basket(price=D('6.99'))
         self.response = self.client.post(reverse('paypal-place-order'), 
-                                         {'payer_id': '12345',
+                                         {'action': 'place_order',
+                                          'payer_id': '12345',
                                           'token': 'EC-8P797793UC466090M'})
         self.order = Order.objects.all()[0]
 

@@ -92,6 +92,7 @@ class CancelResponseView(RedirectView):
 
 class SuccessResponseView(PaymentDetailsView):
     template_name_preview = 'paypal/preview.html'
+    preview = True
 
     def get(self, request, *args, **kwargs):
         """
@@ -136,9 +137,9 @@ class SuccessResponseView(PaymentDetailsView):
             return HttpResponseRedirect(reverse('basket:summary'))
 
         # Pass the user email so it can be stored with the order
-        kwargs['guest_email'] = self.txn.value('EMAIL')
+        order_kwargs = {'guest_email': self.txn.value('EMAIL')}
 
-        return super(SuccessResponseView, self).post(request, *args, **kwargs)
+        return self.submit(request.basket, order_kwargs=order_kwargs)
 
     def fetch_paypal_data(self, payer_id, token):
         self.payer_id = payer_id
