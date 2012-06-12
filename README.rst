@@ -2,10 +2,6 @@
 PayPal package for django-oscar
 ===============================
 
-This is a work in progress - not ready for production yet.  It also depends on
-the forthcoming version of oscar (0.2) which hasn't been released yet.  It's 99%
-ready though.
-
 Overview
 ========
 
@@ -132,6 +128,13 @@ Known issues
   not passed to PayPal at the moment.
 
 * Vouchers may have expired during the time when the user is on the PayPal site.
+
+Changelog
+=========
+
+0.1 - 2012-06-12
+~~~~~~~~~~~~~~~~
+* First release based on oscar 0.2
 
 Contribute
 ==========
