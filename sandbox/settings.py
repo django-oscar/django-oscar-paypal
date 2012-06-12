@@ -198,7 +198,6 @@ INSTALLED_APPS = (
     # Apps from oscar
     'oscar',
     'oscar.apps.analytics',
-    'oscar.apps.discount',
     'oscar.apps.order',
     'oscar.apps.checkout',
     'oscar.apps.catalogue',
@@ -216,6 +215,9 @@ INSTALLED_APPS = (
     'oscar.apps.dashboard.reports',
     'oscar.apps.dashboard.users',
     'oscar.apps.dashboard.orders',
+    'oscar.apps.dashboard.offers',
+    'oscar.apps.dashboard.ranges',
+    'oscar.apps.dashboard.vouchers',
     'oscar.apps.dashboard.promotions',
     'oscar.apps.dashboard.catalogue',
     'sorl.thumbnail',
