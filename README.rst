@@ -129,6 +129,13 @@ Known issues
 
 * Vouchers may have expired during the time when the user is on the PayPal site.
 
+Changelog
+=========
+
+0.1 - 2012-06-12
+~~~~~~~~~~~~~~~~
+* First release based on oscar 0.2
+
 Contribute
 ==========
 
