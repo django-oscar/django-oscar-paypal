@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 
 setup(name='django-oscar-paypal',
-      version='0.1',
+      version='0.1.1',
       url='https://github.com/tangentlabs/django-oscar-paypal',
       author="David Winterbottom",
       author_email="david.winterbottom@tangentlabs.co.uk",
