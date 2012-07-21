@@ -10,6 +10,7 @@ if not settings.configured:
         'PAYPAL_EXPRESS_URL': 'https://www.sandbox.paypal.com/webscr',
         'PAYPAL_SANDBOX_MODE': True,
         'PAYPAL_VERSION': '88.0',
+        'PAYPAL_PAYFLOW_TEST_MODE': True,
     }
     try:
         from integration import *
@@ -68,6 +69,7 @@ if not settings.configured:
                 'oscar.apps.dashboard.promotions',
                 'sorl.thumbnail',
                 'paypal',
+                'paypal.payflow',
                 'south',
                 ],
             MIDDLEWARE_CLASSES=(

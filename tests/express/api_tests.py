@@ -61,7 +61,7 @@ class SuccessResponseTests(MockedResponseTestCase):
 
         with patch('requests.post') as post:
             post.return_value = response
-            self.url = express.set_txn(self.basket, self.methods, 'GBP', 
+            self.url = express.set_txn(self.basket, self.methods, 'GBP',
                                        'http://localhost:8000/success',
                                        'http://localhost:8000/error')
 

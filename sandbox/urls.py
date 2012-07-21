@@ -1,11 +1,11 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import patterns, include, url
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
 
-from oscar.app import shop
+from apps.app import application
 
 admin.autodiscover()
 
@@ -13,7 +13,7 @@ urlpatterns = patterns('',
     (r'^admin/', include(admin.site.urls)),
     # Include the below line to enable PayPal integration
     (r'^checkout/paypal/', include('paypal.express.urls')),
-    (r'', include(shop.urls)),
+    (r'', include(application.urls)),
 )
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()

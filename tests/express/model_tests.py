@@ -24,4 +24,3 @@ class TransactionTests(TestCase):
                                          ack='SuccessWithWarning',
                                          response_time=0)
         self.assertTrue(txn.is_successful)
-

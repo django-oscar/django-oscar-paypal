@@ -1,0 +1,3 @@
+# Transaction types (TRXTYPE)
+SALE, CREDIT, AUTHORIZATION, DELAYED_CAPTURE, VOID, DUPICATE_TRANSACTION = (
+    'S', 'C', 'A', 'D', 'V', 'N')
