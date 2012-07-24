@@ -24,13 +24,8 @@ SALE, AUTHORIZATION, ORDER = 'Sale', 'Authorization', 'Order'
 
 # It's quite difficult to work out what the latest version of the PayPal Express
 # API is.  The best way is to look for the 'web version: ...' string in the
-# source of https://www.sandbox.paypal.com/
+# source of https://www.sandbox.paypal.com/.  Very odd.
 API_VERSION = getattr(settings, 'PAYPAL_API_VERSION', '88.0')
-
-# Anonymous checkout must be abled
-if not settings.OSCAR_ALLOW_ANON_CHECKOUT:
-    from django.core.exceptions import ImproperlyConfigured
-    raise ImproperlyConfigured("OSCAR_ALLOW_ANON_CHECKOUT must be True for PayPal Express to work")
 
 logger = logging.getLogger('paypal.express')
 
@@ -123,7 +118,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     There are quite a few options that can be passed to PayPal to configure this
     request - most are controlled by PAYPAL_* settings.
     """
-    # PayPal have an upper limit on transactions.  It's in dollars which is 
+    # PayPal have an upper limit on transactions.  It's in dollars which is
     # a fiddly to work with.  Lazy solution - only check when dollars are used as
     # the PayPal currency.
     amount = basket.total_incl_tax
@@ -241,7 +236,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         max_charge = charge = shipping_method.basket_charge_incl_tax()
         params['PAYMENTREQUEST_0_SHIPPINGAMT'] = charge
         params['PAYMENTREQUEST_0_AMT'] += charge
-        
+
     # Both the old version (MAXAMT) and the new version (PAYMENT...) are needed
     # here - think it's a problem with the API.
     params['PAYMENTREQUEST_0_MAXAMT'] = amount + max_charge
