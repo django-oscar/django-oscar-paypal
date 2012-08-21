@@ -8,6 +8,10 @@ from paypal.payflow import codes
 
 
 class PayflowTransaction(models.Model):
+    # This is the linking parameter between the merchant and PayPal.  It is
+    # normally set to the order number
+    comment1 = models.CharField(_("Comment 1"), max_length=128, db_index=True)
+
     trxtype = models.CharField(_("Transaction type"), max_length=12)
     tender = models.CharField(_("Bankcard or PayPal"), max_length=12)
 

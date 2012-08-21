@@ -14,7 +14,7 @@ from paypal.payflow import codes
 logger = logging.getLogger('paypal.payflowpro')
 
 
-def authorize(card_number, cvv, expiry_date, amt, **kwargs):
+def authorize(order_number, card_number, cvv, expiry_date, amt, **kwargs):
     """
     Make an AUTHORIZE request.
 
@@ -24,22 +24,22 @@ def authorize(card_number, cvv, expiry_date, amt, **kwargs):
     * The hold lasts for around a week.
     * The hold cannot be cancelled through the PayPal API.
     """
-    return _submit_payment_details(codes.AUTHORIZATION, card_number, cvv, expiry_date,
+    return _submit_payment_details(codes.AUTHORIZATION, order_number, card_number, cvv, expiry_date,
                                    amt, **kwargs)
 
 
-def sale(card_number, cvv, expiry_date, amt, **kwargs):
+def sale(order_number, card_number, cvv, expiry_date, amt, **kwargs):
     """
     Make a SALE request.
 
     This authorises money within the customer's bank and marks it for settlement
     immediately.
     """
-    return _submit_payment_details(codes.SALE, card_number, cvv, expiry_date,
+    return _submit_payment_details(codes.SALE, order_number, card_number, cvv, expiry_date,
                                    amt, **kwargs)
 
 
-def _submit_payment_details(trxtype, card_number, cvv, expiry_date, amt, **kwargs):
+def _submit_payment_details(trxtype, order_number, card_number, cvv, expiry_date, amt, **kwargs):
     """
     Submit payment details to PayPal.
     """
@@ -52,7 +52,7 @@ def _submit_payment_details(trxtype, card_number, cvv, expiry_date, amt, **kwarg
         'CVV2': cvv,
         'EXPDATE': expiry_date,
         # Audit information (eg order number)
-        'COMMENT1': kwargs.get('comment1', ''),
+        'COMMENT1': order_number,
         'COMMENT2': kwargs.get('comment2', ''),
         # Billing address (only required if using address verification service)
         'FIRSTNAME': kwargs.get('first_name', ''),
@@ -115,6 +115,7 @@ def _transaction(extra_params):
     pairs = gateway.post(url, params)
 
     return models.PayflowTransaction.objects.create(
+        comment1=params['COMMENT1'],
         trxtype=params['TRXTYPE'],
         tender=params['TENDER'],
         amount=params['AMT'],

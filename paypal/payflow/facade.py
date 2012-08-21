@@ -39,11 +39,11 @@ def authorize(order_number, amt, bankcard, billing_address=None):
         })
 
     txn = gateway.authorize(
+        order_number,
         card_number=bankcard.card_number,
         cvv=bankcard.cvv,
         expiry_date=exp_date,
         amt=amt,
-        comment1=order_number,
         **address_fields)
     if not txn.is_approved:
         raise NotApproved(txn.respmsg)

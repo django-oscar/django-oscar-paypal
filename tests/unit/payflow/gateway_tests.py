@@ -21,6 +21,7 @@ class TestAuthorizeFunction(TestCase):
                 '_response_time': 1000
             }
             txn = gateway.authorize(
+                order_number='1234',
                 card_number='4111111111111111',
                 cvv='123',
                 expiry_date='1214',
@@ -40,6 +41,7 @@ class TestAuthorizeFunction(TestCase):
                 '_response_time': 1000
             }
             txn = gateway.authorize(
+                order_number='1234',
                 card_number='5555555555554444',
                 cvv='123',
                 expiry_date='0113',
