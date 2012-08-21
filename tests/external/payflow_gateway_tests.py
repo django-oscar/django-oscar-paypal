@@ -45,3 +45,10 @@ class TestGateway(TestCase):
 
         # Normally this fails as the auth_txn is not approved
         self.assertFalse(capture_txn.is_approved)
+
+    def test_credit_after_sale(self):
+        sale_txn = gateway.sale('1234', '4111111111111111', '123', '1213', D('12.99'))
+        credit_txn = gateway.credit('1234', sale_txn.pnref)
+
+        # Normally this fails as the auth_txn is not approved
+        self.assertFalse(credit_txn.is_approved)

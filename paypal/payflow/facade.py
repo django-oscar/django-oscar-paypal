@@ -82,6 +82,7 @@ def delayed_capture(order_number, pnref=None, amt=None):
     * Only one delayed capture is allowed for a given PNREF.
     * If multiple captures are required, a 'reference transaction' needs to be
       used.
+    * It's safe to retry captures if the first one fails or errors
 
     :order_number: Order number
     :pnref: The PNREF of the authorization transaction to use.  If not
@@ -102,3 +103,29 @@ def delayed_capture(order_number, pnref=None, amt=None):
     txn = gateway.delayed_capture(order_number, pnref, amt)
     if not txn.is_approved:
         raise exceptions.UnableToTakePayment(txn.respmsg)
+
+
+def credit(order_number, pnref=None, amt=None):
+    """
+    Return funds that have been previously settled.
+
+    :order_number: Order number
+    :pnref: The PNREF of the authorization transaction to use.  If not
+    specified, the order number is used to retrieve the appropriate transaction.
+    :amt: A custom amount to capture.
+    """
+    if pnref is None:
+        # No PNREF specified, look-up the auth/sale transaction for this order number
+        # to get the PNREF from there.
+        try:
+            auth_txn = models.PayflowTransaction.objects.get(
+                comment1=order_number, trxtype__in=(codes.AUTHORIZATION,
+                                                    codes.SALE))
+        except models.PayflowTransaction.DoesNotExist:
+            raise exceptions.UnableToTakePayment(
+                "No authorization transaction found with PNREF=%s" % pnref)
+        pnref = auth_txn
+
+    txn = gateway.capture(order_number, pnref, amt)
+    if not txn.is_approved:
+        raise exceptions.PaymentError(txn.respmsg)

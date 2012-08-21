@@ -81,6 +81,32 @@ def delayed_capture(order_number, pnref, amt=None):
     return _transaction(params)
 
 
+def credit(order_number, pnref, amt=None):
+    """
+    Refund money back to a bankcard.
+    """
+    params = {
+        'COMMENT1': order_number,
+        'TRXTYPE': codes.CREDIT,
+        'ORIGID': pnref
+    }
+    if amt:
+        params['AMT'] = amt
+    return _transaction(params)
+
+
+def void(order_number, pnref):
+    """
+    Prevent a transaction from being settled
+    """
+    params = {
+        'COMMENT1': order_number,
+        'TRXTYPE': codes.VOID,
+        'ORIGID': pnref
+    }
+    return _transaction(params)
+
+
 def _transaction(extra_params):
     """
     Perform a transaction with PayPal.
@@ -96,6 +122,8 @@ def _transaction(extra_params):
         codes.AUTHORIZATION: ('ACCT', 'AMT', 'EXPDATE'),
         codes.SALE: ('ACCT', 'AMT', 'EXPDATE'),
         codes.DELAYED_CAPTURE: ('ORIGID',),
+        codes.CREDIT: ('ORIGID',),
+        codes.VOID: ('ORIGID',),
     }
     trxtype = extra_params['TRXTYPE']
     for key in constraints[trxtype]:

@@ -74,13 +74,6 @@ class TestSale(TestCase):
 
 class TestDelayedCapture(TestCase):
 
-    def setUp(self):
-        self.card = Bankcard(
-            card_number='4111111111111111',
-            name='John Doe',
-            expiry_date='12/13',
-        )
-
     def test_returns_nothing_when_txn_is_approved(self):
         models.PayflowTransaction.objects.create(
             trxtype=codes.AUTHORIZATION,
