@@ -7,6 +7,7 @@ import mock
 
 from paypal.payflow import facade
 from paypal.payflow import models
+from paypal.payflow import codes
 
 """
 See page 49 of the PDF for information on PayPal's testing set-up
@@ -69,3 +70,26 @@ class TestSale(TestCase):
                 result='0'
             )
             self.assertIsNone(self.sale())
+
+
+class TestDelayedCapture(TestCase):
+
+    def setUp(self):
+        self.card = Bankcard(
+            card_number='4111111111111111',
+            name='John Doe',
+            expiry_date='12/13',
+        )
+
+    def test_returns_nothing_when_txn_is_approved(self):
+        models.PayflowTransaction.objects.create(
+            trxtype=codes.AUTHORIZATION,
+            comment1='1234',
+            pnref='V19A3A079142',
+            response_time=0,
+        )
+        with mock.patch('paypal.payflow.gateway.delayed_capture') as mock_f:
+            mock_f.return_value = models.PayflowTransaction(
+                result='0'
+            )
+            facade.delayed_capture('1234')

@@ -4,6 +4,8 @@ Bridging module between Oscar and the gateway module (which is Oscar agnostic)
 from oscar.apps.payment import exceptions
 
 from paypal.payflow import gateway
+from paypal.payflow import models
+from paypal.payflow import codes
 
 
 def authorize(order_number, amt, bankcard, billing_address=None):
@@ -70,9 +72,33 @@ def _submit_payment_details(gateway_fn, order_number, amt, bankcard, billing_add
         raise exceptions.UnableToTakePayment(txn.respmsg)
 
 
-def settle():
-    pass
+def delayed_capture(order_number, pnref=None, amt=None):
+    """
+    Capture funds that have been previously authorized.
 
+    Note:
+    * It's possible to capture a lower amount than the original auth
+      transaction - however..
+    * Only one delayed capture is allowed for a given PNREF.
+    * If multiple captures are required, a 'reference transaction' needs to be
+      used.
 
-def refund():
-    pass
+    :order_number: Order number
+    :pnref: The PNREF of the authorization transaction to use.  If not
+    specified, the order number is used to retrieve the appropriate transaction.
+    :amt: A custom amount to capture.
+    """
+    if pnref is None:
+        # No PNREF specified, look-up the auth transaction for this order number
+        # to get the PNREF from there.
+        try:
+            auth_txn = models.PayflowTransaction.objects.get(
+                comment1=order_number, trxtype=codes.AUTHORIZATION)
+        except models.PayflowTransaction.DoesNotExist:
+            raise exceptions.UnableToTakePayment(
+                "No authorization transaction found with PNREF=%s" % pnref)
+        pnref = auth_txn
+
+    txn = gateway.delayed_capture(order_number, pnref, amt)
+    if not txn.is_approved:
+        raise exceptions.UnableToTakePayment(txn.respmsg)

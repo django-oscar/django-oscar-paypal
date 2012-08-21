@@ -7,7 +7,7 @@ from django.conf import settings
 from paypal.payflow import gateway
 
 
-@unittest.skipUnless(getattr(settings, 'RUN_EXTERNAL_TESTS', False),
+@unittest.skipUnless(getattr(settings, 'PAYPAL_RUN_EXTERNAL_TESTS', False),
                     "External tests are not enabled")
 class TestGateway(TestCase):
 
@@ -31,3 +31,17 @@ class TestGateway(TestCase):
         txn = gateway.sale('1234', '4111111111111111', '123', '1213', D('12.99'))
         self.assertTrue(txn.is_approved)
 
+    def test_auth_then_delayed_capture(self):
+        params = {
+            'first_name': 'Barry',
+            'last_name': 'Chuckle',
+            'street': '1 Road',
+            'city': 'Liverpool',
+            'zip': 'L1 9ET',
+        }
+        auth_txn = gateway.authorize('1234', '4111111111111111', '123', '1213', D('12.99'),
+                                     **params)
+        capture_txn = gateway.delayed_capture('1234', auth_txn.pnref)
+
+        # Normally this fails as the auth_txn is not approved
+        self.assertFalse(capture_txn.is_approved)

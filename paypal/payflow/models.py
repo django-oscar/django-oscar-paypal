@@ -13,7 +13,7 @@ class PayflowTransaction(models.Model):
     comment1 = models.CharField(_("Comment 1"), max_length=128, db_index=True)
 
     trxtype = models.CharField(_("Transaction type"), max_length=12)
-    tender = models.CharField(_("Bankcard or PayPal"), max_length=12)
+    tender = models.CharField(_("Bankcard or PayPal"), max_length=12, null=True)
 
     amount = models.DecimalField(max_digits=12, decimal_places=2, null=True,
                                  blank=True)

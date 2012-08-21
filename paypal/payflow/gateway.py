@@ -65,6 +65,22 @@ def _submit_payment_details(trxtype, order_number, card_number, cvv, expiry_date
     return _transaction(params)
 
 
+def delayed_capture(order_number, pnref, amt=None):
+    """
+    Perform a DELAYED CAPTURE transaction.
+
+    This captures money that was previously authorised.
+    """
+    params = {
+        'COMMENT1': order_number,
+        'TRXTYPE': codes.DELAYED_CAPTURE,
+        'ORIGID': pnref
+    }
+    if amt:
+        params['AMT'] = amt
+    return _transaction(params)
+
+
 def _transaction(extra_params):
     """
     Perform a transaction with PayPal.
@@ -79,6 +95,7 @@ def _transaction(extra_params):
     constraints = {
         codes.AUTHORIZATION: ('ACCT', 'AMT', 'EXPDATE'),
         codes.SALE: ('ACCT', 'AMT', 'EXPDATE'),
+        codes.DELAYED_CAPTURE: ('ORIGID',),
     }
     trxtype = extra_params['TRXTYPE']
     for key in constraints[trxtype]:
@@ -117,8 +134,8 @@ def _transaction(extra_params):
     return models.PayflowTransaction.objects.create(
         comment1=params['COMMENT1'],
         trxtype=params['TRXTYPE'],
-        tender=params['TENDER'],
-        amount=params['AMT'],
+        tender=params.get('TENDER', None),
+        amount=params.get('AMT', None),
         pnref=pairs.get('PNREF', None),
         ppref=pairs.get('PPREF', None),
         cvv2match=pairs.get('CVV2MATCH', None),
