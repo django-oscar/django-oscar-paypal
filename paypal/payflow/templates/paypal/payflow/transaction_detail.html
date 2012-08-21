@@ -1,0 +1,46 @@
+{% extends 'dashboard/layout.html' %}
+{% load currency_filters %}
+
+{% block title %}
+PayPal Payflow transaction {{ txn.pnref }} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li>
+        <a href="{% url dashboard:index %}">Dashboard</a>
+        <span class="divider">/</span>
+    </li>
+    <li>
+        <a href="{% url paypal-payflow-list %}">PayPal Payflow</a>
+        <span class="divider">/</span>
+    </li>
+	<li class="active"><a href=".">Transaction {{ txn.pnref }}</a></li>
+</ul>
+{% endblock %}
+
+{% block dashboard_content %}
+
+<div class="sub-header">
+	<h2>Transaction {{ txn.pnref }}</h2>
+</div>
+
+<table class="table table-striped table-bordered">
+	<tbody>
+		<tr><th>Order number</th><td>{{ txn.comment1 }}</td></tr>
+		<tr><th>Transaction type</th><td>{{ txn.get_trxtype_display }}</td></tr>
+		<tr><th>Tender</th><td>{{ txn.get_tender_display }}</td></tr>
+		<tr><th>Amount</th><td>{{ txn.amount|currency }}</td></tr>
+		<tr><th>PN reference</th><td>{{ txn.pnref }}</td></tr>
+		<tr><th>PP reference</th><td>{{ txn.ppref|default:"-" }}</td></tr>
+		<tr><th>Auth code</th><td>{{ txn.auth_code|default:"-" }}</td></tr>
+		<tr><th>Result</th><td>{{ txn.result }}</td></tr>
+		<tr><th>Reason</th><td>{{ txn.respmsg }}</td></tr>
+		<tr><th>Is approved?</th><td>{{ txn.is_approved }}</td></tr>
+		<tr><th>Raw request</th><td>{{ txn.raw_request }}</td></tr>
+		<tr><th>Raw response</th><td>{{ txn.raw_response }}</td></tr>
+		<tr><th>Date</th><td>{{ txn.date_created }}</td></tr>
+	</tbody>
+</table>
+
+{% endblock dashboard_content %}
