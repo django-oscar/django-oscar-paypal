@@ -25,12 +25,13 @@ class TestAuthorize(TestCase):
     def authorize(self):
         return facade.authorize('1234', D('10.00'), self.card)
 
-    def test_returns_nothing_when_txn_is_approved(self):
+    def test_returns_approved_txn(self):
         with mock.patch('paypal.payflow.gateway.authorize') as mock_f:
             mock_f.return_value = models.PayflowTransaction(
                 result='0'
             )
-            self.assertIsNone(self.authorize())
+            txn = self.authorize()
+            self.assertTrue(txn.is_approved)
 
     def test_raises_exception_when_not_approved(self):
         with mock.patch('paypal.payflow.gateway.authorize') as mock_f:
@@ -64,12 +65,13 @@ class TestSale(TestCase):
     def sale(self):
         return facade.sale('1234', D('10.00'), self.card)
 
-    def test_returns_nothing_when_txn_is_approved(self):
+    def test_returns_approved_transaction(self):
         with mock.patch('paypal.payflow.gateway.sale') as mock_f:
             mock_f.return_value = models.PayflowTransaction(
                 result='0'
             )
-            self.assertIsNone(self.sale())
+            txn = self.sale()
+            self.assertTrue(txn.is_approved)
 
 
 class TestDelayedCapture(TestCase):
