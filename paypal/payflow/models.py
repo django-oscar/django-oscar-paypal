@@ -22,12 +22,18 @@ class PayflowTransaction(models.Model):
     pnref = models.CharField(_("Payflow transaction ID"), max_length=32)
     ppref = models.CharField(_("Payment transaction ID"), max_length=32,
                              unique=True, null=True)
-    cvv2match = models.CharField(_("CVV2 check"), null=True, blank=True,
-                                 max_length=12)
     result = models.CharField(max_length=32, null=True, blank=True)
     respmsg = models.CharField(_("Response message"), max_length=512)
     authcode = models.CharField(_("Auth code"), max_length=32, null=True,
                                 blank=True)
+
+    # Fraud/risk params
+    cvv2match = models.CharField(_("CVV2 check"), null=True, blank=True,
+                                 max_length=12)
+    avsaddr = models.CharField(_("House number check"), null=True, blank=True,
+                               max_length=1)
+    avszip = models.CharField(_("Zip/Postcode check"), null=True, blank=True,
+                               max_length=1)
 
     # Audit information
     raw_request = models.TextField(max_length=512)
@@ -55,6 +61,9 @@ class PayflowTransaction(models.Model):
     @property
     def is_approved(self):
         return self.result in ('0', '126')
+
+    def is_address_verified(self):
+        return self.avsaddr == 'Y' and self.avzip == 'Y'
 
     @property
     def context(self):

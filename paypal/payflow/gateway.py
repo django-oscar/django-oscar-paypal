@@ -122,6 +122,8 @@ def _transaction(extra_params):
         pnref=pairs.get('PNREF', None),
         ppref=pairs.get('PPREF', None),
         cvv2match=pairs.get('CVV2MATCH', None),
+        avsaddr=pairs.get('AVSADDR', None),
+        avszip=pairs.get('AVSZIP', None),
         result=pairs.get('RESULT', None),
         respmsg=pairs.get('RESPMSG', None),
         authcode=pairs.get('AUTHCODE', None),
