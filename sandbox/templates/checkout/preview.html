@@ -20,10 +20,11 @@
 <form method="post" action="{% url checkout:preview %}">
 	{% csrf_token %}
 
-	{# Store bankcard form but hidden so the bankcard details get resubmitted #}
+	{# Store payment forms but hidden so they get resubmitted #}
 	<div style="display:none">
 		<input type="hidden" name="action" value="place_order" />
 		{{ bankcard_form.as_p }}
+		{{ billing_address_form.as_p }}
 	</div>
 
     <div class="form-actions">

@@ -21,7 +21,7 @@ class TestAuthorize(TestCase):
         )
 
     def authorize(self):
-        return facade.authorize('1234', self.card, D('10.00'))
+        return facade.authorize('1234', D('10.00'), self.card)
 
     def test_returns_nothing_when_txn_is_approved(self):
         with mock.patch('paypal.payflow.gateway.authorize') as mock_f:

@@ -5,6 +5,7 @@ non-Oscar project.  All Oscar-related functionality should be in the facade.
 import logging
 
 from django.conf import settings
+from django.core import exceptions
 
 from paypal import gateway
 from paypal.payflow import models
@@ -12,63 +13,88 @@ from paypal.payflow import codes
 
 logger = logging.getLogger('paypal.payflowpro')
 
-# Payment methods (TENDER)
-BANKCARD, PAYPAL = 'C', 'P'
 
 
 def authorize(card_number, cvv, expiry_date, amt, **kwargs):
     """
-    Make an AUTHORIZE request.  This holds the money on the bankcard but doesn't
+    Make an AUTHORIZE request.
+
+    This holds the money within the customer's bankcard but doesn't
     actually settle - that comes from a later step.
+
+    * The hold lasts for around a week.
+    * The hold cannot be cancelled through the PayPal API.
     """
     params = {
         'TRXTYPE': codes.AUTHORIZATION,
-        'TENDER': BANKCARD,
+        'TENDER': codes.BANKCARD,
         'AMT': amt,
         # Bankcard
         'ACCT': card_number,
         'CVV2': cvv,
         'EXPDATE': expiry_date,
-        # Audit information
+        # Audit information (eg order number)
         'COMMENT1': kwargs.get('comment1', ''),
         'COMMENT2': kwargs.get('comment2', ''),
-        # TODO - Address
-        'FIRSTNAME': '',
-        'LASTNAME': '',
-        'STREET': '',
-        'CITY': '',
-        'STATE': '',
-        'ZIP': '',
+        # Billing address (only required if using address verification service)
+        'FIRSTNAME': kwargs.get('first_name', ''),
+        'LASTNAME': kwargs.get('last_name', ''),
+        'STREET': kwargs.get('street', ''),
+        'CITY': kwargs.get('city', ''),
+        'STATE': kwargs.get('state', ''),
+        'ZIP': kwargs.get('zip', ''),
     }
     return transaction(params)
 
 
 def transaction(extra_params):
+    """
+    Perform a transaction with PayPal.
+
+    :extra_params: Additional parameters to include in the payload other than
+    the user credentials.
+    """
+    if 'TRXTYPE' not in extra_params:
+        raise RuntimeError("All transactions must specify a 'TRXTYPE' paramter")
+
     # Validate constraints on parameters
     constraints = {
         codes.AUTHORIZATION: ('ACCT', 'AMT', 'EXPDATE'),
     }
-    for key in constraints[extra_params['TRXTYPE']]:
+    trxtype = extra_params['TRXTYPE']
+    for key in constraints[trxtype]:
         if key not in extra_params:
-            raise RuntimeError("The key %s must be supplied" % key)
+            raise RuntimeError(
+                "A %s parameter must be supplied for a %s transaction" % (
+                    key, trxtype))
+
+    # At a minimum, we require a vendor ID and a password.
+    for setting in ('PAYPAL_PAYFLOW_VENDOR_ID',
+                    'PAYPAL_PAYFLOW_PASSWORD'):
+        if not hasattr(settings, setting):
+            raise exceptions.ImproperlyConfigured(
+                "You must define a %s setting" % setting
+            )
 
     params = {
         # Required user params
-        'USER': settings.PAYPAL_PAYFLOW_USER,
         'VENDOR': settings.PAYPAL_PAYFLOW_VENDOR_ID,
-        'PARTNER': settings.PAYPAL_PAYFLOW_PARTNER_ID,
         'PWD': settings.PAYPAL_PAYFLOW_PASSWORD,
+        'USER': getattr(settings, 'PAYPAL_PAYFLOW_USER',
+                        settings.PAYPAL_PAYFLOW_VENDOR_ID),
+        'PARTNER': getattr(settings, 'PAYPAL_PAYFLOW_PARTNER',
+                           'PayPal')
     }
     params.update(extra_params)
 
-    if settings.PAYPAL_PAYFLOW_TEST_MODE:
-        url = 'https://pilot-payflowpro.paypal.com'
-    else:
+    if getattr(settings, 'PAYPAL_PAYFLOW_PRODUCTION_MODE', False):
         url = 'https://payflowpro.paypal.com'
+    else:
+        url = 'https://pilot-payflowpro.paypal.com'
 
+    logger.info("Performing %s transaction", trxtype)
     pairs = gateway.post(url, params)
 
-    # Create transaction model
     return models.PayflowTransaction.objects.create(
         trxtype=params['TRXTYPE'],
         tender=params['TENDER'],

@@ -39,10 +39,12 @@ class PayflowTransaction(models.Model):
         return super(PayflowTransaction, self).save(*args, **kwargs)
 
     def get_trxtype_display(self):
-        mapping = {
-            codes.AUTHORIZATION: 'Authorize',
-        }
-        return mapping.get(self.trxtype, self.trxtype)
+        return codes.trxtype_map.get(self.trxtype, self.trxtype)
+    get_trxtype_display.short_description = "Transaction type"
+
+    def get_tender_display(self):
+        return codes.tender_map.get(self.tender, '')
+    get_tender_display.short_description = "Tender"
 
     @property
     def is_approved(self):

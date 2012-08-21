@@ -4,7 +4,8 @@ from paypal.payflow import models
 
 
 class TxnAdmin(admin.ModelAdmin):
-    list_display = ['pnref', 'amount', 'trxtype', 'tender', 'result', 'date_created']
+    list_display = ['pnref', 'amount', 'get_trxtype_display',
+                    'get_tender_display', 'result', 'respmsg', 'date_created']
 
     readonly_fields = [
         'trxtype',
