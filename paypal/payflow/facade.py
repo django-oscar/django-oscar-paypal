@@ -1,11 +1,9 @@
 """
 Bridging module between Oscar and the gateway module (which is Oscar agnostic)
 """
+from oscar.apps.payment import exceptions
+
 from paypal.payflow import gateway
-
-
-class NotApproved(Exception):
-    pass
 
 
 def authorize(order_number, amt, bankcard, billing_address=None):
@@ -22,6 +20,29 @@ def authorize(order_number, amt, bankcard, billing_address=None):
     :billing_address: A dict of billing address information (which can come from
     the `cleaned_data` of a billing address form.
     """
+    return _submit_payment_details(gateway.authorize, order_number, amt, bankcard,
+                                   billing_address)
+
+
+def sale(order_number, amt, bankcard, billing_address=None):
+    """
+    Make a sale request to PayPal.
+
+    If successful, return nothing ("silence is golden") - if unsuccessful raise
+    an exception which can be caught and handled within view code.
+
+    :order_number: Order number for request
+    :amt: Amount for transaction
+    :bankcard: Instance of Oscar's Bankcard class (which is just a dumb wrapper
+    around the pertinent bankcard attributes).
+    :billing_address: A dict of billing address information (which can come from
+    the `cleaned_data` of a billing address form.
+    """
+    return _submit_payment_details(gateway.sale, order_number, amt, bankcard,
+                                   billing_address)
+
+
+def _submit_payment_details(gateway_fn, order_number, amt, bankcard, billing_address=None):
     # Oscar's bankcard class returns dates in form '01/02' - we strip the '/' to
     # conform to PayPal's conventions.
     exp_date = bankcard.expiry_date.replace('/', '')
@@ -38,7 +59,7 @@ def authorize(order_number, amt, bankcard, billing_address=None):
             'zip': billing_address['postcode'].strip(' ')
         })
 
-    txn = gateway.authorize(
+    txn = gateway_fn(
         order_number,
         card_number=bankcard.card_number,
         cvv=bankcard.cvv,
@@ -46,7 +67,7 @@ def authorize(order_number, amt, bankcard, billing_address=None):
         amt=amt,
         **address_fields)
     if not txn.is_approved:
-        raise NotApproved(txn.respmsg)
+        raise exceptions.UnableToTakePayment(txn.respmsg)
 
 
 def settle():

@@ -2,6 +2,7 @@ from decimal import Decimal as D
 
 from django.test import TestCase
 from oscar.apps.payment.utils import Bankcard
+from oscar.apps.payment import exceptions
 import mock
 
 from paypal.payflow import facade
@@ -35,7 +36,7 @@ class TestAuthorize(TestCase):
             mock_f.return_value = models.PayflowTransaction(
                 result='1'
             )
-            with self.assertRaises(facade.NotApproved):
+            with self.assertRaises(exceptions.UnableToTakePayment):
                 self.authorize()
 
     def test_not_approved_exception_contains_useful_message(self):
@@ -46,5 +47,25 @@ class TestAuthorize(TestCase):
             )
             try:
                 self.authorize()
-            except facade.NotApproved, e:
+            except exceptions.UnableToTakePayment, e:
                 self.assertEqual("Invalid account number", e.message)
+
+
+class TestSale(TestCase):
+
+    def setUp(self):
+        self.card = Bankcard(
+            card_number='4111111111111111',
+            name='John Doe',
+            expiry_date='12/13',
+        )
+
+    def sale(self):
+        return facade.sale('1234', D('10.00'), self.card)
+
+    def test_returns_nothing_when_txn_is_approved(self):
+        with mock.patch('paypal.payflow.gateway.sale') as mock_f:
+            mock_f.return_value = models.PayflowTransaction(
+                result='0'
+            )
+            self.assertIsNone(self.sale())
