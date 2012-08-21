@@ -72,3 +72,6 @@ class PayflowTransaction(models.Model):
     def value(self, key):
         ctx = self.context
         return ctx[key][0] if key in ctx else None
+
+    def __unicode__(self):
+        return self.ppnref

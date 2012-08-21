@@ -14,7 +14,6 @@ from paypal.payflow import codes
 logger = logging.getLogger('paypal.payflowpro')
 
 
-
 def authorize(card_number, cvv, expiry_date, amt, **kwargs):
     """
     Make an AUTHORIZE request.
@@ -25,8 +24,27 @@ def authorize(card_number, cvv, expiry_date, amt, **kwargs):
     * The hold lasts for around a week.
     * The hold cannot be cancelled through the PayPal API.
     """
+    return _submit_payment_details(codes.AUTHORIZATION, card_number, cvv, expiry_date,
+                                   amt, **kwargs)
+
+
+def sale(card_number, cvv, expiry_date, amt, **kwargs):
+    """
+    Make a SALE request.
+
+    This authorises money within the customer's bank and marks it for settlement
+    immediately.
+    """
+    return _submit_payment_details(codes.SALE, card_number, cvv, expiry_date,
+                                   amt, **kwargs)
+
+
+def _submit_payment_details(trxtype, card_number, cvv, expiry_date, amt, **kwargs):
+    """
+    Submit payment details to PayPal.
+    """
     params = {
-        'TRXTYPE': codes.AUTHORIZATION,
+        'TRXTYPE': codes.SALE,
         'TENDER': codes.BANKCARD,
         'AMT': amt,
         # Bankcard
@@ -44,10 +62,10 @@ def authorize(card_number, cvv, expiry_date, amt, **kwargs):
         'STATE': kwargs.get('state', ''),
         'ZIP': kwargs.get('zip', ''),
     }
-    return transaction(params)
+    return _transaction(params)
 
 
-def transaction(extra_params):
+def _transaction(extra_params):
     """
     Perform a transaction with PayPal.
 
@@ -60,6 +78,7 @@ def transaction(extra_params):
     # Validate constraints on parameters
     constraints = {
         codes.AUTHORIZATION: ('ACCT', 'AMT', 'EXPDATE'),
+        codes.SALE: ('ACCT', 'AMT', 'EXPDATE'),
     }
     trxtype = extra_params['TRXTYPE']
     for key in constraints[trxtype]:
