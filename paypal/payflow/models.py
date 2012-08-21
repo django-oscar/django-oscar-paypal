@@ -36,6 +36,8 @@ class PayflowTransaction(models.Model):
 
     def save(self, *args, **kwargs):
         self.raw_request = re.sub(r'PWD=.+&', 'PWD=XXXXXX&', self.raw_request)
+        self.raw_request = re.sub(r'ACCT=\d+(\d{4})&', 'ACCT=XXXXXXXXXXXX\1&', self.raw_request)
+        self.raw_request = re.sub(r'CVV2=\d+&', 'CVV2=XXX&', self.raw_request)
         return super(PayflowTransaction, self).save(*args, **kwargs)
 
     def get_trxtype_display(self):
@@ -74,4 +76,4 @@ class PayflowTransaction(models.Model):
         return ctx[key][0] if key in ctx else None
 
     def __unicode__(self):
-        return self.ppnref
+        return self.pnref
