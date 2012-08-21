@@ -44,7 +44,7 @@ def _submit_payment_details(trxtype, order_number, card_number, cvv, expiry_date
     Submit payment details to PayPal.
     """
     params = {
-        'TRXTYPE': codes.SALE,
+        'TRXTYPE': trxtype,
         'TENDER': codes.BANKCARD,
         'AMT': amt,
         # Bankcard
@@ -78,6 +78,22 @@ def delayed_capture(order_number, pnref, amt=None):
     }
     if amt:
         params['AMT'] = amt
+    return _transaction(params)
+
+
+def reference_transaction(order_number, pnref, amt):
+    """
+    Capture money using the card/address details of a previous transaction
+
+    * The PNREF of the original txn is valid for 12 months
+    """
+    params = {
+        'COMMENT1': order_number,
+        # Use SALE as we are effectively authorisating and settling a new transaction
+        'TRXTYPE': codes.SALE,
+        'ORIGID': pnref,
+        'AMT': amt,
+    }
     return _transaction(params)
 
 

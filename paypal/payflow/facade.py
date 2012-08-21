@@ -70,6 +70,7 @@ def _submit_payment_details(gateway_fn, order_number, amt, bankcard, billing_add
         **address_fields)
     if not txn.is_approved:
         raise exceptions.UnableToTakePayment(txn.respmsg)
+    return txn
 
 
 def delayed_capture(order_number, pnref=None, amt=None):
@@ -103,6 +104,29 @@ def delayed_capture(order_number, pnref=None, amt=None):
     txn = gateway.delayed_capture(order_number, pnref, amt)
     if not txn.is_approved:
         raise exceptions.UnableToTakePayment(txn.respmsg)
+    return txn
+
+
+def referenced_sale(order_number, pnref, amt):
+    """
+    Capture funds using the bank/address details of a previous transaction
+    """
+    txn = gateway.reference_transaction(order_number,
+                                        pnref,
+                                        amt)
+    if not txn.is_approved:
+        raise exceptions.UnableToTakePayment(txn.respmsg)
+    return txn
+
+
+def void(order_number, pnref):
+    """
+    Void an auth transaction to prevent it from being settled
+    """
+    txn = gateway.void(order_number, pnref)
+    if not txn.is_approved:
+        raise exceptions.PaymentError(txn.respmsg)
+    return txn
 
 
 def credit(order_number, pnref=None, amt=None):
@@ -126,6 +150,7 @@ def credit(order_number, pnref=None, amt=None):
                 "No authorization transaction found with PNREF=%s" % pnref)
         pnref = auth_txn
 
-    txn = gateway.capture(order_number, pnref, amt)
+    txn = gateway.credit(order_number, pnref, amt)
     if not txn.is_approved:
         raise exceptions.PaymentError(txn.respmsg)
+    return txn
