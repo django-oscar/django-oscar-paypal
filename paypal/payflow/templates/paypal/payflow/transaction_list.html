@@ -31,6 +31,7 @@ PayPal Payflow transactions | {{ block.super }}
 			<th>PP reference</th>
 			<th>Response code</th>
 			<th>Response message</th>
+			<th>Response time (ms)</th>
 			<th>Date</th>
 			<th></th>
 		</tr>
@@ -40,11 +41,12 @@ PayPal Payflow transactions | {{ block.super }}
     <tr>
         <td>{{ txn.comment1 }}</td>
         <td>{{ txn.get_trxtype_display }}</td>
-        <td>{{ txn.amount|currency }}</td>
+        <td>{{ txn.amount|currency|default:"-" }}</td>
         <td>{{ txn.pnref }}</td>
-        <td>{{ txn.ppref }}</td>
+        <td>{{ txn.ppref|default:"-" }}</td>
         <td>{{ txn.result }}</td>
         <td>{{ txn.respmsg }}</td>
+        <td>{{ txn.response_time|floatformat:0 }}</td>
         <td>{{ txn.date_created }}</td>
 		<td>
 			<a href="{% url paypal-payflow-detail txn.id %}" class="btn btn-info">View</a>

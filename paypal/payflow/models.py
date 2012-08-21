@@ -45,7 +45,7 @@ class PayflowTransaction(models.Model):
         ordering = ('-date_created',)
 
     def save(self, *args, **kwargs):
-        self.raw_request = re.sub(r'PWD=.+&', 'PWD=XXXXXX&', self.raw_request)
+        self.raw_request = re.sub(r'PWD=.+?&', 'PWD=XXXXXX&', self.raw_request)
         self.raw_request = re.sub(r'ACCT=\d+(\d{4})&', 'ACCT=XXXXXXXXXXXX\1&', self.raw_request)
         self.raw_request = re.sub(r'CVV2=\d+&', 'CVV2=XXX&', self.raw_request)
         return super(PayflowTransaction, self).save(*args, **kwargs)
@@ -90,3 +90,27 @@ class PayflowTransaction(models.Model):
 
     def __unicode__(self):
         return self.pnref
+
+    @property
+    def can_be_voided(self):
+        if self.trxtype != codes.AUTHORIZATION:
+            return False
+        return self.is_approved
+
+    @property
+    def can_be_credited(self):
+        """
+        Test if this txn can be credited
+        """
+        if self.trxtype not in (codes.SALE, codes.DELAYED_CAPTURE):
+            return False
+        return self.is_approved
+
+    @property
+    def can_be_captured(self):
+        """
+        Test if this txn can be captured
+        """
+        if self.trxtype != codes.AUTHORIZATION:
+            return False
+        return self.is_approved

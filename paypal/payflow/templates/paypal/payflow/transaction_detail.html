@@ -31,8 +31,8 @@ PayPal Payflow transaction {{ txn.pnref }} | {{ block.super }}
 		<tr><th>Transaction type</th><td>{{ txn.get_trxtype_display }}</td></tr>
 		<tr><th>Tender</th><td>{{ txn.get_tender_display }}</td></tr>
 		<tr><th>Amount</th><td>{{ txn.amount|currency }}</td></tr>
-		<tr><th>PN reference</th><td>{{ txn.pnref }}</td></tr>
-		<tr><th>PP reference</th><td>{{ txn.ppref|default:"-" }}</td></tr>
+		<tr><th>Payflow transaction ID (PNREF)</th><td>{{ txn.pnref }}</td></tr>
+		<tr><th>Payment ID (PPREF)</th><td>{{ txn.ppref|default:"-" }}</td></tr>
 		<tr><th>Auth code</th><td>{{ txn.auth_code|default:"-" }}</td></tr>
 		<tr><th>Result</th><td>{{ txn.result }}</td></tr>
 		<tr><th>Reason</th><td>{{ txn.respmsg }}</td></tr>
@@ -42,5 +42,15 @@ PayPal Payflow transaction {{ txn.pnref }} | {{ block.super }}
 		<tr><th>Date</th><td>{{ txn.date_created }}</td></tr>
 	</tbody>
 </table>
+
+{% if show_forms %}
+<h2>Actions</h2>
+<form method="post" action=".">
+	{% csrf_token %}
+	<button class="btn btn-success {% if not txn.can_be_captured %}disable{% endif %}" type="submit" name="action" value="capture">Capture</button>
+	<button class="btn btn-danger {% if not txn.can_be_voided %}disable{% endif %}" type="submit" name="action" value="void">Void</button>
+	<button class="btn btn-danger {% if not txn.can_be_credited %}disabled{% endif %}" type="submit" name="action" value="credit">Credit</button>
+</form>
+{% endif %}
 
 {% endblock dashboard_content %}
