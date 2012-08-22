@@ -1,6 +1,7 @@
 import re
-from django.db import models
 import urlparse
+
+from django.db import models
 
 
 class ExpressTransaction(models.Model):

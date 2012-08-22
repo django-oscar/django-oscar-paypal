@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 from paypal.express.models import ExpressTransaction as Transaction
-from paypal.express import (
+from paypal.express.gateway import (
     set_txn, get_txn, do_txn, SALE, AUTHORIZATION, ORDER,
     do_capture, DO_EXPRESS_CHECKOUT, do_void, refund_txn
 )
