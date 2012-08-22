@@ -1,0 +1,64 @@
+{% extends 'dashboard/layout.html' %}
+{% load currency_filters %}
+
+{% block title %}
+PayPal Payflow transactions | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li>
+        <a href="{% url dashboard:index %}">Dashboard</a>
+        <span class="divider">/</span>
+    </li>
+    <li class="active"><a href=".">PayPal Payflow transactions</a></li>
+</ul>
+{% endblock %}
+
+{% block dashboard_content %}
+
+<div class="sub-header">
+    <h2>PayPal Payflow transactions</h2>
+</div>
+
+<table class="table table-striped table-bordered">
+	<thead>
+		<tr>
+			<th>Order number</th>
+			<th>Transaction type</th>
+			<th>Amount</th>
+			<th>PN reference</th>
+			<th>PP reference</th>
+			<th>Response code</th>
+			<th>Response message</th>
+			<th>Response time (ms)</th>
+			<th>Date</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+    {% for txn in transactions %}
+    <tr>
+        <td>{{ txn.comment1 }}</td>
+        <td>{{ txn.get_trxtype_display }}</td>
+        <td>{{ txn.amount|currency|default:"-" }}</td>
+        <td>{{ txn.pnref }}</td>
+        <td>{{ txn.ppref|default:"-" }}</td>
+        <td>{{ txn.result }}</td>
+        <td>{{ txn.respmsg }}</td>
+        <td>{{ txn.response_time|floatformat:0 }}</td>
+        <td>{{ txn.date_created }}</td>
+		<td>
+			<a href="{% url paypal-payflow-detail txn.id %}" class="btn btn-info">View</a>
+		</td>
+    </tr>
+    {% endfor %}
+	</tbody>
+</table>
+
+{% if page_obj %}
+    {% include "catalogue/partials/pagination.html" %}
+{% endif %}
+</form>
+
+{% endblock dashboard_content %}

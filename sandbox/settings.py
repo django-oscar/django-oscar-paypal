@@ -90,7 +90,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'oscar.apps.promotions.context_processors.promotions',
     'oscar.apps.checkout.context_processors.checkout',
     'oscar.core.context_processors.metadata',
-) 
+)
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -199,7 +199,6 @@ INSTALLED_APPS = (
     'oscar',
     'oscar.apps.analytics',
     'oscar.apps.order',
-    'oscar.apps.checkout',
     'oscar.apps.catalogue',
     'oscar.apps.catalogue.reviews',
     'oscar.apps.basket',
@@ -223,6 +222,7 @@ INSTALLED_APPS = (
     'sorl.thumbnail',
     'paypal',
     'apps.shipping',
+    'apps.checkout',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -239,7 +239,7 @@ DEBUG_TOOLBAR_CONFIG = {
 
 # Oscar settings
 from oscar.defaults import *
-OSCAR_ALLOW_ANON_CHECKOUT = True
+OSCAR_ALLOW_ANON_CHECKOUT = False
 
 # Haystack settings
 HAYSTACK_SITECONF = 'oscar.search_sites'
@@ -254,3 +254,5 @@ PAYPAL_API_VERSION = '88.0'
 PAYPAL_API_USERNAME = 'sdk-three_api1.sdk.com'
 PAYPAL_API_PASSWORD = 'QFZCWN5HZM8VBG7Q'
 PAYPAL_API_SIGNATURE = 'A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU'
+
+PAYPAL_PAYFLOW_TEST_MODE = True
