@@ -1,10 +1,10 @@
 import re
-import urlparse
 
 from django.db import models
+from paypal import base
 
 
-class ExpressTransaction(models.Model):
+class ExpressTransaction(base.ResponseModel):
 
     # The PayPal method and version used
     method = models.CharField(max_length=32)
@@ -25,14 +25,6 @@ class ExpressTransaction(models.Model):
     error_code = models.CharField(max_length=32, null=True, blank=True)
     error_message = models.CharField(max_length=256, null=True, blank=True)
 
-    # Debug information
-    raw_request = models.TextField(max_length=512)
-    raw_response = models.TextField(max_length=512)
-
-    response_time = models.FloatField(help_text="Response time in milliseconds")
-
-    date_created = models.DateTimeField(auto_now_add=True)
-
     class Meta:
         ordering = ('-date_created',)
         app_label = 'paypal'
@@ -45,29 +37,7 @@ class ExpressTransaction(models.Model):
     def is_successful(self):
         return self.ack in (self.SUCCESS, self.SUCCESS_WITH_WARNING)
 
-    @property
-    def context(self):
-        return urlparse.parse_qs(self.raw_response)
-
-    def request(self):
-        request_params = urlparse.parse_qs(self.raw_request)
-        return self._as_table(request_params)
-    request.allow_tags = True
-
-    def response(self):
-        return self._as_table(self.context)
-    response.allow_tags = True
-
-    def _as_table(self, params):
-        rows = []
-        for k, v in sorted(params.items()):
-            rows.append('<tr><th>%s</th><td>%s</td></tr>' % (k, v[0]))
-        return '<table>%s</table>' % ''.join(rows)
-
     def __unicode__(self):
-        return u'<Transaction method: %s: token: %s>' % (
+        return u'method: %s: token: %s' % (
             self.method, self.token)
 
-    def value(self, key):
-        ctx = self.context
-        return ctx[key][0] if key in ctx else None

@@ -1,13 +1,13 @@
 import re
-import urlparse
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from paypal.payflow import codes
+from paypal import base
 
 
-class PayflowTransaction(models.Model):
+class PayflowTransaction(base.ResponseModel):
     # This is the linking parameter between the merchant and PayPal.  It is
     # normally set to the order number
     comment1 = models.CharField(_("Comment 1"), max_length=128, db_index=True)
@@ -35,12 +35,6 @@ class PayflowTransaction(models.Model):
     avszip = models.CharField(_("Zip/Postcode check"), null=True, blank=True,
                                max_length=1)
 
-    # Audit information
-    raw_request = models.TextField(max_length=512)
-    raw_response = models.TextField(max_length=512)
-    response_time = models.FloatField(help_text="Response time in milliseconds")
-    date_created = models.DateTimeField(auto_now_add=True)
-
     class Meta:
         ordering = ('-date_created',)
         app_label = 'paypal'
@@ -65,29 +59,6 @@ class PayflowTransaction(models.Model):
 
     def is_address_verified(self):
         return self.avsaddr == 'Y' and self.avzip == 'Y'
-
-    @property
-    def context(self):
-        return urlparse.parse_qs(self.raw_response)
-
-    def request(self):
-        request_params = urlparse.parse_qs(self.raw_request)
-        return self._as_table(request_params)
-    request.allow_tags = True
-
-    def response(self):
-        return self._as_table(self.context)
-    response.allow_tags = True
-
-    def _as_table(self, params):
-        rows = []
-        for k, v in sorted(params.items()):
-            rows.append('<tr><th>%s</th><td>%s</td></tr>' % (k, v[0]))
-        return '<table>%s</table>' % ''.join(rows)
-
-    def value(self, key):
-        ctx = self.context
-        return ctx[key][0] if key in ctx else None
 
     def __unicode__(self):
         return self.pnref
