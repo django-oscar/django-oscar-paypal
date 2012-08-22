@@ -9,7 +9,7 @@ from django.conf import settings
 from django.template.defaultfilters import truncatewords
 from oscar.apps.payment.exceptions import PaymentError
 
-from paypal import models
+from paypal.express import models
 
 
 # PayPal methods

@@ -3,7 +3,7 @@ from django.contrib.sites.models import Site
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-from paypal.models import ExpressTransaction as Transaction
+from paypal.express.models import ExpressTransaction as Transaction
 from paypal.express import (
     set_txn, get_txn, do_txn, SALE, AUTHORIZATION, ORDER,
     do_capture, DO_EXPRESS_CHECKOUT, do_void, refund_txn
@@ -73,7 +73,7 @@ def confirm_transaction(payer_id, token, amount, currency):
     """
     Confirm the payment action.
     """
-    return do_txn(payer_id, token, amount, currency, 
+    return do_txn(payer_id, token, amount, currency,
                   action=_get_payment_action())
 
 
@@ -90,7 +90,7 @@ def capture_authorization(token, note=None):
     """
     txn = Transaction.objects.get(token=token,
                                   method=DO_EXPRESS_CHECKOUT)
-    return do_capture(txn.value('TRANSACTIONID'), 
+    return do_capture(txn.value('TRANSACTIONID'),
                       txn.amount, txn.currency, note=note)
 
 
@@ -101,4 +101,3 @@ def void_authorization(token, note=None):
     txn = Transaction.objects.get(token=token,
                                   method=DO_EXPRESS_CHECKOUT)
     return do_void(txn.value('TRANSACTIONID'), note=note)
-    

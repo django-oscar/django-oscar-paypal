@@ -71,7 +71,6 @@ if not settings.configured:
                 'oscar.apps.dashboard.promotions',
                 'sorl.thumbnail',
                 'paypal',
-                'paypal.payflow',
                 'south',
                 ],
             MIDDLEWARE_CLASSES=(
@@ -105,7 +104,7 @@ def run_tests(*test_args):
         test_args = ['tests']
 
     # Run tests
-    test_runner = NoseTestSuiteRunner(verbosity=1)
+    test_runner = NoseTestSuiteRunner(verbosity=2)
 
     c = coverage(source=['paypal'], omit=['*migrations*', '*tests*'])
     c.start()

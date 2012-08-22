@@ -43,6 +43,7 @@ class PayflowTransaction(models.Model):
 
     class Meta:
         ordering = ('-date_created',)
+        app_label = 'paypal'
 
     def save(self, *args, **kwargs):
         self.raw_request = re.sub(r'PWD=.+?&', 'PWD=XXXXXX&', self.raw_request)

@@ -221,7 +221,6 @@ INSTALLED_APPS = (
     'oscar.apps.dashboard.catalogue',
     'sorl.thumbnail',
     'paypal',
-    'paypal.payflow',
     'apps.shipping',
     'apps.checkout',
 )

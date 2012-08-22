@@ -8,13 +8,15 @@ def post(url, params):
     """
     Make a POST request to the URL using the key-value pairs.  Return
     a set of key-value pairs.
+
+    :url: URL to post to
+    :params: Dict of parameters to include in post payload
     """
     for k in params.keys():
         if type(params[k]) == unicode:
             params[k] = params[k].encode('utf-8')
     payload = urllib.urlencode(params.items())
 
-    # Make request
     start_time = time.time()
     response = requests.post(url, payload)
     if response.status_code != requests.codes.ok:

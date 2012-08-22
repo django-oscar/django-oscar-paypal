@@ -5,7 +5,7 @@ from mock import patch, Mock
 from oscar.apps.shipping.methods import Free
 
 from paypal import express
-from paypal.models import ExpressTransaction as Transaction
+from paypal.express.models import ExpressTransaction as Transaction
 
 
 class MockedResponseTestCase(TestCase):
