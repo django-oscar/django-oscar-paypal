@@ -16,7 +16,7 @@ The package is structured so that it can be used without Oscar if you so wish.
 * `Continuous integration status`_
 
 .. _`Full documentation`: http://django-oscar-paypal.readthedocs.org/en/latest/
-.. _`Continuous integation status`: http://travis-ci.org/#!/tangentlabs/django-oscar-paypal
+.. _`Continuous integration status`: http://travis-ci.org/#!/tangentlabs/django-oscar-paypal
 
 Having problems or got a question?
 
