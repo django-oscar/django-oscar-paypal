@@ -3,6 +3,8 @@ import time
 import urllib
 import urlparse
 
+from paypal import exceptions
+
 
 def post(url, params):
     """
@@ -20,7 +22,7 @@ def post(url, params):
     start_time = time.time()
     response = requests.post(url, payload)
     if response.status_code != requests.codes.ok:
-        raise RuntimeError("Unable to communicate with PayPal")
+        raise exceptions.PayPalError("Unable to communicate with PayPal")
 
     # Convert response into a simple key-value format
     pairs = {}

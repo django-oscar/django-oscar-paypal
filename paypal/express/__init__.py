@@ -1,15 +1,13 @@
 import urllib
-import urlparse
-import time
 import logging
 from decimal import Decimal as D
 
-import requests
 from django.conf import settings
 from django.template.defaultfilters import truncatewords
-from oscar.apps.payment.exceptions import PaymentError
 
 from paypal.express import models
+from paypal import gateway
+from paypal import exceptions
 
 
 # PayPal methods
@@ -30,10 +28,6 @@ API_VERSION = getattr(settings, 'PAYPAL_API_VERSION', '88.0')
 logger = logging.getLogger('paypal.express')
 
 
-class PayPalError(PaymentError):
-    pass
-
-
 def _fetch_response(method, extra_params):
     """
     Fetch the response from PayPal and return a transaction object
@@ -47,63 +41,48 @@ def _fetch_response(method, extra_params):
         'SIGNATURE': settings.PAYPAL_API_SIGNATURE,
     }
     params.update(extra_params)
-    for k in params.keys():
-        if type(params[k]) == unicode:
-            params[k] = params[k].encode('utf-8')
-    payload = urllib.urlencode(params.items())
 
-    # Make request
-    logger.debug("Making request: %s" % payload)
-    start_time = time.time()
     if getattr(settings, 'PAYPAL_SANDBOX_MODE', True):
         url = 'https://api-3t.sandbox.paypal.com/nvp'
     else:
         url = 'https://www.paypal.com/nvp'
-    response = requests.post(url, payload)
-    if response.status_code != 200:
-        logger.error("Received status code %s from PayPal",
-                     response.status_code)
-        raise PayPalError("Unable to communicate with PayPal")
-
-    response_time = (time.time() - start_time) * 1000.0
-    response_dict = urlparse.parse_qs(response.content)
-    logger.debug("Received response: %s" % response.content)
+    pairs = gateway.post(url, params)
 
     # Record transaction data - we save this model whether the txn
     # was successful or not
     txn = models.ExpressTransaction(
         method=method,
         version=API_VERSION,
-        ack=response_dict['ACK'][0],
-        raw_request=payload,
-        raw_response=response.content,
-        response_time=response_time,
+        ack=pairs['ACK'],
+        raw_request=pairs['_raw_request'],
+        raw_response=pairs['_raw_response'],
+        response_time=pairs['_response_time'],
     )
     if txn.is_successful:
-        txn.correlation_id = response_dict['CORRELATIONID'][0]
+        txn.correlation_id = pairs['CORRELATIONID']
         if method == SET_EXPRESS_CHECKOUT:
             txn.amount = params['PAYMENTREQUEST_0_AMT']
             txn.currency = params['PAYMENTREQUEST_0_CURRENCYCODE']
-            txn.token = response_dict['TOKEN'][0]
+            txn.token = pairs['TOKEN']
         elif method == GET_EXPRESS_CHECKOUT:
             txn.token = params['TOKEN']
-            txn.amount = D(response_dict['PAYMENTREQUEST_0_AMT'][0])
-            txn.currency = response_dict['PAYMENTREQUEST_0_CURRENCYCODE'][0]
+            txn.amount = D(pairs['PAYMENTREQUEST_0_AMT'])
+            txn.currency = pairs['PAYMENTREQUEST_0_CURRENCYCODE']
         elif method == DO_EXPRESS_CHECKOUT:
             txn.token = params['TOKEN']
-            txn.amount = D(response_dict['PAYMENTINFO_0_AMT'][0])
-            txn.currency = response_dict['PAYMENTINFO_0_CURRENCYCODE'][0]
+            txn.amount = D(pairs['PAYMENTINFO_0_AMT'])
+            txn.currency = pairs['PAYMENTINFO_0_CURRENCYCODE']
     else:
-        if 'L_ERRORCODE0' in response_dict:
-            txn.error_code = response_dict['L_ERRORCODE0'][0]
-        if 'L_LONGMESSAGE0' in response_dict:
-            txn.error_message = response_dict['L_LONGMESSAGE0'][0]
+        if 'L_ERRORCODE0' in pairs:
+            txn.error_code = pairs['L_ERRORCODE0']
+        if 'L_LONGMESSAGE0' in pairs:
+            txn.error_message = pairs['L_LONGMESSAGE0']
     txn.save()
 
     if not txn.is_successful:
         msg = "Error %s - %s" % (txn.error_code, txn.error_message)
         logger.error(msg)
-        raise PayPalError(msg)
+        raise exceptions.PayPalError(msg)
 
     return txn
 
@@ -123,7 +102,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     # the PayPal currency.
     amount = basket.total_incl_tax
     if currency == 'USD' and amount > 10000:
-        raise PayPalError('PayPal can only be used for orders up to 10000 USD')
+        raise exceptions.PayPalError('PayPal can only be used for orders up to 10000 USD')
 
     params = {
         'PAYMENTREQUEST_0_AMT': amount,
@@ -312,7 +291,7 @@ PARTIAL_REFUND = 'Partial'
 def refund_txn(txn_id, is_partial=False, amount=None, currency=None):
     params = {
         'TRANSACTIONID': txn_id,
-        'REFUNDTYPE': refund_type,
+        'REFUNDTYPE': PARTIAL_REFUND if is_partial else FULL_REFUND,
     }
     if is_partial:
         params['AMT'] = amount

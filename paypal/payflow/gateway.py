@@ -11,7 +11,7 @@ from paypal import gateway
 from paypal.payflow import models
 from paypal.payflow import codes
 
-logger = logging.getLogger('paypal.payflowpro')
+logger = logging.getLogger('paypal.payflow')
 
 
 def authorize(order_number, card_number, cvv, expiry_date, amt, **kwargs):

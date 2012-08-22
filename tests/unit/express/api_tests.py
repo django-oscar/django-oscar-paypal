@@ -5,6 +5,7 @@ from mock import patch, Mock
 from oscar.apps.shipping.methods import Free
 
 from paypal import express
+from paypal import exceptions
 from paypal.express.models import ExpressTransaction as Transaction
 
 
@@ -38,7 +39,7 @@ class ErrorResponseTests(MockedResponseTestCase):
 
         with patch('requests.post') as post:
             post.return_value = response
-            with self.assertRaises(express.PayPalError):
+            with self.assertRaises(exceptions.PayPalError):
                 express.set_txn(self.basket, self.methods, 'GBP', 'http://localhost:8000/success',
                                 'http://localhost:8000/error')
 
@@ -47,7 +48,7 @@ class ErrorResponseTests(MockedResponseTestCase):
 
         with patch('requests.post') as post:
             post.return_value = response
-            with self.assertRaises(express.PayPalError):
+            with self.assertRaises(exceptions.PayPalError):
                 express.set_txn(self.basket, self.methods, 'GBP', 'http://localhost:8000/success',
                                 'http://localhost:8000/error')
 
