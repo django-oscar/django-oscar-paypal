@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 
+from paypal import VERSION
+
 setup(name='django-oscar-paypal',
-      version='0.2',
+      version=VERSION,
       url='https://github.com/tangentlabs/django-oscar-paypal',
       author="David Winterbottom",
       author_email="david.winterbottom@tangentlabs.co.uk",
