@@ -12,6 +12,8 @@ if not settings.configured:
         'PAYPAL_VERSION': '88.0',
         'PAYPAL_PAYFLOW_TEST_MODE': True,
     }
+    # To specify integration settings (which include passwords, hence why they
+    # are not committed), create an integration.py module.
     try:
         from integration import *
     except ImportError:
