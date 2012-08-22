@@ -11,12 +11,17 @@ payment options:
 
 * PayPal Express -
 
-* PayPal PayFlow Pro -
+* PayPal PayFlow Pro - Allows you to accept customer payments on your site
+  without requiring a redirect to PayPal.  
 
 It's possible to use both of these options individually or at the same time.
+Further, it's possible to use either without Oscar.
 
 Installation
 ------------
+
+Whichever payment option you wish to use, the package installation instructions
+are the same.
 
 Install::
 
@@ -26,19 +31,15 @@ add ``paypal`` to your ``INSTALLED_APPS``, and run::
 
     python manage.py syncdb
 
-Sandbox
--------
-
-This is a sandbox build within the project that demonstrates an integration
-between oscar and payflow pro.  It includes both PayPal Express and PayFlow Pro.
-
-Contents:
+Table of contents
+-----------------
 
 .. toctree::
     :maxdepth: 2
 
     express
     payflow
+    contributing
 
 
 Indices and tables

@@ -2,32 +2,75 @@
 Payflow Pro
 ===========
 
-Payflow Pro is a server-to-server payment option
+Payflow Pro is a server-to-server payment option for businesses who have a
+merchant account.  Unlike Express Checkout, it doesn't require redirecting the
+user to PayPal's site and allows a customer to use a normal bankcard instead of
+their PayPal account.  `Read more details on the PayPal site`_.
 
-Read more details on the PayPal site.
+.. _`Read more details on the PayPal site`: https://merchant.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=merchant/payment_gateway
 
 .. note::
 
     This version of the library was built using the PP_PayflowPro_Guide.pdf
-    found in the docs/guides folder.  It is recommended that developers read
-    this guide so that they are familiar with the overall structure.
+    guide found in the docs/guides folder.  It is recommended that developers at
+    least skim-read this guide so that they are familiar with the overall
+    processes.  It also has magic bankcard numbers that can be used for testing.
 
 ---------------
 Getting started
 ---------------
 
-You'll need to set-up a merchant account for PayPay:
-https://merchant.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=merchant/payment_gateway
-
-https://manager.paypal.com/
-
-Register a new acccount with PayPal.
-Create a PayFlow pro account with PayPal - you will need a:
+You'll need to create an Payflow account with PayPal in order to get a:
 
 * Vendor ID
-* User (often same as vendor ID)
+* Username (usually same as vendor ID)
 * Password
-* Partner ID (normally "PayPal")
+* Partner ID (normally "PayPal" when you register directly with PayPal)
+
+In practice, you only really need a vendor ID and a password.  Add settings to
+your project with your credentials::
+
+    # settings.py
+    ...
+    PAYPAL_PAYFLOW_VENDOR_ID = 'mypaypalaccount'
+    PAYPAL_PAYFLOW_PASSWORD = 'asdfasdfasdf'
+
+----------
+Next steps
+----------
+
+The next steps are to plumb the payment gateway into your checkout and order
+processing.  There is no one-size-fits-all solution here - your implementation
+will depend on your business model.  
+
+A good way to start is to browse the sandbox project within the repo - this is a
+fully integrated Oscar site.
+
+Note that in an Oscar site, you should only consume the API of the
+``paypal.payflow.facade`` module.
+
+For checkout integration, you'll typically want the ``PaymentDetailsView`` in
+the following ways:
+
+* Override the ``get_context_data`` method to provide a bankcard and billing
+  address form.
+
+* Override the ``post`` method to validate the forms and render them again in
+  the preview view (but hidden).
+
+* Override the ``handle_payment`` method of your checkout's
+  ``PaymentDetailsView`` to call either the ``authorize`` or ``sale`` method of
+  the facade depending on whether you are using one- or two-stage payment
+  processing.
+
+For general order processing integration, you'll likely need to adjust your
+``EventHandler`` to make calls to the PayPal facade when certain shipping events
+occur.  For instance, you may call ``delayed_capture`` when items ship in order
+to capture the funds at that stage.
+
+You can log into your Payflow account to manage transactions under review and
+view reports.
+https://manager.paypal.com/
 
 --------
 Settings
@@ -66,50 +109,3 @@ Not included
 * SWIPE transactions (eg card present)
 * Non-referenced credits (eg refunding to an arbitrary bankcard).  All refunds
   must correspond to a previously settled transaction.
-
-Sign in here:
-https://manager.paypal.com/
-
-Server-to-server payment gateway
-Real-time synchronous (can take up to 3 seconds) - the funds are held by the
-customer's bank for around a week, waiting for the settle transaction.
-
-2-stage
-Perform an auth transaction for the first one
-Use a 'delayed capture' for the first settle and a 'reference transaction' for
-any later ones.
-
-
-
-PayPal provide SKDs for Java and .NET but no Python (boo)o
-
-This implementation uses the Name-Value pair mode (not XMLPay)
-
-.. note::
-
-    This version of the library was built using the PP_PayflowPro_Guide.pdf
-    found in the docs.
-
----------------
-Getting started
----------------
-
-Register a new acccount with PayPal.
-Create a PayFlow pro account with PayPal - you will need a:
-
-* Vendor ID
-* User (often same as vendor ID)
-* Password
-* Partner ID (normally "PayPal")
-
--------------
-Not supported
--------------
-
--------
-Testing
--------
-
-See page 49 of the PDF guide for test bankcard numbers
-
-* 5555555555554444

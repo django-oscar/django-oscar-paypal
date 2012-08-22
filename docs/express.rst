@@ -1,16 +1,6 @@
-===============================
-PayPal package for django-oscar
-===============================
-
-This package provides integration between django-oscar and both PayPal Express
-and PayPal Payflow Pro.
-
---------------
-PayPal Express
---------------
-
-Overview
-========
+================
+Express checkout
+================
 
 `PayPal Express` is an API for integrating PayPal payments into an ecommerce
 site.  A typical implementation involves redirecting the user to PayPal's site
@@ -18,16 +8,14 @@ where they enter their shipping and billing information before arriving back on
 the merchant site to confirm the order.  It can also be used purely for payment,
 with shipping details being collected on the merchant site.
 
-This library provides integration between PayPal Express and `django-oscar`_.
-
 See the `PDF documentation`_ for the gory details of PayPal Express.
 
 .. _`PayPal Express`: https://www.paypal.com/uk/cgi-bin/webscr?cmd=_additional-payment-ref-impl1
 .. _`PDF documentation`: https://cms.paypal.com/cms_content/US/en_US/files/developer/PP_ExpressCheckout_IntegrationGuide.pdf
-.. _`django-oscar`: https://github.com/tangentlabs/django-oscar
 
-Installation
-============
+---------------
+Getting started
+---------------
 
 First, you'll need to create a sandbox merchant account with PayPal - this will
 provide a username, password and 'signature' which are used to authenticate API
@@ -36,18 +24,11 @@ requests.  I
 If you want to test your installation in a browser (which you should), then
 you'll need to also create a sandbox buyer account so you can checkout.
 
-Fetch package (not ready just yet)::
-
-    pip install django-oscar-paypal
-
 Add the following settings using the details from your sandbox buyer account::
 
     PAYPAL_API_USERNAME = 'test_xxxx.gmail.com'
     PAYPAL_API_PASSWORD = '123456789'
     PAYPAL_API_SIGNATURE = '...'
-
-Augment your ``INSTALLED_APPS`` to include ``paypal.express`` and run syncdb to
-create the appropriate models.
 
 Next, you need to add the PayPal URLs to your URL config.  This can be done as
 follows::
@@ -88,9 +69,10 @@ setting::
     )
 
 If anything is unclear or not workin as expected then review how the 'sandbox`
-installation is set-up.  This is a working oscar install that uses PayPal
+installation is set-up.  This is a working Oscar install that uses PayPal
 Express.
 
+--------
 Settings
 --------
 
@@ -114,12 +96,13 @@ settings.
 Some of these options, like the display ones, can be set in your PayPal merchant
 profile.
 
+------------
 Not included
 ------------
 
 The following options are part of the PayPal Express API but are not handled
 within this implementation - mainly as it's not obvious how you can handle
-these in a 'generic' way within oscar:
+these in a 'generic' way within Oscar:
 
 * Gift wrapping
 * Buyer consent to receive promotional emails
@@ -128,6 +111,7 @@ these in a 'generic' way within oscar:
 * Recurring payments
 * Fraud management
 
+------------
 Known issues
 ------------
 
@@ -135,40 +119,3 @@ Known issues
   not passed to PayPal at the moment.
 
 * Vouchers may have expired during the time when the user is on the PayPal site.
-
-Changelog
-=========
-
-0.1 - 2012-06-12
-----------------
-
-* First release based on oscar 0.2
-
-Contribute
-==========
-
-Do this::
-
-    mkvirtualenv oscar-paypal
-    git clone git://github.com/tangentlabs/django-oscar-paypal.git
-    cd django-oscar-paypal
-    pip install -r requirements.txt
-
-then you should be able to run the tests using::
-
-    ./run_tests.sh
-
-There is also a sandbox site for exploring a sample oscar site.  Set it up::
-
-    cd sandbox
-    ./manage.py syncdb --noinput
-    ./manage.py migrate
-    ./manage.py oscar_import_catalogue data/books-catalogue.csv
-
-and run it::
-
-    ./manage.py runserver
-
-Use the `Github issue tracker`_ for any problems.
-
-.. _`Github issue tracker`: https://github.com/tangentlabs/django-oscar-paypal/issues

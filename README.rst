@@ -12,17 +12,31 @@ Express`_ and `PayPal Payflow Pro`_.
 
 The package is structured so that it can be used without Oscar if you so wish.
 
-* Full documentation
+* `Full documentation`_
 * `Continuous integration status`_
 
+.. _`Full documentation`: http://django-oscar-paypal.readthedocs.org/en/latest/
 .. _`Continuous integation status`: http://travis-ci.org/#!/tangentlabs/django-oscar-paypal
 
-Support:
+Having problems or got a question?
 
-* Ping `@django_oscar`_ on Twitter for quick points.
-* Please ask questions on the Oscar mailing list: django-oscar@googlegroups.com.
-* Use Github for submitting issues.
+* Have a look at the sandbox installation as this is a sample Oscar project
+  integrated with both PayPal options.
+* Ping `@django_oscar`_ with quick queries.
+* Ask more detailed questions on the Oscar mailing list: django-oscar@googlegroups.com.
+* Use Github for submitting issues and pull requests.
 
 .. _`@django_oscar`: https://twitter.com/django_oscar
 
 The package is released under the new BSD license.
+
+Changelog
+---------
+
+0.2
+~~~
+Includes support for Payflow Pro.
+
+0.1
+~~~
+Includes support for Express Checkout.
