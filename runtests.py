@@ -10,7 +10,10 @@ if not settings.configured:
         'PAYPAL_EXPRESS_URL': 'https://www.sandbox.paypal.com/webscr',
         'PAYPAL_SANDBOX_MODE': True,
         'PAYPAL_VERSION': '88.0',
+        'PAYPAL_PAYFLOW_TEST_MODE': True,
     }
+    # To specify integration settings (which include passwords, hence why they
+    # are not committed), create an integration.py module.
     try:
         from integration import *
     except ImportError:
@@ -101,7 +104,7 @@ def run_tests(*test_args):
         test_args = ['tests']
 
     # Run tests
-    test_runner = NoseTestSuiteRunner(verbosity=1)
+    test_runner = NoseTestSuiteRunner(verbosity=2)
 
     c = coverage(source=['paypal'], omit=['*migrations*', '*tests*'])
     c.start()

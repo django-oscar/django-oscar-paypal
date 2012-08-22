@@ -199,7 +199,6 @@ INSTALLED_APPS = (
     'oscar',
     'oscar.apps.analytics',
     'oscar.apps.order',
-    'oscar.apps.checkout',
     'oscar.apps.catalogue',
     'oscar.apps.catalogue.reviews',
     'oscar.apps.basket',
@@ -223,6 +222,7 @@ INSTALLED_APPS = (
     'sorl.thumbnail',
     'paypal',
     'apps.shipping',
+    'apps.checkout',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -254,3 +254,5 @@ PAYPAL_API_VERSION = '88.0'
 PAYPAL_API_USERNAME = 'sdk-three_api1.sdk.com'
 PAYPAL_API_PASSWORD = 'QFZCWN5HZM8VBG7Q'
 PAYPAL_API_SIGNATURE = 'A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU'
+
+PAYPAL_PAYFLOW_TEST_MODE = True

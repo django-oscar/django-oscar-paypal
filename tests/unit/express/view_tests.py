@@ -30,7 +30,7 @@ class MockedPayPalTests(TestCase):
         with patch('requests.post') as post:
             self.patch_http_post(post)
             self.perform_action()
-    
+
     def patch_http_post(self, post):
         post.return_value = self.get_mock_response()
 
@@ -45,7 +45,7 @@ class MockedPayPalTests(TestCase):
 
     def add_product_to_basket(self, price=D('100.00')):
         product = create_product(price=price)
-        self.client.post(reverse('basket:add'), 
+        self.client.post(reverse('basket:add'),
                                  {'product_id': product.id,
                                   'quantity': 1})
 
@@ -106,7 +106,7 @@ class SubmitOrderTests(MockedPayPalTests):
 
     def perform_action(self):
         self.add_product_to_basket(price=D('6.99'))
-        self.response = self.client.post(reverse('paypal-place-order'), 
+        self.response = self.client.post(reverse('paypal-place-order'),
                                          {'action': 'place_order',
                                           'payer_id': '12345',
                                           'token': 'EC-8P797793UC466090M'})
@@ -128,7 +128,3 @@ class SubmitOrderTests(MockedPayPalTests):
     def test_order_email_address(self):
         self.assertEqual('david._1332854868_per@gmail.com',
                          self.order.guest_email)
-
-            
-
-
