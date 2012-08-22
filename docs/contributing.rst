@@ -28,3 +28,5 @@ and run it::
 Use the `Github issue tracker`_ for any problems.
 
 .. _`Github issue tracker`: https://github.com/tangentlabs/django-oscar-paypal/issues
+
+Submit pull requests against the develop branch please.
