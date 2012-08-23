@@ -10,7 +10,8 @@ Express`_ and `PayPal Payflow Pro`_.
 .. _`PayPal Express`: https://www.paypal.com/uk/cgi-bin/webscr?cmd=_additional-payment-ref-impl1
 .. _`PayPal Payflow Pro`: https://merchant.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=merchant/payment_gateway
 
-The package is structured so that it can be used without Oscar if you so wish.
+These payment options can be used individually or both together.  Further, the
+package is structured so that it can be used without Oscar if you so wish.
 
 * `Full documentation`_
 * `Continuous integration status`_
@@ -21,7 +22,8 @@ The package is structured so that it can be used without Oscar if you so wish.
 Having problems or got a question?
 
 * Have a look at the sandbox installation as this is a sample Oscar project
-  integrated with both PayPal options.
+  integrated with both PayPal options.  See the contributing guide within the
+  docs for instructions on how to set up the sandbox locally.
 * Ping `@django_oscar`_ with quick queries.
 * Ask more detailed questions on the Oscar mailing list: django-oscar@googlegroups.com.
 * Use Github for submitting issues and pull requests.
