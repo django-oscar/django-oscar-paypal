@@ -91,7 +91,7 @@ class CancelResponseView(RedirectView):
 
 
 class SuccessResponseView(PaymentDetailsView):
-    template_name_preview = 'paypal/preview.html'
+    template_name_preview = 'paypal/express/preview.html'
     preview = True
 
     def get(self, request, *args, **kwargs):
