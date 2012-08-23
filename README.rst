@@ -35,6 +35,12 @@ The package is released under the new BSD license.
 Changelog
 ---------
 
+0.2.1
+~~~~~
+* Fix packaging issues
+* Remove dead templates
+* With API docs
+
 0.2
 ~~~
 Includes support for Payflow Pro.
