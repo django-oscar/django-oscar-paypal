@@ -1,2 +1,3 @@
 include *.rst
-recursive-include paypal/express/templates/paypal *.txt *.html
+include LICENSE
+recursive-include paypal/templates/ *.html

@@ -18,6 +18,7 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
 sys.path.insert(0, PROJECT_ROOT)
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sandbox.settings')
 
 # -- General configuration -----------------------------------------------------
 

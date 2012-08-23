@@ -109,3 +109,32 @@ Not included
 * SWIPE transactions (eg card present)
 * Non-referenced credits (eg refunding to an arbitrary bankcard).  All refunds
   must correspond to a previously settled transaction.
+
+-------------------
+Using without Oscar
+-------------------
+
+To use Payflow Pro without an Oscar install, you need to use the
+``paypal.payflow.gateway`` module directly.  This module is agnostic of Oscar
+and can be used independently.  
+
+The ``paypal.payflow.facade`` module is a bridging module that provides a
+simpler API designed to link Oscar to the gateway module.
+
+---
+API
+---
+
+Facade
+------
+
+.. automodule:: paypal.payflow.facade
+    :members:
+
+Gateway
+-------
+
+.. automodule:: paypal.payflow.gateway
+    :members:
+
+
