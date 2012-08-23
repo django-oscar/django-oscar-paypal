@@ -85,6 +85,8 @@ Required settings:
 
 Optional settings:
 
+``PAYPAL_PAYFLOW_CURRENCY``
+    The 3 character currency code to use for transactions.  Defaults to 'USD'.
 ``PAYPAL_PAYFLOW_USER``
     The ID of the user authorised to process transations.  If you only have one
     user on the account, then this is the same as the VENDOR_ID and there is no

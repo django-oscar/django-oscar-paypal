@@ -35,6 +35,10 @@ The package is released under the new BSD license.
 Changelog
 ---------
 
+0.2.2
+~~~~~
+* Add support for specifying transaction currency
+
 0.2.1
 ~~~~~
 * Fix packaging issues

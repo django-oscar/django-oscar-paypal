@@ -156,8 +156,8 @@ def _transaction(extra_params):
                 "You must define a %s setting" % setting
             )
 
+    # Set credentials
     params = {
-        # Required user params
         'VENDOR': settings.PAYPAL_PAYFLOW_VENDOR_ID,
         'PWD': settings.PAYPAL_PAYFLOW_PASSWORD,
         'USER': getattr(settings, 'PAYPAL_PAYFLOW_USER',
@@ -166,6 +166,10 @@ def _transaction(extra_params):
                            'PayPal')
     }
     params.update(extra_params)
+
+    # Ensure that any amounts have a currency too
+    if 'AMT' in params and 'CURRENCY' not in params:
+        params['CURRENCY'] = getattr(settings, 'PAYPAL_PAYFLOW_CURRENCY', 'USD')
 
     if getattr(settings, 'PAYPAL_PAYFLOW_PRODUCTION_MODE', False):
         url = 'https://payflowpro.paypal.com'
