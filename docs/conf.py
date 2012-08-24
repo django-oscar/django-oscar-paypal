@@ -18,7 +18,18 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
 sys.path.insert(0, PROJECT_ROOT)
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sandbox.settings')
+
+from django.conf import settings
+if not settings.configured:
+    settings.configure(
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                }
+            },
+    )
+
+#os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sandbox.settings')
 
 # -- General configuration -----------------------------------------------------
 
