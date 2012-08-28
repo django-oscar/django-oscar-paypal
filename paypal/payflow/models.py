@@ -19,7 +19,8 @@ class PayflowTransaction(base.ResponseModel):
                                  blank=True)
 
     # Response params
-    pnref = models.CharField(_("Payflow transaction ID"), max_length=32)
+    pnref = models.CharField(_("Payflow transaction ID"), max_length=32,
+                             null=True)
     ppref = models.CharField(_("Payment transaction ID"), max_length=32,
                              unique=True, null=True)
     result = models.CharField(max_length=32, null=True, blank=True)

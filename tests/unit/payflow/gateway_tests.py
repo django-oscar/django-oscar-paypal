@@ -49,3 +49,19 @@ class TestAuthorizeFunction(TestCase):
 
         self.assertTrue('5555555555554444' not in txn.raw_request)
         self.assertTrue('123' not in txn.raw_request)
+
+    def test_error_handled_gracefully(self):
+        with mock.patch('paypal.gateway.post') as mock_post:
+            mock_post.return_value = {
+                'RESULT': '4',
+                'RESPMSG': 'Invalid amount',
+                '_raw_request': '',
+                '_raw_response': 'RESULT=4&RESPMSG=Invalid amount',
+                '_response_time': 1000
+            }
+            txn = gateway.authorize(
+                order_number='1234',
+                card_number='5555555555554444',
+                cvv='123',
+                expiry_date='0113',
+                amt=D('10.8000'))
