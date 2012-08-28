@@ -167,17 +167,24 @@ def _transaction(extra_params):
     }
     params.update(extra_params)
 
-    # Ensure that any amounts have a currency too
-    if 'AMT' in params and 'CURRENCY' not in params:
-        params['CURRENCY'] = getattr(settings, 'PAYPAL_PAYFLOW_CURRENCY', 'USD')
+    # Ensure that any amounts have a currency and are formatted correctly
+    if 'AMT' in params:
+        if 'CURRENCY' not in params:
+            params['CURRENCY'] = getattr(settings, 'PAYPAL_PAYFLOW_CURRENCY', 'USD')
+        params['AMT'] = "%.2f" % params['AMT']
 
     if getattr(settings, 'PAYPAL_PAYFLOW_PRODUCTION_MODE', False):
         url = 'https://payflowpro.paypal.com'
     else:
         url = 'https://pilot-payflowpro.paypal.com'
 
-    logger.info("Performing %s transaction", trxtype)
+    logger.info("Performing %s transaction (trxtype=%s)",
+                codes.trxtype_map[trxtype], trxtype)
     pairs = gateway.post(url, params)
+
+    # Beware - this log information will contain the Payflow credentials
+    logger.debug("Raw request: %s", pairs['_raw_request'])
+    logger.debug("Raw response: %s", pairs['_raw_response'])
 
     return models.PayflowTransaction.objects.create(
         comment1=params['COMMENT1'],

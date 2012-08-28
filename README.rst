@@ -35,6 +35,11 @@ The package is released under the new BSD license.
 Changelog
 ---------
 
+0.2.3
+~~~~~
+* Fix bug with amount formats not being validated properly
+* Adjust txn model to allow virtually everything to be nullable
+
 0.2.2
 ~~~~~
 * Add support for specifying transaction currency
