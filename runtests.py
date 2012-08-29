@@ -21,6 +21,8 @@ if not settings.configured:
             'PAYPAL_API_USERNAME': '',
             'PAYPAL_API_PASSWORD': '',
             'PAYPAL_API_SIGNATURE': '',
+            'PAYPAL_PAYFLOW_VENDOR_ID': '',
+            'PAYPAL_PAYFLOW_PASSWORD': '',
         })
     else:
         for key, value in locals().items():
