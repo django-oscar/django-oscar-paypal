@@ -7,6 +7,7 @@ PayPal package for django-oscar
 This package provides integration between django-oscar_ and both `PayPal
 Express`_ and `PayPal Payflow Pro`_.
 
+.. _django-oscar: https://github.com/tangentlabs/django-oscar
 .. _`PayPal Express`: https://www.paypal.com/uk/cgi-bin/webscr?cmd=_additional-payment-ref-impl1
 .. _`PayPal Payflow Pro`: https://merchant.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=merchant/payment_gateway
 
