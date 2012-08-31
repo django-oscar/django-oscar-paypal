@@ -36,6 +36,10 @@ The package is released under the new BSD license.
 Changelog
 ---------
 
+0.2.4
+~~~~~
+* Fix bug with installing templates
+
 0.2.3
 ~~~~~
 * Fix bug with amount formats not being validated properly
