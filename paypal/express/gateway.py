@@ -45,7 +45,7 @@ def _fetch_response(method, extra_params):
     if getattr(settings, 'PAYPAL_SANDBOX_MODE', True):
         url = 'https://api-3t.sandbox.paypal.com/nvp'
     else:
-        url = 'https://www.paypal.com/nvp'
+        url = 'https://api-3t.paypal.com/nvp'
     pairs = gateway.post(url, params)
 
     # Record transaction data - we save this model whether the txn
