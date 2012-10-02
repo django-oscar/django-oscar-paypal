@@ -65,3 +65,19 @@ class TestAuthorizeFunction(TestCase):
                 cvv='123',
                 expiry_date='0113',
                 amt=D('10.8000'))
+
+
+class TestReferenceTransaction(TestCase):
+
+    def test_for_smoke(self):
+        with mock.patch('paypal.gateway.post') as mock_post:
+            mock_post.return_value = {
+                'RESULT': '1',
+                'RESPMSG': '',
+                '_raw_request': '',
+                '_raw_response': '',
+                '_response_time': 1000
+            }
+            gateway.reference_transaction(order_number='12345',
+                                          pnref='111222',
+                                          amt=D('12.23'))

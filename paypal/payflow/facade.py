@@ -131,15 +131,15 @@ def referenced_sale(order_number, pnref, amt):
        payment details.
 
     2. It allows an initial authorisation to be settled in multiple parts.  The
-       first settle should use delayed_capture but any subsequent ones should use this method.
+       first settle should use delayed_capture but any subsequent ones should
+       use this method.
 
     :order_number: Order number.
     :pnref: PNREF of a previous transaction to use.
     :amt: The amount to settle for.
     """
-    txn = gateway.reference_transaction(order_number,
-                                        pnref,
-                                        amt)
+    txn = gateway.reference_transaction(
+        order_number, pnref, amt)
     if not txn.is_approved:
         raise exceptions.UnableToTakePayment(txn.respmsg)
     return txn

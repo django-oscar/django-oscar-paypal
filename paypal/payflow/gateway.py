@@ -89,7 +89,8 @@ def reference_transaction(order_number, pnref, amt):
     """
     params = {
         'COMMENT1': order_number,
-        # Use SALE as we are effectively authorisating and settling a new transaction
+        # Use SALE as we are effectively authorising and settling a new
+        # transaction
         'TRXTYPE': codes.SALE,
         'ORIGID': pnref,
         'AMT': amt,
@@ -136,7 +137,7 @@ def _transaction(extra_params):
     # Validate constraints on parameters
     constraints = {
         codes.AUTHORIZATION: ('ACCT', 'AMT', 'EXPDATE'),
-        codes.SALE: ('ACCT', 'AMT', 'EXPDATE'),
+        codes.SALE: ('AMT',),
         codes.DELAYED_CAPTURE: ('ORIGID',),
         codes.CREDIT: ('ORIGID',),
         codes.VOID: ('ORIGID',),
@@ -170,7 +171,8 @@ def _transaction(extra_params):
     # Ensure that any amounts have a currency and are formatted correctly
     if 'AMT' in params:
         if 'CURRENCY' not in params:
-            params['CURRENCY'] = getattr(settings, 'PAYPAL_PAYFLOW_CURRENCY', 'USD')
+            params['CURRENCY'] = getattr(settings,
+                                         'PAYPAL_PAYFLOW_CURRENCY', 'USD')
         params['AMT'] = "%.2f" % params['AMT']
 
     if getattr(settings, 'PAYPAL_PAYFLOW_PRODUCTION_MODE', False):
@@ -183,6 +185,7 @@ def _transaction(extra_params):
     pairs = gateway.post(url, params)
 
     # Beware - this log information will contain the Payflow credentials
+    # only use it in development, not production.
     logger.debug("Raw request: %s", pairs['_raw_request'])
     logger.debug("Raw response: %s", pairs['_raw_response'])
 
