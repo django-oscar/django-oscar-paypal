@@ -64,15 +64,15 @@ if not settings.configured:
             ),
             DEBUG=False,
             SOUTH_TESTS_MIGRATE=False,
-            HAYSTACK_CONNECTIONS = {
+            HAYSTACK_CONNECTIONS={
                 'default': {
                     'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
                 },
             },
-            TEMPLATE_DIRS = (OSCAR_MAIN_TEMPLATE_DIR,),
+            TEMPLATE_DIRS=(OSCAR_MAIN_TEMPLATE_DIR,),
             SITE_ID=1,
             ROOT_URLCONF='tests.urls',
-            NOSE_ARGS=['-s'],
+            NOSE_ARGS=['-s', '--with-spec'],
             **extra_settings
         )
 
@@ -88,7 +88,7 @@ def run_tests(*test_args):
         test_args = ['tests']
 
     # Run tests
-    test_runner = NoseTestSuiteRunner(verbosity=2)
+    test_runner = NoseTestSuiteRunner(verbosity=1)
 
     c = coverage(source=['paypal'], omit=['*migrations*', '*tests*'])
     c.start()
@@ -99,6 +99,7 @@ def run_tests(*test_args):
         sys.exit(num_failures)
     print "Generating HTML coverage report"
     c.html_report()
+
 
 def generate_migration():
     from south.management.commands.schemamigration import Command
