@@ -1,4 +1,4 @@
-*.sw[pc]
+*.sw[po]
 *.py[oc]
 
 htmlcov
