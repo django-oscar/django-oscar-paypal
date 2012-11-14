@@ -39,4 +39,4 @@ class ResponseModel(models.Model):
 
     def value(self, key):
         ctx = self.context
-        return ctx[key][0] if key in ctx else None
+        return ctx[key][0].decode('utf8') if key in ctx else None
