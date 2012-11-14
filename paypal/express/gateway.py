@@ -118,7 +118,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['L_PAYMENTREQUEST_0_NAME%d' % index] = product.get_title()
         params['L_PAYMENTREQUEST_0_NUMBER%d' % index] = product.upc
         params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(product.description, 12)
-        params['L_PAYMENTREQUEST_0_AMT%d' % index] = line.unit_price_incl_tax
+        params['L_PAYMENTREQUEST_0_AMT%d' % index] = line.line_price_incl_tax_and_discounts
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = line.quantity
 
     # We include tax in the prices rather than separately as that's how it's
