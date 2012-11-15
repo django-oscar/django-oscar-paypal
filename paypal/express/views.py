@@ -209,7 +209,7 @@ class SuccessResponseView(PaymentDetailsView):
                         amount_debited=txn.amount)
         self.add_payment_source(source)
 
-    def create_shipping_address(self):
+    def create_shipping_address(self, basket=None):
         """
         Return a created shipping address instance, created using
         the data returned by PayPal.
