@@ -3,7 +3,6 @@ from unittest import TestCase
 
 from mock import patch, Mock
 from purl import URL
-from django.contrib.sites.models import Site
 from oscar.apps.shipping.methods import Free
 
 from paypal.models import ExpressTransaction as Transaction
@@ -38,6 +37,7 @@ class SuccessfulSetExpressCheckoutTests(MockedResponseTests):
         basket.id = 1
         basket.total_incl_tax = D('200')
         basket.all_lines = Mock(return_value=[])
+        basket.get_discounts = Mock(return_value=[])
         methods = [Free()]
         url_str = get_paypal_url(basket, methods)
         self.url = URL.from_string(url_str)

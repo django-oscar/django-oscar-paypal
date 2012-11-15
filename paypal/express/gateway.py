@@ -3,6 +3,8 @@ import logging
 from decimal import Decimal as D
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import truncatewords
 
 from paypal.express import models
@@ -113,6 +115,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     }
 
     # Add item details
+    index = 0
     for index, line in enumerate(basket.all_lines()):
         product = line.product
         params['L_PAYMENTREQUEST_0_NAME%d' % index] = product.get_title()
@@ -120,6 +123,21 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(product.description, 12)
         params['L_PAYMENTREQUEST_0_AMT%d' % index] = line.unit_price_incl_tax
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = line.quantity
+
+    start_index = index + 1
+    # If the order has discounts associated with it, the way PayPal suggests using the API
+    # is to add a separate item for the discount with the value as a negative price.
+    # See "Integrating Order Details into the Express Checkout Flow"
+    # https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_ECCustomizing
+    for index, discount in enumerate(basket.get_discounts(), start_index):
+        if discount['voucher']:
+            name = "%s (%s)" % (discount['voucher'].name, discount['voucher'].code)
+        else:
+            name = _("Special Offer: %s") % discount['name']
+        params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
+        params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
+        params['L_PAYMENTREQUEST_0_AMT%d' % index] = -discount['discount']
+        params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
 
     # We include tax in the prices rather than separately as that's how it's
     # done on most British/Australian sites.  Will need to refactor in the
