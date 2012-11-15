@@ -36,6 +36,12 @@ The package is released under the new BSD license.
 Changelog
 ---------
 
+0.3
+~~~
+* Order discounts are now passed correctly to PayPal as separate lines
+* Fix unicode issue when reading data back from PayPal
+* Use Tox for testsuite
+
 0.2.5
 ~~~~~
 * Fix silly bug with reference transactions

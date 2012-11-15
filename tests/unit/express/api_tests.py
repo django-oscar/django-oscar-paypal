@@ -19,6 +19,7 @@ class MockedResponseTestCase(TestCase):
         basket = Mock()
         basket.total_incl_tax = D('10.00')
         basket.all_lines = Mock(return_value=[])
+        basket.get_discounts = Mock(return_value=[])
         return basket
 
     def tearDown(self):
