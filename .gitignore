@@ -5,3 +5,4 @@ build/
 django_oscar_paypal.egg-info/
 TODO
 docs/_build
+.tox
