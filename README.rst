@@ -2,8 +2,6 @@
 PayPal package for django-oscar
 ===============================
 
-.. image:: https://secure.travis-ci.org/tangentlabs/django-oscar-paypal.png
-
 This package provides integration between django-oscar_ and both `PayPal
 Express`_ and `PayPal Payflow Pro`_.
 
@@ -15,10 +13,17 @@ These payment options can be used individually or both together.  Further, the
 package is structured so that it can be used without Oscar if you so wish.
 
 * `Full documentation`_
-* `Continuous integration status`_
 
 .. _`Full documentation`: http://django-oscar-paypal.readthedocs.org/en/latest/
 .. _`Continuous integration status`: http://travis-ci.org/#!/tangentlabs/django-oscar-paypal
+
+License
+-------
+
+The package is released under the new BSD license.
+
+Support
+-------
 
 Having problems or got a question?
 
@@ -31,7 +36,12 @@ Having problems or got a question?
 
 .. _`@django_oscar`: https://twitter.com/django_oscar
 
-The package is released under the new BSD license.
+Tests
+-----
+
+.. image:: https://secure.travis-ci.org/tangentlabs/django-oscar-paypal.png
+    :alt: Continuous integration status
+    :target: http://travis-ci.org/#!/tangentlabs/django-oscar-paypal
 
 Changelog
 ---------
