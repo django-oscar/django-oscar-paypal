@@ -108,11 +108,11 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 ROOT_URLCONF = 'urls'
 
-from oscar import OSCAR_PARENT_TEMPLATE_DIR
+from oscar import OSCAR_MAIN_TEMPLATE_DIR
 TEMPLATE_DIRS = (
     location('templates'),
-    os.path.join(OSCAR_PARENT_TEMPLATE_DIR, 'templates'),
-    OSCAR_PARENT_TEMPLATE_DIR,
+    os.path.join(OSCAR_MAIN_TEMPLATE_DIR, 'templates'),
+    OSCAR_MAIN_TEMPLATE_DIR,
 )
 
 # A sample logging configuration. The only tangible logging
@@ -219,6 +219,7 @@ INSTALLED_APPS = (
     'oscar.apps.dashboard.vouchers',
     'oscar.apps.dashboard.promotions',
     'oscar.apps.dashboard.catalogue',
+    'oscar.apps.dashboard.communications',
     'sorl.thumbnail',
     'paypal',
     'apps.shipping',
@@ -239,11 +240,14 @@ DEBUG_TOOLBAR_CONFIG = {
 
 # Oscar settings
 from oscar.defaults import *
-OSCAR_ALLOW_ANON_CHECKOUT = False
+OSCAR_ALLOW_ANON_CHECKOUT = True
 
 # Haystack settings
-HAYSTACK_SITECONF = 'oscar.search_sites'
-HAYSTACK_SEARCH_ENGINE = 'dummy'
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
+    },
+}
 
 # Paypal settings
 from integration import *
