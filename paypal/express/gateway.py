@@ -22,12 +22,16 @@ REFUND_TRANSACTION = 'RefundTransaction'
 
 SALE, AUTHORIZATION, ORDER = 'Sale', 'Authorization', 'Order'
 
-# It's quite difficult to work out what the latest version of the PayPal Express
-# API is.  The best way is to look for the 'web version: ...' string in the
-# source of https://www.sandbox.paypal.com/
+# It's quite difficult to work out what the latest version of the PayPal
+# Express API is.  The best way is to look for the 'web version: ...' string in
+# the source of https://www.sandbox.paypal.com/
 API_VERSION = getattr(settings, 'PAYPAL_API_VERSION', '88.0')
 
 logger = logging.getLogger('paypal.express')
+
+
+def _format_currency(amt):
+    return amt.quantize(D('0.01'))
 
 
 def _fetch_response(method, extra_params):
@@ -75,6 +79,7 @@ def _fetch_response(method, extra_params):
             txn.amount = D(pairs['PAYMENTINFO_0_AMT'])
             txn.currency = pairs['PAYMENTINFO_0_CURRENCYCODE']
     else:
+        # There can be more than one error, each with its own number.
         if 'L_ERRORCODE0' in pairs:
             txn.error_code = pairs['L_ERRORCODE0']
         if 'L_LONGMESSAGE0' in pairs:
@@ -119,35 +124,45 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     for index, line in enumerate(basket.all_lines()):
         product = line.product
         params['L_PAYMENTREQUEST_0_NAME%d' % index] = product.get_title()
-        params['L_PAYMENTREQUEST_0_NUMBER%d' % index] = product.upc
-        params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(product.description, 12)
+        params['L_PAYMENTREQUEST_0_NUMBER%d' % index] = (product.upc if
+                                                         product.upc else '')
+        desc = ''
+        if product.description:
+            desc = truncatewords(product.description, 12)
+        params['L_PAYMENTREQUEST_0_DESC%d' % index] = desc
         # Note, we don't include discounts here - they are handled as separate
         # lines - see below
-        params['L_PAYMENTREQUEST_0_AMT%d' % index] = line.unit_price_incl_tax
+        params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
+            line.unit_price_incl_tax)
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = line.quantity
 
-    # If the order has discounts associated with it, the way PayPal suggests using the API
-    # is to add a separate item for the discount with the value as a negative price.
-    # See "Integrating Order Details into the Express Checkout Flow"
+    # If the order has discounts associated with it, the way PayPal suggests
+    # using the API is to add a separate item for the discount with the value
+    # as a negative price.  See "Integrating Order Details into the Express
+    # Checkout Flow"
     # https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_ECCustomizing
     for index, discount in enumerate(basket.get_discounts(), index + 1):
         if discount['voucher']:
-            name = "%s (%s)" % (discount['voucher'].name, discount['voucher'].code)
+            name = "%s (%s)" % (discount['voucher'].name,
+                                discount['voucher'].code)
         else:
             name = _("Special Offer: %s") % discount['name']
         params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
         params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
-        params['L_PAYMENTREQUEST_0_AMT%d' % index] = -discount['discount']
+        params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
+            -discount['discount'])
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
 
     # We include tax in the prices rather than separately as that's how it's
     # done on most British/Australian sites.  Will need to refactor in the
     # future no doubt
-    params['PAYMENTREQUEST_0_ITEMAMT'] = basket.total_incl_tax
-    params['PAYMENTREQUEST_0_TAXAMT'] = D('0.00')
+    params['PAYMENTREQUEST_0_ITEMAMT'] = _format_currency(
+        basket.total_incl_tax)
+    params['PAYMENTREQUEST_0_TAXAMT'] = _format_currency(D('0.00'))
 
     # Customer services number
-    customer_service_num = getattr(settings, 'PAYPAL_CUSTOMER_SERVICES_NUMBER', None)
+    customer_service_num = getattr(
+        settings, 'PAYPAL_CUSTOMER_SERVICES_NUMBER', None)
     if customer_service_num:
         params['CUSTOMERSERVICENUMBER'] = customer_service_num
 
@@ -159,10 +174,13 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     elif header_image:
         params['LOGOIMG'] = header_image
     else:
-        # Think these settings maybe deprecated in latest version of PayPal's API
+        # Think these settings maybe deprecated in latest version of PayPal's
+        # API
         display_params = {
-            'HDRBACKCOLOR': getattr(settings, 'PAYPAL_HEADER_BACK_COLOR', None),
-            'HDRBORDERCOLOR': getattr(settings, 'PAYPAL_HEADER_BORDER_COLOR', None),
+            'HDRBACKCOLOR': getattr(settings,
+                                    'PAYPAL_HEADER_BACK_COLOR', None),
+            'HDRBORDERCOLOR': getattr(settings,
+                                      'PAYPAL_HEADER_BORDER_COLOR', None),
         }
         params.update(x for x in display_params.items() if bool(x[1]))
 
@@ -171,7 +189,8 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     if locale:
         valid_choices = ('AU', 'DE', 'FR', 'GB', 'IT', 'ES', 'JP', 'US')
         if locale not in valid_choices:
-            raise ImproperlyConfigured("'%s' is not a valid locale code" % locale)
+            raise ImproperlyConfigured(
+                "'%s' is not a valid locale code" % locale)
         params['LOCALECODE'] = locale
 
     # Confirmed shipping address
@@ -182,10 +201,12 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     # Instant update callback information
     if update_url:
         params['CALLBACK'] = update_url
-        params['CALLBACKTIMEOUT'] = getattr(settings, 'PAYPAL_CALLBACK_TIMEOUT', 3)
+        params['CALLBACKTIMEOUT'] = getattr(
+            settings, 'PAYPAL_CALLBACK_TIMEOUT', 3)
 
-    # Contact details and address details - we provide these as it would make the PayPal
-    # registration process smoother is the user doesn't already have an account.
+    # Contact details and address details - we provide these as it would make
+    # the PayPal registration process smoother is the user doesn't already have
+    # an account.
     if user:
         params['EMAIL'] = user.email
     if user_address:
@@ -196,12 +217,12 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['SHIPTOZIP'] = user_address.postcode
         params['SHIPTOCOUNTRYCODE'] = user_address.country.iso_3166_1_a2
 
-    # Shipping details (if already set) - we override the SHIPTO* fields
-    # and set a flag to indicate that these can't be altered on the PayPal side.
+    # Shipping details (if already set) - we override the SHIPTO* fields and
+    # set a flag to indicate that these can't be altered on the PayPal side.
     if shipping_method and shipping_address:
         params['ADDROVERRIDE'] = 1
-        # It's recommend not to set 'confirmed shipping' if supplying the shipping
-        # address directly.
+        # It's recommend not to set 'confirmed shipping' if supplying the
+        # shipping address directly.
         params['REQCONFIRMSHIPPING'] = 0
         params['SHIPTOSTREET'] = shipping_address.line1
         params['SHIPTOSTREET2'] = shipping_address.line2
@@ -216,7 +237,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['ALLOWNOTE'] = 1
 
     # Shipping charges
-    params['PAYMENTREQUEST_0_SHIPPINGAMT'] = D('0.00')
+    params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(D('0.00'))
     max_charge = D('0.00')
     for index, method in enumerate(shipping_methods):
         is_default = index == 0
@@ -225,24 +246,28 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         if charge > max_charge:
             max_charge = charge
         if is_default:
-            params['PAYMENTREQUEST_0_SHIPPINGAMT'] = charge
+            params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(charge)
         params['L_SHIPPINGOPTIONNAME%d' % index] = method.name
-        params['L_SHIPPINGOPTIONAMOUNT%d' % index] = charge
+        params['L_SHIPPINGOPTIONAMOUNT%d' % index] = _format_currency(charge)
 
     # Set shipping charge explicitly if it has been passed
     if shipping_method:
         max_charge = charge = shipping_method.basket_charge_incl_tax()
-        params['PAYMENTREQUEST_0_SHIPPINGAMT'] = charge
+        params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(charge)
         params['PAYMENTREQUEST_0_AMT'] += charge
 
     # Both the old version (MAXAMT) and the new version (PAYMENT...) are needed
     # here - think it's a problem with the API.
-    params['PAYMENTREQUEST_0_MAXAMT'] = amount + max_charge
-    params['MAXAMT'] = amount + max_charge
+    params['PAYMENTREQUEST_0_MAXAMT'] = _format_currency(amount + max_charge)
+    params['MAXAMT'] = _format_currency(amount + max_charge)
 
     # Handling set to zero for now - I've never worked on a site that needed a
     # handling charge.
-    params['PAYMENTREQUEST_0_HANDLINGAMT'] = D('0.00')
+    params['PAYMENTREQUEST_0_HANDLINGAMT'] = _format_currency(D('0.00'))
+
+    # Ensure that the total is formatted correctly.
+    params['PAYMENTREQUEST_0_AMT'] = _format_currency(
+        params['PAYMENTREQUEST_0_AMT'])
 
     txn = _fetch_response(SET_EXPRESS_CHECKOUT, params)
 
