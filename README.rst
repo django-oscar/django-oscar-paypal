@@ -46,6 +46,11 @@ Tests
 Changelog
 ---------
 
+0.3.1
+~~~~~
+* Fix issue with currency formatting
+* Fix issue with i18n proxies being passed to PayPal
+
 0.3
 ~~~
 * Order discounts are now passed correctly to PayPal as separate lines
