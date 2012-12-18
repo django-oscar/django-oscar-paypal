@@ -46,6 +46,11 @@ Tests
 Changelog
 ---------
 
+0.3.2
+~~~~~
+* Pass shipping address name when using Express checkout
+* Docs update
+
 0.3.1
 ~~~~~
 * Fix issue with currency formatting
