@@ -17,12 +17,11 @@ See the `PDF documentation`_ for the gory details of PayPal Express.
 Getting started
 ---------------
 
-First, you'll need to create a sandbox merchant account with PayPal - this will
-provide a username, password and 'signature' which are used to authenticate API
-requests.  I
-
-If you want to test your installation in a browser (which you should), then
-you'll need to also create a sandbox buyer account so you can checkout.
+You need to create a PayPal sandbox account which is different from your normal
+paypal account then use this account to create two 'test' users: a buyer and a
+seller.  Once the seller is created, you will have access to a
+username, password and 'signature' which are used to authenticate API
+requests.
 
 Add the following settings using the details from your sandbox buyer account::
 
@@ -96,6 +95,14 @@ settings.
 Some of these options, like the display ones, can be set in your PayPal merchant
 profile.
 
+----------------
+PayPal Dashboard
+----------------
+
+You can view the merchant dashboard in PayPal's sandbox site by logging in as
+the sandbox master user, selecting the test seller account in the 'Test
+Accounts' tab then clicking 'Enter sandbox'.
+
 ------------
 Not included
 ------------
@@ -114,8 +121,5 @@ these in a 'generic' way within Oscar:
 ------------
 Known issues
 ------------
-
-* Hasn't been adapted to work with offers and vouchers (yet).  The discounts are
-  not passed to PayPal at the moment.
 
 * Vouchers may have expired during the time when the user is on the PayPal site.
