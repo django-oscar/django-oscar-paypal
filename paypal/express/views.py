@@ -85,6 +85,8 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
 
 
 class CancelResponseView(RedirectView):
+    permanent = False
+
     def get_redirect_url(self, **kwargs):
         messages.error(self.request, "PayPal transaction cancelled")
         return reverse('basket:summary')
@@ -199,6 +201,8 @@ class SuccessResponseView(PaymentDetailsView):
             txn = confirm_transaction(payer_id, token, amount=self.txn.amount,
                                       currency=self.txn.currency)
         except PayPalError:
+            raise UnableToTakePayment()
+        if not txn.is_successful:
             raise UnableToTakePayment()
 
         # Record payment source
