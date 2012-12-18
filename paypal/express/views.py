@@ -202,6 +202,8 @@ class SuccessResponseView(PaymentDetailsView):
                                       currency=self.txn.currency)
         except PayPalError:
             raise UnableToTakePayment()
+        if not txn.is_successful:
+            raise UnableToTakePayment()
 
         # Record payment source
         source_type, is_created = SourceType.objects.get_or_create(name='PayPal')
