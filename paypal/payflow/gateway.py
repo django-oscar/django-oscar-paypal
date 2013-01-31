@@ -92,6 +92,7 @@ def reference_transaction(order_number, pnref, amt):
         # Use SALE as we are effectively authorising and settling a new
         # transaction
         'TRXTYPE': codes.SALE,
+        'TENDER': codes.BANKCARD,
         'ORIGID': pnref,
         'AMT': amt,
     }
