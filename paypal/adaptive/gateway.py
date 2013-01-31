@@ -57,7 +57,9 @@ def pay(receivers, currency, return_url, cancel_url,
                        receiver.email))
         params.append(('receiverList.receiver(%d).primary' % index,
                        'true' if receiver.is_primary else 'false'))
-        total += receiver.amount
+        # The primary receiver should have the total amount as their amount
+        if receiver.is_primary:
+            total = receiver.amount
     # Add optional params
     if fees_payer:
         params.append(('feesPayer', fees_payer))

@@ -15,8 +15,10 @@ class TestPayOperation(TestCase):
     def test_successful_create(self):
         receivers = (
             gateway.Receiver(email='person1@gmail.com',
-                             amount=D('12.00'), is_primary=True),
+                             amount=D('28.00'), is_primary=True),
             gateway.Receiver(email='person2@gmail.com',
+                             amount=D('14.00'), is_primary=False),
+            gateway.Receiver(email='person3@gmail.com',
                              amount=D('14.00'), is_primary=False),
         )
         return_url = 'http://example.com/success/'
@@ -37,7 +39,7 @@ class TestPayOperation(TestCase):
         self.assertEqual('AP-9WC20815W6814813H', txn.pay_key)
         self.assertEqual('d59ed693b9244', txn.correlation_id)
         self.assertTrue('AP-9WC20815W6814813H' in txn.redirect_url)
-        self.assertEqual(D('26.00'), txn.amount)
+        self.assertEqual(D('28.00'), txn.amount)
 
     def test_unsuccessful_create(self):
         receivers = (
