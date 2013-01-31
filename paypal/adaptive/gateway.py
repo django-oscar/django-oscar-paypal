@@ -11,6 +11,7 @@ from django.conf import settings
 
 from paypal import gateway, models
 
+# Custom tuple for submitting receiver information
 Receiver = collections.namedtuple('Receiver', 'email amount is_primary')
 
 # Enum class for who pays the fees
@@ -23,6 +24,14 @@ Fees = type('Feeds', (), {
 })
 
 
+def payment_details(pay_key):
+    """
+    Fetch the payment details for a given transaction
+    """
+    params = [("payKey", pay_key),]
+    return _request('PaymentDetails', params)
+
+
 def pay(receivers, currency, return_url, cancel_url,
         ip_address, tracking_id=None, fees_payer=None,
         memo=None):
@@ -30,24 +39,15 @@ def pay(receivers, currency, return_url, cancel_url,
     Submit a 'Pay' transaction to PayPal
     """
     headers = {
-        'X-PAYPAL-SECURITY-USERID': settings.PAYPAL_API_USERNAME,
-        'X-PAYPAL-SECURITY-PASSWORD': settings.PAYPAL_API_PASSWORD,
-        'X-PAYPAL-SECURITY-SIGNATURE': settings.PAYPAL_API_SIGNATURE,
-        'X-PAYPAL-APPLICATION-ID': settings.PAYPAL_API_APPLICATION_ID,
-        # Use NVP so we can re-used code from Expres and Payflow Pro
-        'X-PAYPAL-REQUEST-DATA-FORMAT': 'NV',
-        'X-PAYPAL-RESPONSE-DATA-FORMAT': 'NV',
         'X-PAYPAL-DEVICE-IPADDRESS': ip_address,
     }
     # Set core params
-    action = "PAY"
+    action = "Pay"
     params = [
-        ("actionType", action),
+        ("actionType", action.upper()),
         ("currencyCode", currency),
         ("returnUrl", return_url),
         ("cancelUrl", cancel_url),
-        ("requestEnvelope.errorLanguage", "en_US"),
-        ("requestEnvelope.detailLevel", "ReturnAll"),
     ]
     for index, receiver in enumerate(receivers):
         params.append(('receiverList.receiver(%d).amount' % index,
@@ -64,26 +64,53 @@ def pay(receivers, currency, return_url, cancel_url,
     if memo:
         params.append(('memo', memo))
 
+    return _request(action, params, headers)
+
+
+def _request(action, params, headers=None):
+    """
+    Make a request to PayPal
+    """
+    if headers is None:
+        headers = {}
+    request_headers = {
+        'X-PAYPAL-SECURITY-USERID': settings.PAYPAL_API_USERNAME,
+        'X-PAYPAL-SECURITY-PASSWORD': settings.PAYPAL_API_PASSWORD,
+        'X-PAYPAL-SECURITY-SIGNATURE': settings.PAYPAL_API_SIGNATURE,
+        'X-PAYPAL-APPLICATION-ID': settings.PAYPAL_API_APPLICATION_ID,
+        # Use NVP so we can re-used code from Express and Payflow Pro
+        'X-PAYPAL-REQUEST-DATA-FORMAT': 'NV',
+        'X-PAYPAL-RESPONSE-DATA-FORMAT': 'NV',
+    }
+    request_headers.update(headers)
+
+    common_params = [
+        ("requestEnvelope.errorLanguage", "en_US"),
+        ("requestEnvelope.detailLevel", "ReturnAll"),
+    ]
+    params.extend(common_params)
+
     if getattr(settings, 'PAYPAL_SANDBOX_MODE', False):
-        url = 'https://svcs.sandbox.paypal.com/AdaptivePayments/Pay'
+        url = 'https://svcs.sandbox.paypal.com/AdaptivePayments/%s'
         is_sandbox = True
     else:
-        url = 'https://svcs.paypal.com/AdaptivePayments/Pay'
+        url = 'https://svcs.paypal.com/AdaptivePayments/%s'
         is_sandbox = False
+    url = url % action
 
     # We use an OrderedDict as the key-value pairs have to be in the correct
     # order(!).  Otherwise, PayPal returns error 'Invalid request: {0}'
     # with errorId 580001.  All very silly.
-    pairs = gateway.post(url, collections.OrderedDict(params), headers)
+    pairs = gateway.post(url, collections.OrderedDict(params), request_headers)
 
     # Create model that represents request/response
     return models.AdaptiveTransaction.objects.create(
+        action=action,
         is_sandbox=is_sandbox,
         raw_request=pairs['_raw_request'],
         raw_response=pairs['_raw_response'],
         response_time=pairs['_response_time'],
-        action=action,
-        currency=currency,
+        currency=pairs.get('currencyCode', None),
         ack=pairs.get('responseEnvelope.ack', None),
         pay_key=pairs.get('payKey', None),
         correlation_id=pairs.get('responseEnvelope.correlationId', None),

@@ -8,17 +8,24 @@ class AdaptiveTransaction(base.ResponseModel):
     # Request info
     is_sandbox = models.BooleanField(default=True)
     action = models.CharField(max_length=32)
-    currency = models.CharField(max_length=32)
+    currency = models.CharField(max_length=32, null=True, blank=True)
 
     # Response info
     ack = models.CharField(max_length=32)
-    correlation_id = models.CharField(max_length=32, null=True, blank=True)
+
+    # This is PayPal's ID for the transaction.  It should be unique but we
+    # don't enforce it as we don't want PayPal errors causing errors in our
+    # system.
+    correlation_id = models.CharField(max_length=32, db_index=True)
 
     # Only set if the transaction is successful.
     pay_key = models.CharField(max_length=64, null=True, blank=True)
 
     error_id = models.CharField(max_length=32, null=True, blank=True)
     error_message = models.CharField(max_length=256, null=True, blank=True)
+
+    def __unicode__(self):
+        return self.correlation_id
 
     @property
     def is_successful(self):

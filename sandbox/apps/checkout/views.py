@@ -84,6 +84,9 @@ class AdaptivePaymentsView(generic.RedirectView):
     permanent = False
 
     def transaction(self):
+        # This is just a dummy chained transaction set up to test the end to
+        # end process.  It doesn't actually use the submitted basket at all but
+        # hard-codes some test users from a PayPal sandbox account.
         receivers = (
             gateway.Receiver(email='david._1332854868_per@gmail.com',
                             amount=D('12.00'), is_primary=True),

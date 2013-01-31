@@ -13,7 +13,11 @@ def post(url, params, headers=None):
 
     :url: URL to post to
     :params: Dict of parameters to include in post payload
+    :headers: Dict of headers
     """
+    if headers is None:
+        headers = {}
+
     for k in params.keys():
         if type(params[k]) == unicode:
             params[k] = params[k].encode('utf-8')
