@@ -111,7 +111,6 @@ ROOT_URLCONF = 'urls'
 from oscar import OSCAR_MAIN_TEMPLATE_DIR
 TEMPLATE_DIRS = (
     location('templates'),
-    os.path.join(OSCAR_MAIN_TEMPLATE_DIR, 'templates'),
     OSCAR_MAIN_TEMPLATE_DIR,
 )
 
@@ -249,21 +248,28 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
-# Put your own sandbox settings into an integration.py modulde (that is ignored
-# by git).
-try:
-    from integration import *
-except ImportError:
-    pass
+# ===============
+# Paypal settings
+# ===============
 
 # Taken from PayPal's documentation - these should always work in the sandbox
 PAYPAL_SANDBOX_MODE = True
 PAYPAL_API_VERSION = '88.0'
 
 # These are the standard PayPal sandbox details from the docs - but I don't
-# think you can get access to the merchant dashboard.
+# think you can get access to the merchant dashboard.  Specify your own in
+# integration.py to override these
 PAYPAL_API_USERNAME = 'sdk-three_api1.sdk.com'
 PAYPAL_API_PASSWORD = 'QFZCWN5HZM8VBG7Q'
 PAYPAL_API_SIGNATURE = 'A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU'
 
-PAYPAL_PAYFLOW_CURRENCY = 'GBP'
+# See http://stackoverflow.com/questions/9164332/how-do-i-get-an-application-id-for-the-paypal-sandbox
+PAYPAL_API_APPLICATION_ID = 'APP-80W284485P519543T'
+
+PAYPAL_CURRENCY = 'GBP'
+
+# Private settings (eg my PayPal sandbox details)
+try:
+    from integration import *
+except ImportError:
+    pass

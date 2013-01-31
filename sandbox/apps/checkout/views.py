@@ -1,11 +1,18 @@
+from decimal import Decimal as D
+
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.views import generic
+from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 from oscar.apps.checkout import views
 from oscar.apps.payment import forms
 from oscar.apps.payment import exceptions
 
 from paypal.payflow import facade
+from paypal.adaptive import gateway
+from paypal import utils
 
 
 class PaymentDetailsView(views.PaymentDetailsView):
@@ -71,3 +78,48 @@ class PaymentDetailsView(views.PaymentDetailsView):
         except facade.NotApproved, e:
             # Submission failed
             raise exceptions.UnableToTakePayment(e.message)
+
+
+class AdaptivePaymentsView(generic.RedirectView):
+    permanent = False
+
+    def transaction(self):
+        receivers = (
+            gateway.Receiver(email='david._1332854868_per@gmail.com',
+                            amount=D('12.00'), is_primary=True),
+            gateway.Receiver(email='david._1359545821_pre@gmail.com',
+                            amount=D('12.00'), is_primary=False),
+        )
+        return_url = utils.absolute_url(
+            self.request, reverse('checkout:adaptive-payments-success'))
+        cancel_url = utils.absolute_url(
+            self.request, reverse('checkout:adaptive-payments-cancel'))
+        return gateway.pay(
+            receivers=receivers,
+            currency=settings.PAYPAL_CURRENCY,
+            return_url=return_url,
+            cancel_url=cancel_url,
+            ip_address=self.request.META['REMOTE_ADDR'])
+
+    def get_redirect_url(self, **kwargs):
+        txn = self.transaction()
+        if not txn.is_successful:
+            messages.error(
+                self.request,
+                _("An error occurred communicating with PayPal"))
+            url = '.'
+        else:
+            url = txn.redirect_url
+        return url
+
+
+class SuccessResponseView(generic.TemplateView):
+    pass
+
+
+class CancelResponseView(generic.RedirectView):
+    permanent = False
+
+    def get_redirect_url(self, **kwargs):
+        messages.error(self.request, _("PayPal transaction cancelled"))
+        return reverse('checkout:payment-details')

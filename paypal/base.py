@@ -4,11 +4,13 @@ from django.db import models
 
 
 class ResponseModel(models.Model):
+    """
+    Superclass for name-value pair transactions
+    """
 
     # Debug information
     raw_request = models.TextField(max_length=512)
     raw_response = models.TextField(max_length=512)
-
     response_time = models.FloatField(help_text="Response time in milliseconds")
 
     date_created = models.DateTimeField(auto_now_add=True)
@@ -19,11 +21,17 @@ class ResponseModel(models.Model):
         app_label = 'paypal'
 
     def request(self):
+        """
+        Return request as a HTML table (looks good in admin)
+        """
         request_params = urlparse.parse_qs(self.raw_request)
         return self._as_table(request_params)
     request.allow_tags = True
 
     def response(self):
+        """
+        Return response as a HTML table (looks good in admin)
+        """
         return self._as_table(self.context)
     response.allow_tags = True
 

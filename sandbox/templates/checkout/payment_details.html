@@ -1,4 +1,4 @@
-{% extends 'templates/checkout/payment_details.html' %}
+{% extends 'oscar/checkout/payment_details.html' %}
 {% load url from future %}
 
 {% block payment_details %}
@@ -11,8 +11,14 @@
 	</div>
 	<p>Click on the below icon to use Express Checkout but where the shipping
 	address and method is already chosen on the merchant site.</p>
-
 	<div style="overflow:auto"><a href="{% url 'paypal-direct-payment' %}" title="Pay with PayPal"><img src="https://www.paypal.com/en_US/i/logo/PayPal_mark_37x23.gif" align="left" style="margin-right:7px;"></a>&nbsp;</div>
+
+    <div class="sub-header">
+		<h3>PayPal Adaptive Payments</h3>
+	</div>
+    <div class="form-actions">
+        <a href="{% url 'checkout:adaptive-payments' %}" class="btn btn-large btn-primary">Continue</a>
+    </div>
 
     <div class="sub-header">
 		<h3>PayPal PayFlow Pro</h3>

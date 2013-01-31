@@ -6,7 +6,7 @@ import urlparse
 from paypal import exceptions
 
 
-def post(url, params):
+def post(url, params, headers=None):
     """
     Make a POST request to the URL using the key-value pairs.  Return
     a set of key-value pairs.
@@ -19,8 +19,14 @@ def post(url, params):
             params[k] = params[k].encode('utf-8')
     payload = urllib.urlencode(params.items())
 
+    # Ensure correct headers are present
+    if 'Content-type' not in headers:
+        headers['Content-type'] = 'application/x-www-form-urlencoded'
+    if 'Accepts' not in headers:
+        headers['Accepts'] = 'text/plain'
+
     start_time = time.time()
-    response = requests.post(url, payload)
+    response = requests.post(url, payload, headers=headers)
     if response.status_code != requests.codes.ok:
         raise exceptions.PayPalError("Unable to communicate with PayPal")
 
