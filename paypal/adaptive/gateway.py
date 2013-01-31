@@ -19,7 +19,7 @@ Receiver = collections.namedtuple('Receiver', 'email amount is_primary')
 Fees = type('Feeds', (), {
     'SENDER': 'SENDER',
     'PRIMARY_RECEIVER': 'PRIMARYRECEIVER',
-    'EACH_RECEIVER': 'EACHRECIEVER',
+    'EACH_RECEIVER': 'EACHRECEIVER',
     'SECONDARY_ONLY': 'SECONDARYONLY',
 })
 
