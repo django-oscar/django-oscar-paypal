@@ -249,8 +249,12 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
-# Paypal settings
-from integration import *
+# Put your own sandbox settings into an integration.py modulde (that is ignored
+# by git).
+try:
+    from integration import *
+except ImportError:
+    pass
 
 # Taken from PayPal's documentation - these should always work in the sandbox
 PAYPAL_SANDBOX_MODE = True
