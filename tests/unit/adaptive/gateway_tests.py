@@ -37,6 +37,7 @@ class TestPayOperation(TestCase):
         self.assertEqual('AP-9WC20815W6814813H', txn.pay_key)
         self.assertEqual('d59ed693b9244', txn.correlation_id)
         self.assertTrue('AP-9WC20815W6814813H' in txn.redirect_url)
+        self.assertEqual(D('26.00'), txn.amount)
 
     def test_unsuccessful_create(self):
         receivers = (

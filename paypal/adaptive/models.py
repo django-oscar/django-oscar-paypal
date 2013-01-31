@@ -8,6 +8,8 @@ class AdaptiveTransaction(base.ResponseModel):
     # Request info
     is_sandbox = models.BooleanField(default=True)
     action = models.CharField(max_length=32)
+    amount = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True)
     currency = models.CharField(max_length=32, null=True, blank=True)
 
     # Response info
@@ -19,7 +21,8 @@ class AdaptiveTransaction(base.ResponseModel):
     correlation_id = models.CharField(max_length=32, db_index=True)
 
     # Only set if the transaction is successful.
-    pay_key = models.CharField(max_length=64, null=True, blank=True)
+    pay_key = models.CharField(max_length=64, null=True, blank=True,
+                               db_index=True)
 
     error_id = models.CharField(max_length=32, null=True, blank=True)
     error_message = models.CharField(max_length=256, null=True, blank=True)

@@ -49,6 +49,7 @@ def pay(receivers, currency, return_url, cancel_url,
         ("returnUrl", return_url),
         ("cancelUrl", cancel_url),
     ]
+    total = D('0.00')
     for index, receiver in enumerate(receivers):
         params.append(('receiverList.receiver(%d).amount' % index,
                        str(receiver.amount)))
@@ -56,6 +57,7 @@ def pay(receivers, currency, return_url, cancel_url,
                        receiver.email))
         params.append(('receiverList.receiver(%d).primary' % index,
                        'true' if receiver.is_primary else 'false'))
+        total += receiver.amount
     # Add optional params
     if fees_payer:
         params.append(('feesPayer', fees_payer))
@@ -64,15 +66,18 @@ def pay(receivers, currency, return_url, cancel_url,
     if memo:
         params.append(('memo', memo))
 
-    return _request(action, params, headers)
+    # We pass the total so it can be added to the txn model for better audit
+    return _request(action, params, headers, {'amount': total})
 
 
-def _request(action, params, headers=None):
+def _request(action, params, headers=None, txn_fields=None):
     """
     Make a request to PayPal
     """
     if headers is None:
         headers = {}
+    if txn_fields is None:
+        txn_fields = {}
     request_headers = {
         'X-PAYPAL-SECURITY-USERID': settings.PAYPAL_API_USERNAME,
         'X-PAYPAL-SECURITY-PASSWORD': settings.PAYPAL_API_PASSWORD,
@@ -115,4 +120,5 @@ def _request(action, params, headers=None):
         pay_key=pairs.get('payKey', None),
         correlation_id=pairs.get('responseEnvelope.correlationId', None),
         error_id=pairs.get('error(0).errorId', None),
-        error_message=pairs.get('error(0).message', None))
+        error_message=pairs.get('error(0).message', None),
+        **txn_fields)
