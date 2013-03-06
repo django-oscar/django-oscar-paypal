@@ -42,29 +42,25 @@ follows::
 
 Finally, you need to modify oscar's basket template to include the button that
 links to PayPal.  This can be done by creating a new template
-``templates/basket/basket.html`` with content::
+``templates/checkout/payment_details.html`` with content::
 
-    {% extends 'templates/basket/basket.html' %}
+   {% extends 'oscar/checkout/payment_details.html' %}
 
-    {% block formactions %}
-    <div class="form-actions">
-        <a href="{% url paypal-redirect %}"><img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"></a>
-        <a href="{% url checkout:index %}" class="pull-right btn btn-large btn-primary">Proceed to checkout</a>
-    </div>
-    {% endblock %}
+   {% block payment_details_content %}
+     <div class="form-actions">
+      <a href="{% url paypal-redirect %}"><img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"></a>
+     </div>
+   {% endblock payment_details_content %}
 
-Note that we extending the ``basket/basket.html`` template from oscar and
-overriding the ``formactions`` block.  For this trick to work, you need to
-ensure that you have ``OSCAR_PARENT_TEMPLATE_DIR`` in your ``TEMPLATE_DIRS``
+Note that we are extending the ``checkout/checkout_payments.html`` template from oscar and
+overriding the ``payment_details_content`` block.  For this trick to work, you need to
+ensure that you have ``OSCAR_MAIN_TEMPLATE_DIR`` in your ``TEMPLATE_DIRS`` after your local templates
 setting::
 
-    import os
-    location = lambda x: os.path.join(os.path.dirname(os.path.realpath(__file__)), x)
-    from oscar import OSCAR_PARENT_TEMPLATE_DIR
+
     TEMPLATE_DIRS = (
         location('templates'),
-        os.path.join(OSCAR_PARENT_TEMPLATE_DIR, 'templates'),
-        OSCAR_PARENT_TEMPLATE_DIR,
+        OSCAR_MAIN_TEMPLATE_DIR,
     )
 
 If anything is unclear or not workin as expected then review how the 'sandbox`
