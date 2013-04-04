@@ -13,3 +13,4 @@ django-debug-toolbar>=0.9.4,<0.10
 pinocchio>=0.3.1,<0.4
 WebTest>=2.0.4,<2.1
 django-webtest>=1.6.1,<1.7
+flake8
