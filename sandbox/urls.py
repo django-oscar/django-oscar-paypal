@@ -12,8 +12,9 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     (r'^admin/', include(admin.site.urls)),
-    # Include the below line to enable PayPal integration
+    # PayPal Express integration...
     (r'^checkout/paypal/', include('paypal.express.urls')),
+    # Dashboard views for Payflow Pro
     (r'^dashboard/paypal/payflow/', include(paypal_application.urls)),
     (r'', include(application.urls)),
 )
