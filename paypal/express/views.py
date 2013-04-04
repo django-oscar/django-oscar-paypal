@@ -17,14 +17,17 @@ from oscar.apps.payment.models import SourceType, Source
 from oscar.core.loading import get_class
 from oscar.apps.shipping.methods import FixedPrice
 
+from django.views.decorators.csrf import csrf_exempt
+
 from paypal.express.facade import get_paypal_url, fetch_transaction_details, confirm_transaction
 from paypal.exceptions import PayPalError
+import logging
+logger = logging.getLogger('paypal.express')
 
 ShippingAddress = get_model('order', 'ShippingAddress')
 Country = get_model('address', 'Country')
 Basket = get_model('basket', 'Basket')
 Repository = get_class('shipping.repository', 'Repository')
-
 
 class RedirectView(CheckoutSessionMixin, RedirectView):
     """
@@ -116,7 +119,7 @@ class SuccessResponseView(PaymentDetailsView):
             messages.error(self.request, "A problem occurred communicating with PayPal - please try again later")
             return HttpResponseRedirect(reverse('basket:summary'))
         return super(SuccessResponseView, self).get(request, *args, **kwargs)
-
+    @csrf_exempt
     def post(self, request, *args, **kwargs):
         """
         Place an order.
@@ -253,7 +256,12 @@ class SuccessResponseView(PaymentDetailsView):
 
 class ShippingOptionsView(View):
 
-    def get(self, request, *args, **kwargs):
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(ShippingOptionsView, self).dispatch(*args, **kwargs)
+
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
         """
         We use the shipping address given to use by PayPal to
         determine the available shipping method
@@ -268,6 +276,35 @@ class ShippingOptionsView(View):
         if not user:
             user = AnonymousUser()
 
+
+    logger.debug("shiptocountry" + self.request.POST.get('SHIPTOCOUNTRY',"NO COUNTRY"))
+        # Create a shipping address instance using the data passed back
+        shipping_address = ShippingAddress(
+            line1=self.request.POST.get('SHIPTOSTREET', None),
+            line2=self.request.POST.get('SHIPTOSTREET2', None),
+            line4=self.request.POST.get('SHIPTOCITY', None),
+            state=self.request.POST.get('SHIPTOSTATE', None),
+            postcode=self.request.POST.get('SHIPTOZIP', None),
+            country=Country.objects.get(iso_3166_1_a2__iexact=self.request.POST.get('SHIPTOCOUNTRY'))
+        )
+        methods = self.get_shipping_methods(user, basket, shipping_address)
+        return self.render_to_response(methods)
+
+    @csrf_exempt
+    def get(self, request, *args, **kwargs):
+        """
+        We use the shipping address given to use by PayPal to
+        determine the available shipping method
+        """
+        # Basket ID is passed within the URL path.  We need to do this as some
+        # shipping options depend on the user and basket contents.  PayPal do
+        # pass back details of the basket contents but it would be royal pain to
+        # reconstitute the basket based on those - easier to just to piggy-back
+        # the basket ID in the callback URL.
+        basket = get_object_or_404(Basket, id=kwargs['basket_id'])
+        user = basket.owner
+        if not user:
+            user = AnonymousUser()
         # Create a shipping address instance using the data passed back
         shipping_address = ShippingAddress(
             line1=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOSTREET', None),
@@ -275,7 +312,8 @@ class ShippingOptionsView(View):
             line4=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOCITY', None),
             state=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOSTATE', None),
             postcode=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOZIP', None),
-            country=Country.objects.get(iso_3166_1_a2=self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRY'))
+            country=Country.objects.get(iso_3166_1_a2=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE',None))
+            #country=Country.objects.get(iso_3166_1_a2=self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRY'))
         )
         methods = self.get_shipping_methods(user, basket, shipping_address)
         return self.render_to_response(methods)
@@ -283,9 +321,11 @@ class ShippingOptionsView(View):
     def render_to_response(self, methods):
         pairs = [
             ('METHOD', 'CallbackResponse'),
+	    ('CURRENCYCODE', self.request.POST.get('CURRENCYCODE', 'USD')),
         ]
         for index, method in enumerate(methods):
             pairs.append(('L_SHIPPINGOPTIONNAME%d' % index, method.name))
+            pairs.append(('L_SHIPPINGOPTIONLABEL%d' % index, method.name))
             pairs.append(('L_SHIPPINGOPTIONAMOUNT%d' % index,
                           method.basket_charge_incl_tax()))
             # For now, we assume tax and insurance to be zero
