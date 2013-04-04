@@ -205,13 +205,14 @@ class SuccessResponseView(PaymentDetailsView):
         if not txn.is_successful:
             raise UnableToTakePayment()
 
-        # Record payment source
+        # Record payment source and event
         source_type, is_created = SourceType.objects.get_or_create(name='PayPal')
         source = Source(source_type=source_type,
                         currency=txn.currency,
                         amount_allocated=txn.amount,
                         amount_debited=txn.amount)
         self.add_payment_source(source)
+        self.add_payment_event('Settled', txn.amount)
 
     def create_shipping_address(self, basket=None):
         """
