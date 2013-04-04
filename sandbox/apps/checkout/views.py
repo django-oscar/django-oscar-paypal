@@ -2,8 +2,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from oscar.apps.checkout import views
-from oscar.apps.payment import forms
-from oscar.apps.payment import exceptions
+from oscar.apps.payment import forms, exceptions, models
 
 from paypal.payflow import facade
 
@@ -71,3 +70,11 @@ class PaymentDetailsView(views.PaymentDetailsView):
         except facade.NotApproved, e:
             # Submission failed
             raise exceptions.UnableToTakePayment(e.message)
+
+        # Record payment source and event
+        source_type, is_created = models.SourceType.objects.get_or_create(name='PayPal')
+        source = models.Source(source_type=source_type,
+                               currency='GBP',
+                               amount_allocated=total_incl_tax)
+        self.add_payment_source(source)
+        self.add_payment_event('Authorised', total_incl_tax)
