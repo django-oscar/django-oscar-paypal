@@ -1,26 +1,27 @@
 from decimal import Decimal as D
-from unittest import TestCase
+from django.test import TestCase
 from mock import patch, Mock
 
-from oscar.apps.shipping.methods import Free
+from oscar.apps.shipping.methods import Free, FixedPrice
 
 from paypal.express import gateway
 from paypal import exceptions
 from paypal.express.models import ExpressTransaction as Transaction
 
 
+def create_mock_basket(amt=D('10.00')):
+    basket = Mock()
+    basket.total_incl_tax = amt
+    basket.all_lines = Mock(return_value=[])
+    basket.get_discounts = Mock(return_value=[])
+    return basket
+
+
 class MockedResponseTestCase(TestCase):
 
     def setUp(self):
-        self.basket = self.create_mock_basket()
+        self.basket = create_mock_basket()
         self.methods = [Free()]
-
-    def create_mock_basket(self):
-        basket = Mock()
-        basket.total_incl_tax = D('10.00')
-        basket.all_lines = Mock(return_value=[])
-        basket.get_discounts = Mock(return_value=[])
-        return basket
 
     def tearDown(self):
         Transaction.objects.all().delete()
@@ -76,3 +77,21 @@ class SuccessResponseTests(MockedResponseTestCase):
         self.assertEqual('GBP', txn.currency)
         self.assertEqual('Success', txn.ack)
         self.assertEqual('EC-6469953681606921P', txn.token)
+
+
+class TestOrderTotal(TestCase):
+
+    def test_includes_default_shipping_charge(self):
+        basket = create_mock_basket(D('10.00'))
+        shipping_methods = [FixedPrice(D('2.50'))]
+
+        with patch('paypal.express.gateway._fetch_response') as mock_fetch:
+            gateway.set_txn(basket, shipping_methods, 'GBP', 'http://example.com',
+                            'http://example.com')
+            args, __ = mock_fetch.call_args
+
+        params = args[1]
+        self.assertEqual(params['PAYMENTREQUEST_0_AMT'],
+                         D('10.00') + D('2.50'))
+
+

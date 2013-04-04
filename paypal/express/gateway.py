@@ -249,6 +249,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
             max_charge = charge
         if is_default:
             params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(charge)
+            params['PAYMENTREQUEST_0_AMT'] += charge
         params['L_SHIPPINGOPTIONNAME%d' % index] = unicode(method.name)
         params['L_SHIPPINGOPTIONAMOUNT%d' % index] = _format_currency(charge)
 
