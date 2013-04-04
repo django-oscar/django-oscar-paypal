@@ -1,4 +1,5 @@
 from django.conf.urls.defaults import *
+from django.views.decorators.csrf import csrf_exempt
 
 from paypal.express import views
 
@@ -13,7 +14,8 @@ urlpatterns = patterns('',
     url(r'^place-order/', views.SuccessResponseView.as_view(),
         name='paypal-place-order'),
     # Callback for getting shipping options for a specific basket
-    url(r'^shipping-options/(?P<basket_id>\d+)/', views.ShippingOptionsView.as_view(),
+    url(r'^shipping-options/(?P<basket_id>\d+)/',
+        csrf_exempt(views.ShippingOptionsView.as_view()),
         name='paypal-shipping-options'),
     # View for using PayPal as a payment method
     url(r'^payment/', views.RedirectView.as_view(as_payment_method=True),

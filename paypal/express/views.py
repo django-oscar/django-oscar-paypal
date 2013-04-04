@@ -253,7 +253,7 @@ class SuccessResponseView(PaymentDetailsView):
 
 class ShippingOptionsView(View):
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         """
         We use the shipping address given to use by PayPal to
         determine the available shipping method
@@ -269,13 +269,20 @@ class ShippingOptionsView(View):
             user = AnonymousUser()
 
         # Create a shipping address instance using the data passed back
+        country_code = self.request.POST.get(
+            'PAYMENTREQUEST_0_SHIPTOCOUNTRY', None)
+        try:
+            country = Country.objects.get(iso_3166_1_a2=country_code)
+        except Country.DoesNotExist:
+            country = Country()
+
         shipping_address = ShippingAddress(
-            line1=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOSTREET', None),
-            line2=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOSTREET2', None),
-            line4=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOCITY', None),
-            state=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOSTATE', None),
-            postcode=self.request.GET.get('PAYMENTREQUEST_0_SHIPTOZIP', None),
-            country=Country.objects.get(iso_3166_1_a2=self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRY'))
+            line1=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTREET', None),
+            line2=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTREET2', None),
+            line4=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOCITY', None),
+            state=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTATE', None),
+            postcode=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOZIP', None),
+            country=country
         )
         methods = self.get_shipping_methods(user, basket, shipping_address)
         return self.render_to_response(methods)
@@ -283,9 +290,13 @@ class ShippingOptionsView(View):
     def render_to_response(self, methods):
         pairs = [
             ('METHOD', 'CallbackResponse'),
+            ('CURRENCYCODE', self.request.POST.get('CURRENCYCODE', 'GBP')),
         ]
         for index, method in enumerate(methods):
-            pairs.append(('L_SHIPPINGOPTIONNAME%d' % index, method.name))
+            pairs.append(('L_SHIPPINGOPTIONNAME%d' % index,
+                          unicode(method.name)))
+            pairs.append(('L_SHIPPINGOPTIONLABEL%d' % index,
+                          unicode(method.name)))
             pairs.append(('L_SHIPPINGOPTIONAMOUNT%d' % index,
                           method.basket_charge_incl_tax()))
             # For now, we assume tax and insurance to be zero

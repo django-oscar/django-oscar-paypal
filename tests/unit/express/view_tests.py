@@ -98,7 +98,8 @@ class PreviewOrderTests(MockedPayPalTests):
                 'payer_id', 'token', 'paypal_user_email',
                 'paypal_amount')
         for k in keys:
-            self.assertTrue(k in self.response.context)
+            self.assertTrue(k in self.response.context,
+                           "%s not in context" % k)
 
 
 class SubmitOrderTests(MockedPayPalTests):
