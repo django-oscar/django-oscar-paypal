@@ -90,7 +90,8 @@ def run_tests(*test_args):
     # Run tests
     test_runner = NoseTestSuiteRunner(verbosity=1)
 
-    c = coverage(source=['paypal'], omit=['*migrations*', '*tests*'])
+    c = coverage(source=['paypal'], omit=['*migrations*', '*tests*'],
+                 auto_data=True)
     c.start()
     num_failures = test_runner.run_tests(test_args)
     c.stop()

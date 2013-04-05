@@ -43,6 +43,10 @@ Tests
     :alt: Continuous integration status
     :target: http://travis-ci.org/#!/tangentlabs/django-oscar-paypal
 
+.. image:: https://coveralls.io/repos/tangentlabs/django-oscar-paypal/badge.png?branch=master
+    :alt: Coverage
+    :target: https://coveralls.io/r/tangentlabs/django-oscar-paypal
+
 Changelog
 ---------
 
