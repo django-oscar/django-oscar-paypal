@@ -2,12 +2,9 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib.admin.views.decorators import staff_member_required
 
 from oscar.core.application import Application
-from oscar.apps.dashboard.nav import register, Node
 
 from paypal.payflow import views
 
-node = Node('PayPal', 'paypal-payflow-list')
-register(node, 100)
 
 
 class PayFlowDashboardApplication(Application):
