@@ -49,6 +49,9 @@ Tests
 
 Changelog
 ---------
+0.3.3
+~~~~~
+* Restrict to Oscar < 0.5
 
 0.3.2
 ~~~~~
