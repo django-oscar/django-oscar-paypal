@@ -5,7 +5,7 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 from mock import patch, Mock
 
-from oscar.test.helpers import create_product
+from oscar_testsupport.factories import create_product
 from oscar.apps.order.models import Order
 
 from purl import URL
