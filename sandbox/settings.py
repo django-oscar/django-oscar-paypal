@@ -225,6 +225,7 @@ INSTALLED_APPS = (
     'apps.shipping',
     'apps.checkout',
     'south',
+    'compressor'
 )
 
 AUTHENTICATION_BACKENDS = (
