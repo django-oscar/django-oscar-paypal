@@ -6,7 +6,6 @@ from oscar.core.application import Application
 from paypal.payflow import views
 
 
-
 class PayFlowDashboardApplication(Application):
     name = None
     list_view = views.TransactionListView

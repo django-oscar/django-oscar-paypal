@@ -244,6 +244,21 @@ DEBUG_TOOLBAR_CONFIG = {
 from oscar.defaults import *
 OSCAR_ALLOW_ANON_CHECKOUT = True
 
+# Add Payflow dashboard stuff to settings
+from django.utils.translation import ugettext_lazy as _
+OSCAR_DASHBOARD_NAVIGATION.append(
+    {
+        'label': _('PayPal'),
+        'icon': 'icon-globe',
+        'children': [
+            {
+                'label': _('PayFlow transactions'),
+                'url_name': 'paypal-payflow-list',
+            },
+        ]
+    })
+
+
 # Haystack settings
 HAYSTACK_CONNECTIONS = {
     'default': {
