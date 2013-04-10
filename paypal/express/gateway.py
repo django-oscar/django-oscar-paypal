@@ -141,12 +141,28 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     # as a negative price.  See "Integrating Order Details into the Express
     # Checkout Flow"
     # https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_ECCustomizing
-    for index, discount in enumerate(basket.get_discounts(), index + 1):
-        if discount['voucher']:
-            name = "%s (%s)" % (discount['voucher'].name,
-                                discount['voucher'].code)
-        else:
-            name = _("Special Offer: %s") % discount['name']
+
+    # Iterate over the 3 types of discount that can occur
+    for discount in basket.offer_discounts:
+        index += 1
+        name = _("Special Offer: %s") % discount['name']
+        params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
+        params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
+        params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
+            -discount['discount'])
+        params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
+    for discount in basket.voucher_discounts:
+        index += 1
+        name = "%s (%s)" % (discount['voucher'].name,
+                            discount['voucher'].code)
+        params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
+        params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
+        params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
+            -discount['discount'])
+        params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
+    for discount in basket.shipping_discounts:
+        index += 1
+        name = _("Shipping Offer: %s") % discount['name']
         params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
         params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
         params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(

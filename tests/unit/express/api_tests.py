@@ -13,7 +13,9 @@ def create_mock_basket(amt=D('10.00')):
     basket = Mock()
     basket.total_incl_tax = amt
     basket.all_lines = Mock(return_value=[])
-    basket.get_discounts = Mock(return_value=[])
+    basket.offer_discounts = []
+    basket.voucher_discounts = []
+    basket.shipping_discounts = []
     return basket
 
 
