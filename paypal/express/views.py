@@ -10,6 +10,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.db.models import get_model
+from django.utils.translation import ugettext_lazy as _
 
 from oscar.apps.checkout.views import PaymentDetailsView, CheckoutSessionMixin
 from oscar.apps.payment.exceptions import PaymentError, UnableToTakePayment
@@ -38,7 +39,7 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
         try:
             return self._get_redirect_url(**kwargs)
         except PayPalError:
-            messages.error(self.request, "An error occurred communicating with PayPal")
+            messages.error(self.request, _("An error occurred communicating with PayPal"))
             if self.as_payment_method:
                 url = reverse('checkout:payment-details')
             else:
@@ -48,7 +49,7 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
     def _get_redirect_url(self, **kwargs):
         basket = self.request.basket
         if basket.is_empty:
-            messages.error(self.request, "Your basket is empty")
+            messages.error(self.request, _("Your basket is empty"))
             return reverse('basket:summary')
 
         params = {'basket': self.request.basket}
@@ -58,12 +59,12 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
             shipping_addr = self.get_shipping_address()
             if not shipping_addr:
                 messages.error(self.request,
-                               "A shipping address must be specified")
+                               _("A shipping address must be specified"))
                 return reverse('checkout:shipping-address')
             shipping_method = self.get_shipping_method()
             if not shipping_method:
                 messages.error(self.request,
-                               "A shipping method must be specified")
+                               _("A shipping method must be specified"))
                 return reverse('checkout:shipping-method')
             params['shipping_address'] = shipping_addr
             params['shipping_method'] = shipping_method
@@ -88,7 +89,7 @@ class CancelResponseView(RedirectView):
     permanent = False
 
     def get_redirect_url(self, **kwargs):
-        messages.error(self.request, "PayPal transaction cancelled")
+        messages.error(self.request, _("PayPal transaction cancelled"))
         return reverse('basket:summary')
 
 
@@ -107,13 +108,13 @@ class SuccessResponseView(PaymentDetailsView):
             token = request.GET['token']
         except KeyError:
             # Manipulation - redirect to basket page with warning message
-            messages.error(self.request, "Unable to determine PayPal transaction details")
+            messages.error(self.request, _("Unable to determine PayPal transaction details"))
             return HttpResponseRedirect(reverse('basket:summary'))
 
         try:
             self.fetch_paypal_data(payer_id, token)
         except PayPalError:
-            messages.error(self.request, "A problem occurred communicating with PayPal - please try again later")
+            messages.error(self.request, _("A problem occurred communicating with PayPal - please try again later"))
             return HttpResponseRedirect(reverse('basket:summary'))
         return super(SuccessResponseView, self).get(request, *args, **kwargs)
 
@@ -129,13 +130,13 @@ class SuccessResponseView(PaymentDetailsView):
             token = request.POST['token']
         except KeyError:
             # Probably suspicious manipulation if we get here
-            messages.error(self.request, "A problem occurred communicating with PayPal - please try again later")
+            messages.error(self.request, _("A problem occurred communicating with PayPal - please try again later"))
             return HttpResponseRedirect(reverse('basket:summary'))
         try:
             self.fetch_paypal_data(payer_id, token)
         except PayPalError:
             # Unable to fetch txn details from PayPal - we have to bail out
-            messages.error(self.request, "A problem occurred communicating with PayPal - please try again later")
+            messages.error(self.request, _("A problem occurred communicating with PayPal - please try again later"))
             return HttpResponseRedirect(reverse('basket:summary'))
 
         # Pass the user email so it can be stored with the order
