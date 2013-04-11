@@ -1,4 +1,5 @@
 import urlparse
+from django.utils.translation import ugettext_lazy as _
 
 from django.db import models
 
@@ -9,7 +10,7 @@ class ResponseModel(models.Model):
     raw_request = models.TextField(max_length=512)
     raw_response = models.TextField(max_length=512)
 
-    response_time = models.FloatField(help_text="Response time in milliseconds")
+    response_time = models.FloatField(help_text=_("Response time in milliseconds"))
 
     date_created = models.DateTimeField(auto_now_add=True)
 

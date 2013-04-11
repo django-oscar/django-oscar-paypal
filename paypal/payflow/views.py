@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django import http
+from django.utils.translation import ugettext as _
 
 from paypal.payflow import models
 from paypal.payflow import facade
@@ -28,7 +29,7 @@ class TransactionDetailView(generic.DetailView):
     def post(self, request, *args, **kwargs):
         orig_txn = self.get_object()
         if not getattr(settings, 'PAYPAL_PAYFLOW_DASHBOARD_FORMS', False):
-            messages.error(self.request, "Dashboard actions not permitted")
+            messages.error(self.request, _("Dashboard actions not permitted"))
             return http.HttpResponseRedirect(reverse('paypal-payflow-detail',
                                                      kwargs={'pk': orig_txn.id}))
         dispatch_map = {
@@ -45,11 +46,11 @@ class TransactionDetailView(generic.DetailView):
         try:
             txn = facade.delayed_capture(orig_txn.comment1)
         except Exception, e:
-            messages.error(self.request, "Unable to settle transaction - %s" % e)
+            messages.error(self.request, _("Unable to settle transaction - %s") % e)
             return http.HttpResponseRedirect(reverse('paypal-payflow-detail',
                                                      kwargs={'pk': orig_txn.id}))
         else:
-            messages.success(self.request, "Transaction %s settled" % orig_txn.pnref)
+            messages.success(self.request, _("Transaction %s settled") % orig_txn.pnref)
             return http.HttpResponseRedirect(reverse('paypal-payflow-detail',
                                                      kwargs={'pk': txn.id}))
 
@@ -57,11 +58,11 @@ class TransactionDetailView(generic.DetailView):
         try:
             txn = facade.credit(orig_txn.comment1)
         except Exception, e:
-            messages.error(self.request, "Unable to credit transaction - %s" % e)
+            messages.error(self.request, _("Unable to credit transaction - %s") % e)
             return http.HttpResponseRedirect(reverse('paypal-payflow-detail',
                                                      kwargs={'pk': orig_txn.id}))
         else:
-            messages.success(self.request, "Transaction %s credited" % orig_txn.pnref)
+            messages.success(self.request, _("Transaction %s credited") % orig_txn.pnref)
             return http.HttpResponseRedirect(reverse('paypal-payflow-detail',
                                                      kwargs={'pk': txn.id}))
 
@@ -69,10 +70,10 @@ class TransactionDetailView(generic.DetailView):
         try:
             txn = facade.void(orig_txn.comment1, orig_txn.pnref)
         except Exception, e:
-            messages.error(self.request, "Unable to void transaction - %s" % e)
+            messages.error(self.request, _("Unable to void transaction - %s") % e)
             return http.HttpResponseRedirect(reverse('paypal-payflow-detail',
                                                      kwargs={'pk': orig_txn.id}))
         else:
-            messages.success(self.request, "Transaction %s voided" % orig_txn.pnref)
+            messages.success(self.request, _("Transaction %s voided") % orig_txn.pnref)
             return http.HttpResponseRedirect(reverse('paypal-payflow-detail',
                                                      kwargs={'pk': txn.id}))
