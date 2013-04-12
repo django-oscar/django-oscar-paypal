@@ -255,6 +255,10 @@ OSCAR_DASHBOARD_NAVIGATION.append(
                 'label': _('PayFlow transactions'),
                 'url_name': 'paypal-payflow-list',
             },
+            {
+                'label': _('Express transactions'),
+                'url_name': 'paypal-express-list',
+            },
         ]
     })
 
@@ -284,3 +288,4 @@ PAYPAL_API_PASSWORD = 'QFZCWN5HZM8VBG7Q'
 PAYPAL_API_SIGNATURE = 'A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU'
 
 PAYPAL_PAYFLOW_CURRENCY = 'GBP'
+PAYPAL_PAYFLOW_DASHBOARD_FORMS = True
