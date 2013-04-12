@@ -6,7 +6,8 @@ from django.conf.urls.static import static
 from django.views.generic import TemplateView
 
 from apps.app import application
-from paypal.payflow.app import application as paypal_application
+from paypal.payflow.app import application as payflow
+from paypal.express.dashboard.app import application as express_dashboard
 
 admin.autodiscover()
 
@@ -15,7 +16,9 @@ urlpatterns = patterns('',
     # PayPal Express integration...
     (r'^checkout/paypal/', include('paypal.express.urls')),
     # Dashboard views for Payflow Pro
-    (r'^dashboard/paypal/payflow/', include(paypal_application.urls)),
+    (r'^dashboard/paypal/payflow/', include(payflow.urls)),
+    # Dashboard views for Express
+    (r'^dashboard/paypal/express/', include(express_dashboard.urls)),
     (r'', include(application.urls)),
 )
 if settings.DEBUG:
