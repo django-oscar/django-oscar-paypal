@@ -42,22 +42,25 @@ follows::
 
 Finally, you need to modify oscar's basket template to include the button that
 links to PayPal.  This can be done by creating a new template
-``templates/checkout/payment_details.html`` with content::
+``templates/basket/partials/basket_content.html`` with content::
 
-   {% extends 'oscar/checkout/payment_details.html' %}
+    {% extends 'oscar/basket/partials/basket_content.html' %}
 
-   {% block payment_details_content %}
-     <div class="form-actions">
-      <a href="{% url paypal-redirect %}"><img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"></a>
-     </div>
-   {% endblock payment_details_content %}
+    {% block formactions %}
+    <div class="form-actions">
+        {% if anon_checkout_allowed or request.user.is_authenticated %}
+            <a href="{% url paypal-redirect %}"><img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"></a>
+        {% endif %}
+        <a href="{% url checkout:index %}" class="pull-right btn btn-large btn-primary">Proceed to checkout</a>
+    </div>
+    {% endblock %}
 
-Note that we are extending the ``checkout/checkout_payments.html`` template from oscar and
-overriding the ``payment_details_content`` block.  For this trick to work, you need to
-ensure that you have ``OSCAR_MAIN_TEMPLATE_DIR`` in your ``TEMPLATE_DIRS`` after your local templates
-setting::
+Note that we are extending the ``basket/partials/basket_content.html`` template
+from oscar and overriding the ``formactions`` block.  For this trick to work,
+you need to ensure that you have ``OSCAR_MAIN_TEMPLATE_DIR`` in your
+``TEMPLATE_DIRS`` after your local templates setting::
 
-
+    from oscar import OSCAR_MAIN_TEMPLATE_DIR
     TEMPLATE_DIRS = (
         location('templates'),
         OSCAR_MAIN_TEMPLATE_DIR,
