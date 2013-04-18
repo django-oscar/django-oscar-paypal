@@ -2,6 +2,7 @@ import re
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext
 
 from paypal.payflow import codes
 from paypal import base
@@ -47,12 +48,12 @@ class PayflowTransaction(base.ResponseModel):
         return super(PayflowTransaction, self).save(*args, **kwargs)
 
     def get_trxtype_display(self):
-        return codes.trxtype_map.get(self.trxtype, self.trxtype)
-    get_trxtype_display.short_description = "Transaction type"
+        return ugettext(codes.trxtype_map.get(self.trxtype, self.trxtype))
+    get_trxtype_display.short_description = _("Transaction type")
 
     def get_tender_display(self):
-        return codes.tender_map.get(self.tender, '')
-    get_tender_display.short_description = "Tender"
+        return ugettext(codes.tender_map.get(self.tender, ''))
+    get_tender_display.short_description = _("Tender")
 
     @property
     def is_approved(self):

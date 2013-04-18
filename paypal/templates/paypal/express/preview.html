@@ -1,8 +1,9 @@
 {% extends "checkout/checkout.html" %}
 {% load currency_filters %}
+{% load i18n %}
 
 {% block title %}
-Order preview | {{ block.super }}
+{% trans "Order preview" %} | {{ block.super }}
 {% endblock %}
 
 {% block checkout-nav %}
@@ -16,12 +17,12 @@ Order preview | {{ block.super }}
 {% block payment_method %}
 <div class="span6">
 	<div class="sub-header">
-		<h2>Payment</h2>
+		<h2>{% trans "Payment" %}</h2>
 	</div>
 	<div class="well well-success">
-		<p>PayPal Express Checkout</p>
-		<p>PayPal user: {{ paypal_user_email }}</p>
-		<p>Amount: {{ paypal_amount|currency }}</p>
+		<p>{% trans "PayPal Express Checkout" %}</p>
+		<p>{% trans "PayPal user" %}: {{ paypal_user_email }}</p>
+		<p>{% trans "Amount" %}: {{ paypal_amount|currency }}</p>
 	</div>
 </div>
 {% endblock %}

@@ -4,7 +4,7 @@ from decimal import Decimal as D
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext as _
 from django.template.defaultfilters import truncatewords
 
 from paypal.express import models
