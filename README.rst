@@ -49,6 +49,13 @@ Tests
 
 Changelog
 ---------
+
+0.4
+~~~
+* We now require Oscar >= 0.5
+* Full i18 support
+* New dashboard views for PayPal Express
+
 0.3.3
 ~~~~~
 * Restrict to Oscar < 0.5
