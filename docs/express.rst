@@ -8,6 +8,9 @@ where they enter their shipping and billing information before arriving back on
 the merchant site to confirm the order.  It can also be used purely for payment,
 with shipping details being collected on the merchant site.
 
+Oscar also supports a dashboard for PayPal Express transactions, which
+integrates with Oscar's dashboard.
+
 See the `PDF documentation`_ for the gory details of PayPal Express.
 
 .. _`PayPal Express`: https://www.paypal.com/uk/cgi-bin/webscr?cmd=_additional-payment-ref-impl1
@@ -35,10 +38,30 @@ follows::
     from django.contrib import admin
     from oscar.app import shop
 
+    from paypal.express.dashboard.app import application 
+
     urlpatterns = patterns('',
         (r'^admin/', include(admin.site.urls)),
         (r'^checkout/paypal/', include('paypal.express.urls')),
+        # Optional
+        (r'^dashboard/paypal/express/', include(application.urls)), 
         (r'', include(shop.urls)),
+
+If you are using the dashboard views, extend the dashboard navigation to include
+the appropriate links::
+
+    from django.utils.translation import ugettext_lazy as _
+    OSCAR_DASHBOARD_NAVIGATION.append(
+        {
+            'label': _('PayPal'),
+            'icon': 'icon-globe',
+            'children': [
+                {
+                    'label': _('Express transactions'),
+                    'url_name': 'paypal-express-list',
+                },
+            ]
+        })
 
 Finally, you need to modify oscar's basket template to include the button that
 links to PayPal.  This can be done by creating a new template
