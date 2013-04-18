@@ -279,8 +279,8 @@ PAYPAL_API_VERSION = '88.0'
 
 # These are the standard PayPal sandbox details from the docs - but I don't
 # think you can get access to the merchant dashboard.
-PAYPAL_API_USERNAME = 'sdk-three_api1.sdk.com'
-PAYPAL_API_PASSWORD = 'QFZCWN5HZM8VBG7Q'
-PAYPAL_API_SIGNATURE = 'A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU'
+#PAYPAL_API_USERNAME = 'sdk-three_api1.sdk.com'
+#PAYPAL_API_PASSWORD = 'QFZCWN5HZM8VBG7Q'
+#PAYPAL_API_SIGNATURE = 'A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU'
 
 PAYPAL_PAYFLOW_CURRENCY = 'GBP'

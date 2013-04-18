@@ -288,6 +288,10 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     params['PAYMENTREQUEST_0_AMT'] = _format_currency(
         params['PAYMENTREQUEST_0_AMT'])
 
+    # Test recurring billing
+    params['L_BILLINGTYPE0'] = 'RecurringPayments'
+    params['L_BILLINGAGREEMENTDESCRIPTION0'] = 'Dave magazone subscription'
+
     txn = _fetch_response(SET_EXPRESS_CHECKOUT, params)
 
     # Construct return URL
@@ -351,6 +355,8 @@ def do_void(txn_id, note=None):
 
 FULL_REFUND = 'Full'
 PARTIAL_REFUND = 'Partial'
+
+
 def refund_txn(txn_id, is_partial=False, amount=None, currency=None):
     params = {
         'TRANSACTIONID': txn_id,
@@ -360,3 +366,17 @@ def refund_txn(txn_id, is_partial=False, amount=None, currency=None):
         params['AMT'] = amount
         params['CURRENCYCODE'] = currency
     return _fetch_response(REFUND_TRANSACTION, params)
+
+
+def create_recurring_payments_profile(token):
+    params = {
+        'TOKEN': token,
+        'PROFILESTARTDATE': '2013-05-05T03:00:00',
+        'DESC': 'Dave magazone subscription',
+        'BILLINGPERIOD': 'Month',
+        'BILLINGFREQUENCY': '6',
+        'CURRENCYCODE': 'GBP',
+        'AMT': '10.55',
+    }
+    return _fetch_response('CreateRecurringPaymentsProfile', params)
+

@@ -18,6 +18,7 @@ from oscar.core.loading import get_class
 from oscar.apps.shipping.methods import FixedPrice
 
 from paypal.express.facade import get_paypal_url, fetch_transaction_details, confirm_transaction
+from paypal.express.gateway import create_recurring_payments_profile
 from paypal.exceptions import PayPalError
 
 ShippingAddress = get_model('order', 'ShippingAddress')
@@ -204,6 +205,9 @@ class SuccessResponseView(PaymentDetailsView):
             raise UnableToTakePayment()
         if not txn.is_successful:
             raise UnableToTakePayment()
+
+        # Create recurring profile thing
+        create_recurring_payments_profile(token)
 
         # Record payment source and event
         source_type, is_created = SourceType.objects.get_or_create(name='PayPal')
