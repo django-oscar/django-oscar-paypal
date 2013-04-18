@@ -24,5 +24,4 @@ class ExpressDashboardApplication(Application):
         return staff_member_required
 
 
-
 application = ExpressDashboardApplication()
