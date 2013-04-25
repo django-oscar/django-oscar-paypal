@@ -3,8 +3,6 @@ Adaptive payments:
 
 https://www.x.com/developers/paypal/documentation-tools/adaptive-payments/gs_AdaptivePayments
 """
-import json
-import requests
 import collections
 from decimal import Decimal as D
 from django.conf import settings
@@ -28,7 +26,7 @@ def payment_details(pay_key):
     """
     Fetch the payment details for a given transaction
     """
-    params = [("payKey", pay_key),]
+    params = [("payKey", pay_key)]
     return _request('PaymentDetails', params)
 
 
@@ -49,6 +47,10 @@ def pay(receivers, currency, return_url, cancel_url,
         ("returnUrl", return_url),
         ("cancelUrl", cancel_url),
     ]
+
+    # Chained payment?
+    is_chained = any([r.is_primary for r in receivers])
+
     total = D('0.00')
     for index, receiver in enumerate(receivers):
         params.append(('receiverList.receiver(%d).amount' % index,
@@ -58,8 +60,11 @@ def pay(receivers, currency, return_url, cancel_url,
         params.append(('receiverList.receiver(%d).primary' % index,
                        'true' if receiver.is_primary else 'false'))
         # The primary receiver should have the total amount as their amount
-        if receiver.is_primary:
+        if is_chained and receiver.is_primary:
             total = receiver.amount
+            continue
+        total += receiver.amount
+
     # Add optional params
     if fees_payer:
         params.append(('feesPayer', fees_payer))
