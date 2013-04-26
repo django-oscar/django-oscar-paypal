@@ -111,6 +111,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     if currency == 'USD' and amount > 10000:
         raise exceptions.PayPalError('PayPal can only be used for orders up to 10000 USD')
 
+    # PAYMENTREQUEST_0_AMT should include tax, shipping and handling
     params = {
         'PAYMENTREQUEST_0_AMT': amount,
         'PAYMENTREQUEST_0_CURRENCYCODE': currency,
@@ -118,6 +119,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         'CANCELURL': cancel_url,
         'PAYMENTREQUEST_0_PAYMENTACTION': action,
     }
+
 
     # Add item details
     index = 0
@@ -171,7 +173,18 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
 
     # We include tax in the prices rather than separately as that's how it's
     # done on most British/Australian sites.  Will need to refactor in the
-    # future no doubt
+    # future no doubt.
+
+    # Note that the following constraint must be met
+    #
+    # PAYMENTREQUEST_0_AMT = (
+    #     PAYMENTREQUEST_0_ITEMAMT +
+    #     PAYMENTREQUEST_0_TAXAMT +
+    #     PAYMENTREQUEST_0_SHIPPINGAMT +
+    #     PAYMENTREQUEST_0_HANDLINGAMT)
+    #
+    # Hence, if tax is to be shown then it has to be aggregated up to the order
+    # level.
     params['PAYMENTREQUEST_0_ITEMAMT'] = _format_currency(
         basket.total_incl_tax)
     params['PAYMENTREQUEST_0_TAXAMT'] = _format_currency(D('0.00'))
