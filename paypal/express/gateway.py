@@ -138,6 +138,9 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
             line.unit_price_incl_tax)
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = line.quantity
 
+        if line.is_recurring:
+            params['L_BILLINGTYPE0'] = 'RecurringPayments'
+
     # If the order has discounts associated with it, the way PayPal suggests
     # using the API is to add a separate item for the discount with the value
     # as a negative price.  See "Integrating Order Details into the Express
@@ -300,6 +303,8 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     # Ensure that the total is formatted correctly.
     params['PAYMENTREQUEST_0_AMT'] = _format_currency(
         params['PAYMENTREQUEST_0_AMT'])
+
+
 
     txn = _fetch_response(SET_EXPRESS_CHECKOUT, params)
 

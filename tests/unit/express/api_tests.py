@@ -81,6 +81,7 @@ class SuccessResponseTests(MockedResponseTestCase):
         self.assertEqual('EC-6469953681606921P', txn.token)
 
 
+
 class TestOrderTotal(TestCase):
 
     def test_includes_default_shipping_charge(self):
@@ -96,4 +97,20 @@ class TestOrderTotal(TestCase):
         self.assertEqual(params['PAYMENTREQUEST_0_AMT'],
                          D('10.00') + D('2.50'))
 
+
+class TestRecurringPayment(TestCase):
+
+    def test_includes_default_shipping_charge(self):
+        basket = create_mock_basket(D('10.00'))
+        basket.all_lines = Mock(return_value=[Mock(is_recurring=True)])
+        shipping_methods = [FixedPrice(D('2.50'))]
+
+        with patch('paypal.express.gateway._fetch_response') as mock_fetch:
+            gateway.set_txn(basket, shipping_methods, 'GBP', 'http://example.com',
+                            'http://example.com')
+            args, __ = mock_fetch.call_args
+
+        params = args[1]
+        self.assertEqual(params['L_BILLINGTYPE0'],
+                         'RecurringPayments')
 
