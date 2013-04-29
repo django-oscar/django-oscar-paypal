@@ -49,6 +49,10 @@ Tests
 
 Changelog
 ---------
+0.3.4
+~~~~~
+* Use second line of shipping address when placing an order
+
 0.3.3
 ~~~~~
 * Restrict to Oscar < 0.5
