@@ -50,6 +50,11 @@ Tests
 Changelog
 ---------
 
+0.4.1
+~~~~~
+* Fixes a bug where the second line of a user's address was not being used to
+  create the order shipping address.
+
 0.4
 ~~~
 * We now require Oscar >= 0.5
