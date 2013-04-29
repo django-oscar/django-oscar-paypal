@@ -168,6 +168,7 @@ class SuccessResponseView(PaymentDetailsView):
         shipping_address_fields = [
             self.txn.value('PAYMENTREQUEST_0_SHIPTONAME'),
             self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET'),
+            self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET2'),
             self.txn.value('PAYMENTREQUEST_0_SHIPTOCITY'),
             self.txn.value('PAYMENTREQUEST_0_SHIPTOSTATE'),
             self.txn.value('PAYMENTREQUEST_0_SHIPTOZIP'),
@@ -233,6 +234,7 @@ class SuccessResponseView(PaymentDetailsView):
             first_name=first_name,
             last_name=last_name,
             line1=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET'),
+            line2=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET2'),
             line4=self.txn.value('PAYMENTREQUEST_0_SHIPTOCITY'),
             state=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTATE'),
             postcode=self.txn.value('PAYMENTREQUEST_0_SHIPTOZIP'),
