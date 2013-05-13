@@ -52,7 +52,17 @@ def _fetch_response(method, extra_params):
         url = 'https://api-3t.sandbox.paypal.com/nvp'
     else:
         url = 'https://api-3t.paypal.com/nvp'
+
+    param_str = "\n".join(["%s: %s" % x for x in params.items()])
+    logger.debug("Making %s request to %s with params:\n%s", method, url,
+                 param_str)
+
+    # Make HTTP request
     pairs = gateway.post(url, params)
+
+    pairs_str = "\n".join(["%s: %s" % x for x in sorted(pairs.items())
+                           if not x[0].startswith('_')])
+    logger.debug("Response with params:\n%s", pairs_str)
 
     # Record transaction data - we save this model whether the txn
     # was successful or not
