@@ -1,14 +1,6 @@
-{% extends "checkout/checkout.html" %}
+{% extends "checkout/preview.html" %}
 {% load currency_filters %}
 {% load i18n %}
-
-{% block title %}
-    {% trans "Order preview" %} | {{ block.super }}
-{% endblock %}
-
-{% block checkout-nav %}
-    {% include 'checkout/nav.html' with step=4 %}
-{% endblock %}
 
 {# Null out the actions as they can't be used here #}
 {% block shipping_address_actions %}{% endblock %}
@@ -32,7 +24,7 @@
 {% endblock %}
 
 {% block place_order %}
-    <h3>Please review the information above, then click "Place Order"</h3>
+    <h3>{% trans "Please review the information above, then click 'Place Order'" %}</h3>
     <form method="post" action="{% url paypal-place-order %}">
         {% csrf_token %}
         <input type="hidden" name="payer_id" value="{{ payer_id }}" />
