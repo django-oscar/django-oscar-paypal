@@ -3,11 +3,11 @@
 {% load i18n %}
 
 {% block title %}
-{% trans "Order preview" %} | {{ block.super }}
+    {% trans "Order preview" %} | {{ block.super }}
 {% endblock %}
 
 {% block checkout-nav %}
-{% include 'checkout/nav.html' with step=4 %}
+    {% include 'checkout/nav.html' with step=4 %}
 {% endblock %}
 
 {# Null out the actions as they can't be used here #}
@@ -15,26 +15,30 @@
 {% block order_contents_actions %}{% endblock %}
 
 {% block payment_method %}
-<div class="span6">
-	<div class="sub-header">
-		<h2>{% trans "Payment" %}</h2>
-	</div>
-	<div class="well well-success">
-		<p>{% trans "PayPal Express Checkout" %}</p>
-		<p>{% trans "PayPal user" %}: {{ paypal_user_email }}</p>
-		<p>{% trans "Amount" %}: {{ paypal_amount|currency }}</p>
-	</div>
-</div>
+    <div class="span6">
+        <div class="sub-header">
+            <h2>{% trans "Payment" %}</h2>
+        </div>
+        <div class="well well-success">
+            <h4>{% trans "PayPal" %}</h4>
+            <p>
+                {% blocktrans with amt=paypal_amount|currency email=paypal_user_email %}
+                    {{ amt }} will be deducted from your PayPal account, registered 
+                    to email: {{ email }}.
+                {% endblocktrans %}
+            </p>
+        </div>
+    </div>
 {% endblock %}
 
 {% block place_order %}
-<h3>Please review the information above, then click "Place Order"</h3>
-<form method="post" action="{% url paypal-place-order %}">
-	{% csrf_token %}
-	<input type="hidden" name="payer_id" value="{{ payer_id }}" />
-	<input type="hidden" name="token" value="{{ token }}" />
-    <div class="form-actions">
-        <input id='place-order' type="submit" value="Place order" class="pull-right btn btn-primary btn-large js-disable-on-click" />
-    </div>
-</form>
+    <h3>Please review the information above, then click "Place Order"</h3>
+    <form method="post" action="{% url paypal-place-order %}">
+        {% csrf_token %}
+        <input type="hidden" name="payer_id" value="{{ payer_id }}" />
+        <input type="hidden" name="token" value="{{ token }}" />
+        <div class="form-actions">
+            <input id='place-order' type="submit" value="Place order" class="pull-right btn btn-primary btn-large js-disable-on-click" />
+        </div>
+    </form>
 {% endblock place_order %}
