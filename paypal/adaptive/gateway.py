@@ -51,9 +51,7 @@ def pay(receivers, currency, return_url, cancel_url,
     ]
 
     # Chained payment?
-    is_chained = False
-    if True in [r.is_primary for r in receivers]:
-        is_chained = True
+    is_chained = any([r.is_primary for r in receivers])
 
     total = D('0.00')
     for index, receiver in enumerate(receivers):
