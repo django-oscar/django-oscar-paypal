@@ -9,11 +9,11 @@
 {% block breadcrumbs %}
 <ul class="breadcrumb">
     <li>
-        <a href="{% url dashboard:index %}">{% trans "Dashboard" %}</a>
+        <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
         <span class="divider">/</span>
     </li>
     <li>
-        <a href="{% url paypal-payflow-list %}">{% trans "PayPal Payflow Pro" %}</a>
+        <a href="{% url 'paypal-payflow-list' %}">{% trans "PayPal Payflow Pro" %}</a>
         <span class="divider">/</span>
     </li>
     <li class="active">{% trans "Transactions" %}</li>
@@ -55,7 +55,7 @@
             <td>{{ txn.response_time|floatformat:0 }}</td>
             <td>{{ txn.date_created }}</td>
             <td>
-                <a href="{% url paypal-payflow-detail txn.id %}" class="btn btn-info">{% trans "View" %}</a>
+                <a href="{% url 'paypal-payflow-detail' txn.id %}" class="btn btn-info">{% trans "View" %}</a>
             </td>
         </tr>
         {% endfor %}
