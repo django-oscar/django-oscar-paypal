@@ -1,6 +1,7 @@
 {% extends "checkout/preview.html" %}
 {% load currency_filters %}
 {% load i18n %}
+{% load url from future %}
 
 {# Null out the actions as they can't be used here #}
 {% block shipping_address_actions %}{% endblock %}
@@ -25,7 +26,7 @@
 
 {% block place_order %}
     <h3>{% trans "Please review the information above, then click 'Place Order'" %}</h3>
-    <form method="post" action="{% url paypal-place-order %}">
+    <form method="post" action="{% url 'paypal-place-order' %}">
         {% csrf_token %}
         <input type="hidden" name="payer_id" value="{{ payer_id }}" />
         <input type="hidden" name="token" value="{{ token }}" />
