@@ -9,11 +9,11 @@
 {% block breadcrumbs %}
     <ul class="breadcrumb">
         <li>
-            <a href="{% url dashboard:index %}">{% trans "Dashboard" %}</a>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
             <span class="divider">/</span>
         </li>
         <li>
-            <a href="{% url paypal-express-list %}">{% trans "PayPal Express" %}</a>
+            <a href="{% url 'paypal-express-list' %}">{% trans "PayPal Express" %}</a>
             <span class="divider">/</span>
         </li>
         <li class="active">{% trans "Transactions" %}</li>
@@ -42,7 +42,7 @@
             <tbody>
                 {% for txn in transactions %}
                     <tr>
-                        <td><a href="{% url paypal-express-detail txn.id %}">{{ txn.correlation_id|default:"-" }}</a></td>
+                        <td><a href="{% url 'paypal-express-detail' txn.id %}">{{ txn.correlation_id|default:"-" }}</a></td>
                         <td>{{ txn.method }}</td>
                         <td>{{ txn.ack }}</td>
                         <td>{{ txn.amount|currency|default:"-" }} {{ txt.currency }}</td>

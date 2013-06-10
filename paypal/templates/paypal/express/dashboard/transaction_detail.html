@@ -9,11 +9,11 @@
 {% block breadcrumbs %}
     <ul class="breadcrumb">
         <li>
-            <a href="{% url dashboard:index %}">{% trans "Dashboard" %}</a>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
             <span class="divider">/</span>
         </li>
         <li>
-            <a href="{% url paypal-express-list %}">{% trans "PayPal Express" %}</a>
+            <a href="{% url 'paypal-express-list' %}">{% trans "PayPal Express" %}</a>
             <span class="divider">/</span>
         </li>
         <li class="active">
