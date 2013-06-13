@@ -37,13 +37,19 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
 
     def get_redirect_url(self, **kwargs):
         try:
-            return self._get_redirect_url(**kwargs)
+            url = self._get_redirect_url(**kwargs)
         except PayPalError:
             messages.error(self.request, _("An error occurred communicating with PayPal"))
             if self.as_payment_method:
                 url = reverse('checkout:payment-details')
             else:
                 url = reverse('basket:summary')
+            return url
+        else:
+            # Transaction successfully registered with PayPal.  Now freeze the
+            # basket so it can't be edited while the customer is on the PayPal
+            # site.
+            self.request.basket.freeze()
             return url
 
     def _get_redirect_url(self, **kwargs):
@@ -87,6 +93,12 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
 
 class CancelResponseView(RedirectView):
     permanent = False
+
+    def get(self, request, *args, **kwargs):
+        basket = get_object_or_404(Basket, id=kwargs['basket_id'],
+                                   status=Basket.FROZEN)
+        basket.thaw()
+        return super(CancelResponseView, self).get(request, *args, **kwargs)
 
     def get_redirect_url(self, **kwargs):
         messages.error(self.request, _("PayPal transaction cancelled"))
