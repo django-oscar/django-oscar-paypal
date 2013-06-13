@@ -132,6 +132,17 @@ class SuccessResponseView(PaymentDetailsView):
         except PayPalError:
             messages.error(self.request, _("A problem occurred communicating with PayPal - please try again later"))
             return HttpResponseRedirect(reverse('basket:summary'))
+
+        # Lookup the frozen basket that this txn corresponds to
+        try:
+            self.basket = Basket.objects.get(id=kwargs['basket_id'],
+                                             status=Basket.FROZEN)
+        except Basket.DoesNotExist:
+            messages.error(
+                self.request,
+                _("No basket was found that corresponds to your "
+                  "PayPal transaction"))
+
         return super(SuccessResponseView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -158,7 +169,17 @@ class SuccessResponseView(PaymentDetailsView):
         # Pass the user email so it can be stored with the order
         order_kwargs = {'guest_email': self.txn.value('EMAIL')}
 
-        return self.submit(request.basket, order_kwargs=order_kwargs)
+        # Lookup the frozen basket that this txn corresponds to
+        try:
+            basket = Basket.objects.get(id=kwargs['basket_id'],
+                                        status=Basket.FROZEN)
+        except Basket.DoesNotExist:
+            messages.error(
+                self.request,
+                _("No basket was found that corresponds to your "
+                  "PayPal transaction"))
+
+        return self.submit(basket, order_kwargs=order_kwargs)
 
     def fetch_paypal_data(self, payer_id, token):
         self.payer_id = payer_id
@@ -172,9 +193,13 @@ class SuccessResponseView(PaymentDetailsView):
 
     def get_context_data(self, **kwargs):
         ctx = super(SuccessResponseView, self).get_context_data(**kwargs)
+
         if not hasattr(self, 'payer_id'):
             return ctx
+
+        # This context generation only runs when in preview mode
         ctx.update({
+            'frozen_basket': self.basket,
             'payer_id': self.payer_id,
             'token': self.token,
             'paypal_user_email': self.txn.value('EMAIL'),

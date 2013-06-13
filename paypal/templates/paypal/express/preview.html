@@ -2,6 +2,7 @@
 {% load currency_filters %}
 {% load i18n %}
 {% load url from future %}
+{% load thumbnail %}
 
 {# Null out the actions as they can't be used here #}
 {% block shipping_address_actions %}{% endblock %}
@@ -24,9 +25,60 @@
     </div>
 {% endblock %}
 
+{% comment %}
+    Regrettably, we need to duplicate the order_contents block from Oscar's core checkout/checkout/html template.
+    This is because we want to render the frozen basket details here not the current open basket.  As of Oscar 0.5.1,
+    the basket middlware injects the current open basket into the template context which stops us from being able to
+    automatically render the frozen basket using the default template.  This will be fixed in 0.6, after which we can
+    remove this block
+{% endcomment %}
+{% block order_contents %}
+    <div class="sub-header">
+        <h2>{% trans "Order contents" %}</h2>
+    </div>
+    <div class="basket-title">
+        <div class="row-fluid">
+            <h4 class="span9">{% trans "Items in basket" %}</h4>
+            <h4 class="span1 align-center">{% trans "Quantity" %}</h4>
+            <h4 class="span2 align-right">{% trans "Price" %}</h4>
+        </div>
+    </div>
+    {% for line in frozen_basket.all_lines %}
+    <div class="basket-items">
+        <div class="row-fluid">
+            <div class="span9">
+                <div class="image_container">
+                    {% with image=line.product.primary_image %}
+                    {% thumbnail image.original "200x200" upscale=False as thumb %}
+                    <a href="{{ form.instance.product.get_absolute_url }}"><img class="thumbnail" src="{{ thumb.url }}" alt="{{ product.get_title }}"></a>
+                    {% endthumbnail %}
+                    {% endwith %}
+            </div>
+                <h4><a href="{{ line.product.get_absolute_url }}">{{ line.description }}</a></h4>
+                <span class="availability {{ line.product.stockrecord.availability_code }}">{{ line.product.stockrecord.availability }}</span>
+            </div>
+            <div class="span1 align-center">
+                {{ line.quantity }}
+            </div>
+            <div class="span2 align-right">
+                <p class="price_color">{{ line.line_price_incl_tax|currency }}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="row-fluid">
+        <div class="span6">&nbsp;</div>
+        <div class="span6">
+            {% include 'basket/partials/basket_totals.html' with basket=frozen_basket %}
+        </div>
+    </div>
+
+{% endblock order_contents %}
+
 {% block place_order %}
     <h3>{% trans "Please review the information above, then click 'Place Order'" %}</h3>
-    <form method="post" action="{% url 'paypal-place-order' %}">
+    <form method="post" action="{% url 'paypal-place-order' frozen_basket.id %}">
         {% csrf_token %}
         <input type="hidden" name="payer_id" value="{{ payer_id }}" />
         <input type="hidden" name="token" value="{{ token }}" />

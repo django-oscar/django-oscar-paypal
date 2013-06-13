@@ -34,7 +34,9 @@ def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
     currency = getattr(settings, 'PAYPAL_CURRENCY', 'GBP')
     if host is None:
         host = Site.objects.get_current().domain
-    return_url = '%s://%s%s' % (scheme, host, reverse('paypal-success-response'))
+    return_url = '%s://%s%s' % (
+        scheme, host, reverse('paypal-success-response', kwargs={
+            'basket_id': basket.id}))
     cancel_url = '%s://%s%s' % (
         scheme, host, reverse('paypal-cancel-response', kwargs={
             'basket_id': basket.id}))
