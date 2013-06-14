@@ -37,13 +37,19 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
 
     def get_redirect_url(self, **kwargs):
         try:
-            return self._get_redirect_url(**kwargs)
+            url = self._get_redirect_url(**kwargs)
         except PayPalError:
             messages.error(self.request, _("An error occurred communicating with PayPal"))
             if self.as_payment_method:
                 url = reverse('checkout:payment-details')
             else:
                 url = reverse('basket:summary')
+            return url
+        else:
+            # Transaction successfully registered with PayPal.  Now freeze the
+            # basket so it can't be edited while the customer is on the PayPal
+            # site.
+            self.request.basket.freeze()
             return url
 
     def _get_redirect_url(self, **kwargs):
@@ -88,6 +94,12 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
 class CancelResponseView(RedirectView):
     permanent = False
 
+    def get(self, request, *args, **kwargs):
+        basket = get_object_or_404(Basket, id=kwargs['basket_id'],
+                                   status=Basket.FROZEN)
+        basket.thaw()
+        return super(CancelResponseView, self).get(request, *args, **kwargs)
+
     def get_redirect_url(self, **kwargs):
         messages.error(self.request, _("PayPal transaction cancelled"))
         return reverse('basket:summary')
@@ -116,6 +128,17 @@ class SuccessResponseView(PaymentDetailsView):
         except PayPalError:
             messages.error(self.request, _("A problem occurred communicating with PayPal - please try again later"))
             return HttpResponseRedirect(reverse('basket:summary'))
+
+        # Lookup the frozen basket that this txn corresponds to
+        try:
+            self.basket = Basket.objects.get(id=kwargs['basket_id'],
+                                             status=Basket.FROZEN)
+        except Basket.DoesNotExist:
+            messages.error(
+                self.request,
+                _("No basket was found that corresponds to your "
+                  "PayPal transaction"))
+
         return super(SuccessResponseView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -142,7 +165,18 @@ class SuccessResponseView(PaymentDetailsView):
         # Pass the user email so it can be stored with the order
         order_kwargs = {'guest_email': self.txn.value('EMAIL')}
 
-        return self.submit(request.basket, order_kwargs=order_kwargs)
+        # Lookup the frozen basket that this txn corresponds to
+        try:
+            basket = Basket.objects.get(id=kwargs['basket_id'],
+                                        status=Basket.FROZEN)
+        except Basket.DoesNotExist:
+            messages.error(
+                self.request,
+                _("No basket was found that corresponds to your "
+                  "PayPal transaction"))
+            return HttpResponseRedirect(reverse('basket:summary'))
+
+        return self.submit(basket, order_kwargs=order_kwargs)
 
     def fetch_paypal_data(self, payer_id, token):
         self.payer_id = payer_id
@@ -156,9 +190,13 @@ class SuccessResponseView(PaymentDetailsView):
 
     def get_context_data(self, **kwargs):
         ctx = super(SuccessResponseView, self).get_context_data(**kwargs)
+
         if not hasattr(self, 'payer_id'):
             return ctx
+
+        # This context generation only runs when in preview mode
         ctx.update({
+            'frozen_basket': self.basket,
             'payer_id': self.payer_id,
             'token': self.token,
             'paypal_user_email': self.txn.value('EMAIL'),
