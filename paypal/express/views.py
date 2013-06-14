@@ -178,6 +178,7 @@ class SuccessResponseView(PaymentDetailsView):
                 self.request,
                 _("No basket was found that corresponds to your "
                   "PayPal transaction"))
+            return HttpResponseRedirect(reverse('basket:summary'))
 
         return self.submit(basket, order_kwargs=order_kwargs)
 
