@@ -33,6 +33,10 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
     to PayPal's Express Checkout to perform the transaction.
     """
     permanent = False
+
+    # Setting to distinguish if the site has already collected a shipping
+    # address.  This is False when redirecting to PayPal straight from the
+    # basket page but True when redirecting from checkout.
     as_payment_method = False
 
     def get_redirect_url(self, **kwargs):
