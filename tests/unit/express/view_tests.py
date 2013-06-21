@@ -7,6 +7,7 @@ from mock import patch, Mock
 
 from oscar_testsupport.factories import create_product
 from oscar.apps.order.models import Order
+from oscar.apps.basket.models import Basket
 
 from purl import URL
 
@@ -71,7 +72,11 @@ class FailedTxnTests(MockedPayPalTests):
 
     def perform_action(self):
         self.add_product_to_basket(price=D('6.99'))
-        url = URL().path(reverse('paypal-success-response'))\
+        basket = Basket.objects.all()[0]
+        basket.freeze()
+        url = reverse('paypal-success-response',
+                      kwargs={'basket_id': basket.id})
+        url = URL().path(url)\
                    .query_param('PayerID', '12345')\
                    .query_param('token', 'EC-8P797793UC466090M')
         self.response = self.client.get(str(url), follow=True)
@@ -85,7 +90,12 @@ class PreviewOrderTests(MockedPayPalTests):
 
     def perform_action(self):
         self.add_product_to_basket(price=D('6.99'))
-        url = URL().path(reverse('paypal-success-response'))\
+        basket = Basket.objects.all()[0]
+        basket.freeze()
+        url = reverse('paypal-success-response',
+                      kwargs={'basket_id': basket.id})
+
+        url = URL().path(url)\
                    .query_param('PayerID', '12345')\
                    .query_param('token', 'EC-8P797793UC466090M')
         self.response = self.client.get(str(url), follow=True)
@@ -107,10 +117,15 @@ class SubmitOrderTests(MockedPayPalTests):
 
     def perform_action(self):
         self.add_product_to_basket(price=D('6.99'))
-        self.response = self.client.post(reverse('paypal-place-order'),
-                                         {'action': 'place_order',
-                                          'payer_id': '12345',
-                                          'token': 'EC-8P797793UC466090M'})
+
+        # Explicitly freeze basket
+        basket = Basket.objects.all()[0]
+        basket.freeze()
+        url = reverse('paypal-place-order', kwargs={'basket_id': basket.id})
+        self.response = self.client.post(
+            url, {'action': 'place_order',
+                  'payer_id': '12345',
+                  'token': 'EC-8P797793UC466090M'})
         self.order = Order.objects.all()[0]
 
     def patch_http_post(self, post):
