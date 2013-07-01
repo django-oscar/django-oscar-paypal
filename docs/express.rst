@@ -14,7 +14,7 @@ integrates with Oscar's dashboard.
 See the `PDF documentation`_ for the gory details of PayPal Express.
 
 .. _`PayPal Express`: https://www.paypal.com/uk/cgi-bin/webscr?cmd=_additional-payment-ref-impl1
-.. _`PDF documentation`: https://cms.paypal.com/cms_content/US/en_US/files/developer/PP_ExpressCheckout_IntegrationGuide.pdf
+.. _`PDF documentation`: https://www.paypalobjects.com/webstatic/en_US/developer/docs/pdf/pp_expresscheckout_integrationguide.pdf
 
 ---------------
 Getting started
