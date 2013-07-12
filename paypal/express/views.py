@@ -207,8 +207,8 @@ class SuccessResponseView(PaymentDetailsView):
             'paypal_user_email': self.txn.value('EMAIL'),
             'paypal_amount': D(self.txn.value('AMT')),
         })
-        # We convert the PayPal response values into those that match Oscar's normal
-        # context so we can re-use the preview template as is
+        # We convert the PayPal response values into those that match Oscar's
+        # normal context so we can re-use the preview template as is
         shipping_address_fields = [
             self.txn.value('PAYMENTREQUEST_0_SHIPTONAME'),
             self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET'),
@@ -218,10 +218,12 @@ class SuccessResponseView(PaymentDetailsView):
             self.txn.value('PAYMENTREQUEST_0_SHIPTOZIP'),
             self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME'),
         ]
-        ctx['shipping_address'] = {
-            'active_address_fields': filter(bool, shipping_address_fields),
-            'notes': self.txn.value('NOTETEXT'),
-        }
+        non_empty_fields = filter(bool, shipping_address_fields)
+        if non_empty_fields:
+            ctx['shipping_address'] = {
+                'active_address_fields': non_empty_fields,
+                'notes': self.txn.value('NOTETEXT'),
+            }
         ctx['shipping_method'] = {
             'name': self.txn.value('SHIPPINGOPTIONNAME'),
             'description': '',
@@ -266,6 +268,8 @@ class SuccessResponseView(PaymentDetailsView):
         """
         # Determine names - PayPal uses a single field
         ship_to_name = self.txn.value('PAYMENTREQUEST_0_SHIPTONAME')
+        if ship_to_name is None:
+            return None
         first_name = last_name = None
         parts = ship_to_name.split()
         if len(parts) == 1:

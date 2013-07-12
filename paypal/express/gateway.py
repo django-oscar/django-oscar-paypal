@@ -106,20 +106,21 @@ def _fetch_response(method, extra_params):
 
 def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_url=None,
             action=SALE, user=None, user_address=None, shipping_method=None,
-            shipping_address=None):
+            shipping_address=None, no_shipping=False):
     """
     Register the transaction with PayPal to get a token which we use in the
     redirect URL.  This is the 'SetExpressCheckout' from their documentation.
 
-    There are quite a few options that can be passed to PayPal to configure this
-    request - most are controlled by PAYPAL_* settings.
+    There are quite a few options that can be passed to PayPal to configure
+    this request - most are controlled by PAYPAL_* settings.
     """
-    # PayPal have an upper limit on transactions.  It's in dollars which is
-    # a fiddly to work with.  Lazy solution - only check when dollars are used as
+    # PayPal have an upper limit on transactions.  It's in dollars which is a
+    # fiddly to work with.  Lazy solution - only check when dollars are used as
     # the PayPal currency.
     amount = basket.total_incl_tax
     if currency == 'USD' and amount > 10000:
-        raise exceptions.PayPalError('PayPal can only be used for orders up to 10000 USD')
+        raise exceptions.PayPalError(
+            'PayPal can only be used for orders up to 10000 USD')
 
     # PAYMENTREQUEST_0_AMT should include tax, shipping and handling
     params = {
@@ -129,7 +130,6 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         'CANCELURL': cancel_url,
         'PAYMENTREQUEST_0_PAYMENTACTION': action,
     }
-
 
     # Add item details
     index = 0
@@ -271,6 +271,8 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['SHIPTOSTATE'] = shipping_address.state
         params['SHIPTOZIP'] = shipping_address.postcode
         params['SHIPTOCOUNTRYCODE'] = shipping_address.country.iso_3166_1_a2
+    elif no_shipping:
+        params['NOSHIPPING'] = 1
 
     # Allow customer to specify a shipping note
     allow_note = getattr(settings, 'PAYPAL_ALLOW_NOTE', True)
