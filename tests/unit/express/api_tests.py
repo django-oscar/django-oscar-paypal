@@ -96,4 +96,11 @@ class TestOrderTotal(TestCase):
         self.assertEqual(params['PAYMENTREQUEST_0_AMT'],
                          D('10.00') + D('2.50'))
 
+    def test_forbids_zero_value_basket(self):
+        basket = create_mock_basket(D('0.00'))
+        shipping_methods = [FixedPrice(D('2.50'))]
 
+        with patch('paypal.express.gateway._fetch_response') as mock_fetch:
+            with self.assertRaises(exceptions.PayPalError):
+                gateway.set_txn(basket, shipping_methods, 'GBP',
+                                'http://example.com', 'http://example.com')
