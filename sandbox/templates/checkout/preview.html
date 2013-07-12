@@ -1,5 +1,6 @@
 {% extends 'oscar/checkout/preview.html' %}
 {% load currency_filters %}
+{% load url from future %}
 {% load i18n %}
 
 {% block payment_method %}
@@ -10,7 +11,7 @@
 	<div class="well well-success">
 		<p>{% blocktrans with amount=order_total_incl_tax|currency %}{{ amount }} will be debited from your bankcard.{% endblocktrans %}</p>
 		<div class="alert-actions">
-			<a href="{% url checkout:payment-details %}" class="btn">{% trans "Change payment details" %}</a>
+			<a href="{% url 'checkout:payment-details' %}" class="btn">{% trans "Change payment details" %}</a>
 		</div>
 	</div>
 </div>
@@ -18,7 +19,7 @@
 
 {% block place_order %}
 <h3>{% trans 'Please review the information below, then click "Place Order"' %}</h3>
-<form method="post" action="{% url checkout:preview %}">
+<form method="post" action="{% url 'checkout:preview' %}">
 	{% csrf_token %}
 
 	{# Store payment forms but hidden so they get resubmitted #}
