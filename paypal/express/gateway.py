@@ -122,6 +122,9 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         raise exceptions.PayPalError(
             'PayPal can only be used for orders up to 10000 USD')
 
+    if amount <= 0:
+        raise exceptions.PayPalError('Zero value basket is not allowed')
+
     # PAYMENTREQUEST_0_AMT should include tax, shipping and handling
     params = {
         'PAYMENTREQUEST_0_AMT': amount,
