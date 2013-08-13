@@ -259,7 +259,8 @@ class SuccessResponseView(PaymentDetailsView):
                         amount_allocated=txn.amount,
                         amount_debited=txn.amount)
         self.add_payment_source(source)
-        self.add_payment_event('Settled', txn.amount)
+        self.add_payment_event('Settled', txn.amount,
+                               reference=txn.correlation_id)
 
     def create_shipping_address(self, basket=None):
         """
