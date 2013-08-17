@@ -249,7 +249,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     if user:
         params['EMAIL'] = user.email
     if user_address:
-        params['SHIPTONAME'] = user_address.name()
+        params['SHIPTONAME'] = user_address.name
         params['SHIPTOSTREET'] = user_address.line1
         params['SHIPTOSTREET2'] = user_address.line2
         params['SHIPTOCITY'] = user_address.line4
