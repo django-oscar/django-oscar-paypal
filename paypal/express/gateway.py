@@ -234,7 +234,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
 
     # Confirmed shipping address
     confirm_shipping_addr = getattr(settings, 'PAYPAL_CONFIRM_SHIPPING', None)
-    if confirm_shipping_addr:
+    if confirm_shipping_addr and not no_shipping:
         params['REQCONFIRMSHIPPING'] = 1
 
     # Instant update callback information
@@ -271,6 +271,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['SHIPTOSTATE'] = shipping_address.state
         params['SHIPTOZIP'] = shipping_address.postcode
         params['SHIPTOCOUNTRYCODE'] = shipping_address.country.iso_3166_1_a2
+
     elif no_shipping:
         params['NOSHIPPING'] = 1
 
