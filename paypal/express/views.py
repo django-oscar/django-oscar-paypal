@@ -62,23 +62,30 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
             messages.error(self.request, _("Your basket is empty"))
             return reverse('basket:summary')
 
-        params = {'basket': self.request.basket}
+        params = {
+            'basket': self.request.basket,
+            'shipping_methods': []          # setup a default empty list
+            }                               # to support no_shipping
 
         user = self.request.user
         if self.as_payment_method:
-            shipping_addr = self.get_shipping_address()
-            if not shipping_addr:
-                messages.error(self.request,
-                               _("A shipping address must be specified"))
-                return reverse('checkout:shipping-address')
-            shipping_method = self.get_shipping_method()
-            if not shipping_method:
-                messages.error(self.request,
-                               _("A shipping method must be specified"))
-                return reverse('checkout:shipping-method')
-            params['shipping_address'] = shipping_addr
-            params['shipping_method'] = shipping_method
-            params['shipping_methods'] = []
+            if basket.is_shipping_required():
+                # only check for shipping details if required.
+                shipping_addr = self.get_shipping_address()
+                if not shipping_addr:
+                    messages.error(self.request,
+                                   _("A shipping address must be specified"))
+                    return reverse('checkout:shipping-address')
+
+                shipping_method = self.get_shipping_method()
+                if not shipping_method:
+                    messages.error(self.request,
+                                   _("A shipping method must be specified"))
+                    return reverse('checkout:shipping-method')
+                params['shipping_address'] = shipping_addr
+                params['shipping_method'] = shipping_method
+                params['shipping_methods'] = []
+
         else:
             shipping_methods = Repository().get_shipping_methods(user, basket)
             params['shipping_methods'] = shipping_methods
