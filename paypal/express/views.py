@@ -69,7 +69,7 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
 
         user = self.request.user
         if self.as_payment_method:
-            if not basket.is_shipping_required():
+            if basket.is_shipping_required():
                 # only check for shipping details if required.
                 shipping_addr = self.get_shipping_address()
                 if not shipping_addr:
