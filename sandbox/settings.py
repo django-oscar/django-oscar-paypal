@@ -252,6 +252,10 @@ OSCAR_DASHBOARD_NAVIGATION.append(
                 'label': _('Express transactions'),
                 'url_name': 'paypal-express-list',
             },
+            {
+                'label': _('Adaptive transactions'),
+                'url_name': 'paypal-adaptive-list',
+            },
         ]
     })
 

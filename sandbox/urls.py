@@ -8,6 +8,7 @@ from django.views.generic import TemplateView
 from apps.app import application
 from paypal.payflow.app import application as payflow
 from paypal.express.dashboard.app import application as express_dashboard
+from paypal.adaptive.dashboard.app import application as adaptive_dashboard
 
 admin.autodiscover()
 
@@ -19,6 +20,8 @@ urlpatterns = patterns('',
     (r'^dashboard/paypal/payflow/', include(payflow.urls)),
     # Dashboard views for Express
     (r'^dashboard/paypal/express/', include(express_dashboard.urls)),
+    # Dashboard views for Adaptive
+    (r'^dashboard/paypal/adaptive/', include(adaptive_dashboard.urls)),
     (r'', include(application.urls)),
 )
 if settings.DEBUG:
