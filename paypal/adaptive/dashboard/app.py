@@ -10,6 +10,7 @@ class AdaptiveDashboardApplication(Application):
     name = None
     list_view = views.TransactionListView
     detail_view = views.TransactionDetailView
+    payment_details_view = views.PaymentDetailsView
 
     def get_urls(self):
         urlpatterns = patterns('',
@@ -17,6 +18,9 @@ class AdaptiveDashboardApplication(Application):
                 name='paypal-adaptive-list'),
             url(r'^transactions/(?P<pk>\d+)/$', self.detail_view.as_view(),
                 name='paypal-adaptive-detail'),
+            url(r'^transactions/details/(?P<pay_key>.+)/$',
+                self.payment_details_view.as_view(),
+                name='paypal-adaptive-payment-details'),
         )
         return self.post_process_urls(urlpatterns)
 

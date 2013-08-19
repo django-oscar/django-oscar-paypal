@@ -54,6 +54,11 @@
                         <td>{{ txn.error_id|default:'-' }}</td>
                         <td>{{ txn.error_message|default:'-' }}</td>
                         <td>{{ txn.date_created }}</td>
+                        <td>
+                            {% if txn.pay_key %}
+                                <a class="btn btn-info" href="{% url 'paypal-adaptive-payment-details' txn.pay_key %}">Fetch details</a>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>

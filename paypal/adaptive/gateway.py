@@ -36,6 +36,7 @@ def pay(receivers, currency, return_url, cancel_url,
     """
     Submit a 'Pay' transaction to PayPal
     """
+    assert len(receivers) <= 6, "PayPal only supports up to 6 receivers"
     headers = {
         'X-PAYPAL-DEVICE-IPADDRESS': ip_address,
     }
@@ -77,6 +78,14 @@ def pay(receivers, currency, return_url, cancel_url,
     return _request(action, params, headers, {'amount': total})
 
 
+def details(pay_key):
+    """
+    Fetch details of a previous payment
+    """
+    params = [("payKey", pay_key)]
+    return _request("PaymentDetails", params)
+
+
 def _request(action, params, headers=None, txn_fields=None):
     """
     Make a request to PayPal
@@ -113,7 +122,8 @@ def _request(action, params, headers=None, txn_fields=None):
     # We use an OrderedDict as the key-value pairs have to be in the correct
     # order(!).  Otherwise, PayPal returns error 'Invalid request: {0}'
     # with errorId 580001.  All very silly.
-    pairs = gateway.post(url, collections.OrderedDict(params), request_headers)
+    param_dict = collections.OrderedDict(params)
+    pairs = gateway.post(url, param_dict, request_headers)
 
     # Create model that represents request/response
     return models.AdaptiveTransaction.objects.create(
@@ -122,7 +132,7 @@ def _request(action, params, headers=None, txn_fields=None):
         raw_request=pairs['_raw_request'],
         raw_response=pairs['_raw_response'],
         response_time=pairs['_response_time'],
-        currency=pairs.get('currencyCode', None),
+        currency=param_dict.get('currencyCode', None),
         ack=pairs.get('responseEnvelope.ack', None),
         pay_key=pairs.get('payKey', None),
         correlation_id=pairs.get('responseEnvelope.correlationId', None),

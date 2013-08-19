@@ -33,11 +33,14 @@ class ExpressTransaction(base.ResponseModel):
         self.raw_request = re.sub(r'PWD=\d+&', 'PWD=XXXXXX&', self.raw_request)
         return super(ExpressTransaction, self).save(*args, **kwargs)
 
-    @property
-    def is_successful(self):
-        return self.ack in (self.SUCCESS, self.SUCCESS_WITH_WARNING)
-
     def __unicode__(self):
         return u'method: %s: token: %s' % (
             self.method, self.token)
 
+    @property
+    def is_successful(self):
+        return self.ack in (self.SUCCESS, self.SUCCESS_WITH_WARNING)
+
+    @property
+    def is_complete(self):
+        return self.value('status') == 'COMPLETED'

@@ -38,7 +38,7 @@
             <tr><th>{% trans "Using sandbox" %}</th><td>{{ txn.is_sandbox }}</td></tr>
             <tr><th>{% trans "Action" %}</th><td>{{ txn.action }}</td></tr>
             <tr><th>{% trans "Amount" %}</th><td>{{ txn.amount|default:"-" }}</td></tr>
-            <tr><th>{% trans "Currency" %}</th><td>{{ txn.currency }}</td></tr>
+            <tr><th>{% trans "Currency" %}</th><td>{{ txn.currency|default:"-" }}</td></tr>
             <tr><th>{% trans "Result" %}</th><td>{{ txn.ack }}</td></tr>
             <tr><th>{% trans "Pay key" %}</th><td>{{ txn.pay_key|default:"-" }}</td></tr>
             <tr><th>{% trans "Error code" %}</th><td>{{ txn.error_id|default:'-' }}</td></tr>
