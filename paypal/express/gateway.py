@@ -175,14 +175,15 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
             -discount['discount'])
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
-    for discount in basket.shipping_discounts:
-        index += 1
-        name = _("Shipping Offer: %s") % discount['name']
-        params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
-        params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
-        params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
-            -discount['discount'])
-        params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
+    if hasattr(basket, 'shipping_discounts'):
+        for discount in basket.shipping_discounts:
+            index += 1
+            name = _("Shipping Offer: %s") % discount['name']
+            params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
+            params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
+            params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
+                -discount['discount'])
+            params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
 
     # We include tax in the prices rather than separately as that's how it's
     # done on most British/Australian sites.  Will need to refactor in the
