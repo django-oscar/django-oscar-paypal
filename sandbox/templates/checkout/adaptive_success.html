@@ -1,0 +1,20 @@
+{% extends 'checkout/layout.html' %}
+{% load url from future %}
+{% load i18n %}
+
+{% block title %}
+    {% trans "Payment was successful" %} | {{ block.super }}
+{% endblock title %}
+
+{% block checkout-nav %}
+    {% include 'checkout/nav.html' with step=4 %}
+{% endblock %}
+
+{% block content %}
+	<div class="sub-header">
+		<h1>{% trans "Payment was successful" %}</h1>
+	</div>
+    <p>Payment was successfully taken using PayPal's Adaptive Payment.</p>
+    <p><a href="/" class="btn btn-primary">Continue shopping</a></p>
+</div>
+{% endblock %}

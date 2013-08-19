@@ -126,7 +126,7 @@ class AdaptivePaymentsView(generic.RedirectView):
 
 
 class SuccessResponseView(generic.TemplateView):
-    pass
+    template_name = "checkout/adaptive_success.html"
 
 
 class CancelResponseView(generic.RedirectView):
