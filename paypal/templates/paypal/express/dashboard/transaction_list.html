@@ -1,0 +1,62 @@
+{% extends 'dashboard/layout.html' %}
+{% load currency_filters %}
+{% load i18n %}
+{% load url from future %}
+
+{% block title %}
+    {% trans "PayPal Express transactions" %} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+            <span class="divider">/</span>
+        </li>
+        <li>
+            <a href="{% url 'paypal-express-list' %}">{% trans "PayPal Express" %}</a>
+            <span class="divider">/</span>
+        </li>
+        <li class="active">{% trans "Transactions" %}</li>
+    </ul>
+{% endblock %}
+
+{% block headertext %}
+    {% trans "PayPal Express transactions" %}
+{% endblock %}
+
+{% block dashboard_content %}
+
+    {% if transactions %}
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>{% trans "Correlation ID" %}</th>
+                    <th>{% trans "Method" %}</th>
+                    <th>{% trans "Result" %}</th>
+                    <th>{% trans "Amount" %}</th>
+                    <th>{% trans "Token" %}</th>
+                    <th>{% trans "Error code" %}</th>
+                    <th>{% trans "Error message" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for txn in transactions %}
+                    <tr>
+                        <td><a href="{% url 'paypal-express-detail' txn.id %}">{{ txn.correlation_id|default:"-" }}</a></td>
+                        <td>{{ txn.method }}</td>
+                        <td>{{ txn.ack }}</td>
+                        <td>{{ txn.amount|currency|default:"-" }} {{ txn.currency }}</td>
+                        <td>{{ txn.token|default:'-' }}</td>
+                        <td>{{ txn.error_code|default:'-' }}</td>
+                        <td>{{ txn.error_message|default:'-' }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% include "partials/pagination.html" %}
+    {% else %}
+        <p>{% trans "No transactions have been made yet." %}</p>
+    {% endif %}
+
+{% endblock dashboard_content %}

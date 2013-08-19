@@ -34,15 +34,26 @@ def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
     currency = getattr(settings, 'PAYPAL_CURRENCY', 'GBP')
     if host is None:
         host = Site.objects.get_current().domain
-    return_url = '%s://%s%s' % (scheme, host, reverse('paypal-success-response'))
-    cancel_url = '%s://%s%s' % (scheme, host, reverse('paypal-cancel-response'))
+    return_url = '%s://%s%s' % (
+        scheme, host, reverse('paypal-success-response', kwargs={
+            'basket_id': basket.id}))
+    cancel_url = '%s://%s%s' % (
+        scheme, host, reverse('paypal-cancel-response', kwargs={
+            'basket_id': basket.id}))
 
     # URL for updating shipping methods - we only use this if we have a set of
     # shipping methods to choose between.
     update_url = None
     if shipping_methods:
-        update_url = '%s://%s%s' % (scheme, host, reverse('paypal-shipping-options',
-                                                        kwargs={'basket_id': basket.id}))
+        update_url = '%s://%s%s' % (
+            scheme, host,
+            reverse('paypal-shipping-options',
+                    kwargs={'basket_id': basket.id}))
+
+    # Determine whether a shipping address is required
+    no_shipping = False
+    if not basket.is_shipping_required():
+        no_shipping = True
 
     # Pass a default billing address is there is one.  This means PayPal can
     # pre-fill the registration form.
@@ -62,7 +73,8 @@ def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
                    shipping_method=shipping_method,
                    shipping_address=shipping_address,
                    user=user,
-                   user_address=address)
+                   user_address=address,
+                   no_shipping=no_shipping)
 
 
 def fetch_transaction_details(token):

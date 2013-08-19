@@ -1,0 +1,49 @@
+{% extends 'dashboard/layout.html' %}
+{% load currency_filters %}
+{% load i18n %}
+{% load url from future %}
+
+{% block title %}
+    {% trans "PayPal Express transaction" %} {{ txn.pnref }} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+            <span class="divider">/</span>
+        </li>
+        <li>
+            <a href="{% url 'paypal-express-list' %}">{% trans "PayPal Express" %}</a>
+            <span class="divider">/</span>
+        </li>
+        <li class="active">
+            {% blocktrans with id=txn.correlation_id %}
+                Transaction {{ id }}
+            {% endblocktrans %}
+        </li>
+    </ul>
+{% endblock %}
+
+{% block headertext %}
+    {% blocktrans with id=txn.correlation_id %}
+        Transaction {{ id }}
+    {% endblocktrans %}
+{% endblock %}
+
+{% block dashboard_content %}
+    <table class="table table-striped table-bordered">
+        <tbody>
+            <tr><th>{% trans "Correlation ID" %}</th><td>{{ txn.correlation_id }}</td></tr>
+            <tr><th>{% trans "Method" %}</th><td>{{ txn.method }}</td></tr>
+            <tr><th>{% trans "Amount" %}</th><td>{{ txn.amount|currency|default:"-" }}</td></tr>
+            <tr><th>{% trans "Result" %}</th><td>{{ txn.ack }}</td></tr>
+            <tr><th>{% trans "Token" %}</th><td>{{ txn.token|default:"-" }}</td></tr>
+            <tr><th>{% trans "Error code" %}</th><td>{{ txn.error_code|default:'-' }}</td></tr>
+            <tr><th>{% trans "Error message" %}</th><td>{{ txn.error_message|default:"-" }}</td></tr>
+            <tr><th>{% trans "Raw request" %}</th><td>{{ txn.raw_request }}</td></tr>
+            <tr><th>{% trans "Raw response" %}</th><td>{{ txn.raw_response }}</td></tr>
+            <tr><th>{% trans "Date" %}</th><td>{{ txn.date_created }}</td></tr>
+        </tbody>
+    </table>
+{% endblock dashboard_content %}

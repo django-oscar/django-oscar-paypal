@@ -4,7 +4,7 @@ from decimal import Decimal as D
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext as _
 from django.template.defaultfilters import truncatewords
 
 from paypal.express import models
@@ -52,7 +52,17 @@ def _fetch_response(method, extra_params):
         url = 'https://api-3t.sandbox.paypal.com/nvp'
     else:
         url = 'https://api-3t.paypal.com/nvp'
+
+    param_str = "\n".join(["%s: %s" % x for x in params.items()])
+    logger.debug("Making %s request to %s with params:\n%s", method, url,
+                 param_str)
+
+    # Make HTTP request
     pairs = gateway.post(url, params)
+
+    pairs_str = "\n".join(["%s: %s" % x for x in sorted(pairs.items())
+                           if not x[0].startswith('_')])
+    logger.debug("Response with params:\n%s", pairs_str)
 
     # Record transaction data - we save this model whether the txn
     # was successful or not
@@ -96,21 +106,26 @@ def _fetch_response(method, extra_params):
 
 def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_url=None,
             action=SALE, user=None, user_address=None, shipping_method=None,
-            shipping_address=None):
+            shipping_address=None, no_shipping=False):
     """
     Register the transaction with PayPal to get a token which we use in the
     redirect URL.  This is the 'SetExpressCheckout' from their documentation.
 
-    There are quite a few options that can be passed to PayPal to configure this
-    request - most are controlled by PAYPAL_* settings.
+    There are quite a few options that can be passed to PayPal to configure
+    this request - most are controlled by PAYPAL_* settings.
     """
-    # PayPal have an upper limit on transactions.  It's in dollars which is
-    # a fiddly to work with.  Lazy solution - only check when dollars are used as
+    # PayPal have an upper limit on transactions.  It's in dollars which is a
+    # fiddly to work with.  Lazy solution - only check when dollars are used as
     # the PayPal currency.
     amount = basket.total_incl_tax
     if currency == 'USD' and amount > 10000:
-        raise exceptions.PayPalError('PayPal can only be used for orders up to 10000 USD')
+        raise exceptions.PayPalError(
+            'PayPal can only be used for orders up to 10000 USD')
 
+    if amount <= 0:
+        raise exceptions.PayPalError('Zero value basket is not allowed')
+
+    # PAYMENTREQUEST_0_AMT should include tax, shipping and handling
     params = {
         'PAYMENTREQUEST_0_AMT': amount,
         'PAYMENTREQUEST_0_CURRENCYCODE': currency,
@@ -141,12 +156,28 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     # as a negative price.  See "Integrating Order Details into the Express
     # Checkout Flow"
     # https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_ECCustomizing
-    for index, discount in enumerate(basket.get_discounts(), index + 1):
-        if discount['voucher']:
-            name = "%s (%s)" % (discount['voucher'].name,
-                                discount['voucher'].code)
-        else:
-            name = _("Special Offer: %s") % discount['name']
+
+    # Iterate over the 3 types of discount that can occur
+    for discount in basket.offer_discounts:
+        index += 1
+        name = _("Special Offer: %s") % discount['name']
+        params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
+        params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
+        params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
+            -discount['discount'])
+        params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
+    for discount in basket.voucher_discounts:
+        index += 1
+        name = "%s (%s)" % (discount['voucher'].name,
+                            discount['voucher'].code)
+        params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
+        params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
+        params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
+            -discount['discount'])
+        params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
+    for discount in basket.shipping_discounts:
+        index += 1
+        name = _("Shipping Offer: %s") % discount['name']
         params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
         params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
         params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
@@ -155,7 +186,18 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
 
     # We include tax in the prices rather than separately as that's how it's
     # done on most British/Australian sites.  Will need to refactor in the
-    # future no doubt
+    # future no doubt.
+
+    # Note that the following constraint must be met
+    #
+    # PAYMENTREQUEST_0_AMT = (
+    #     PAYMENTREQUEST_0_ITEMAMT +
+    #     PAYMENTREQUEST_0_TAXAMT +
+    #     PAYMENTREQUEST_0_SHIPPINGAMT +
+    #     PAYMENTREQUEST_0_HANDLINGAMT)
+    #
+    # Hence, if tax is to be shown then it has to be aggregated up to the order
+    # level.
     params['PAYMENTREQUEST_0_ITEMAMT'] = _format_currency(
         basket.total_incl_tax)
     params['PAYMENTREQUEST_0_TAXAMT'] = _format_currency(D('0.00'))
@@ -232,6 +274,8 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['SHIPTOSTATE'] = shipping_address.state
         params['SHIPTOZIP'] = shipping_address.postcode
         params['SHIPTOCOUNTRYCODE'] = shipping_address.country.iso_3166_1_a2
+    elif no_shipping:
+        params['NOSHIPPING'] = 1
 
     # Allow customer to specify a shipping note
     allow_note = getattr(settings, 'PAYPAL_ALLOW_NOTE', True)
@@ -249,6 +293,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
             max_charge = charge
         if is_default:
             params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(charge)
+            params['PAYMENTREQUEST_0_AMT'] += charge
         params['L_SHIPPINGOPTIONNAME%d' % index] = unicode(method.name)
         params['L_SHIPPINGOPTIONAMOUNT%d' % index] = _format_currency(charge)
 

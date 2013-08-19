@@ -1,11 +1,18 @@
 *.sw[po]
 *.py[oc]
 
-htmlcov
+# Packaging
 dist
-integration.py
 build/
 django_oscar_paypal.egg-info/
-TODO
 docs/_build
+
+# Testing
+htmlcov
 .tox
+.coverage
+.coveralls.yml
+
+# Sensitive data
+TODO
+integration.py

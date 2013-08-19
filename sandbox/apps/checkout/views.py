@@ -7,8 +7,7 @@ from django.views import generic
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.checkout import views
-from oscar.apps.payment import forms
-from oscar.apps.payment import exceptions
+from oscar.apps.payment import forms, exceptions, models
 
 from paypal.payflow import facade
 from paypal.adaptive import gateway
@@ -62,15 +61,16 @@ class PaymentDetailsView(views.PaymentDetailsView):
         # gets passed back to the 'handle_payment' method below.
         return self.submit(
             request.basket,
-            payment_kwargs={'bankcard': bankcard,
-                            'billing_address': billing_address_form.cleaned_data})
+            payment_kwargs={
+                'bankcard': bankcard,
+                'billing_address': billing_address_form.cleaned_data})
 
     def handle_payment(self, order_number, total_incl_tax, **kwargs):
         # Make submission to PayPal.
         try:
-            # Using authorization here (two-stage model).  You could use sale to
-            # perform the auth and capture in one step.  The choice is dependent
-            # on your business model.
+            # Using authorization here (two-stage model).  You could use sale
+            # to perform the auth and capture in one step.  The choice is
+            # dependent on your business model.
             facade.authorize(order_number,
                              total_incl_tax,
                              kwargs['bankcard'],
@@ -78,6 +78,15 @@ class PaymentDetailsView(views.PaymentDetailsView):
         except facade.NotApproved, e:
             # Submission failed
             raise exceptions.UnableToTakePayment(e.message)
+
+        # Record payment source and event
+        source_type, is_created = models.SourceType.objects.get_or_create(
+            name='PayPal')
+        source = models.Source(source_type=source_type,
+                               currency='GBP',
+                               amount_allocated=total_incl_tax)
+        self.add_payment_source(source)
+        self.add_payment_event('Authorised', total_incl_tax)
 
 
 class AdaptivePaymentsView(generic.RedirectView):
@@ -89,9 +98,9 @@ class AdaptivePaymentsView(generic.RedirectView):
         # hard-codes some test users from a PayPal sandbox account.
         receivers = (
             gateway.Receiver(email='david._1332854868_per@gmail.com',
-                            amount=D('12.00'), is_primary=True),
+                             amount=D('12.00'), is_primary=True),
             gateway.Receiver(email='david._1359545821_pre@gmail.com',
-                            amount=D('12.00'), is_primary=False),
+                             amount=D('12.00'), is_primary=False),
         )
         return_url = utils.absolute_url(
             self.request, reverse('checkout:adaptive-payments-success'))

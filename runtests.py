@@ -39,43 +39,47 @@ if not settings.configured:
     from oscar import get_core_apps, OSCAR_MAIN_TEMPLATE_DIR
 
     settings.configure(
-            DATABASES={
-                'default': {
-                    'ENGINE': 'django.db.backends.sqlite3',
-                    }
-                },
-            INSTALLED_APPS=[
-                'django.contrib.auth',
-                'django.contrib.admin',
-                'django.contrib.contenttypes',
-                'django.contrib.sessions',
-                'django.contrib.sites',
-                'django.contrib.flatpages',
-                'paypal',
-                'south',
-                ] + get_core_apps(),
-            MIDDLEWARE_CLASSES=(
-                'django.middleware.common.CommonMiddleware',
-                'django.contrib.sessions.middleware.SessionMiddleware',
-                'django.middleware.csrf.CsrfViewMiddleware',
-                'django.contrib.auth.middleware.AuthenticationMiddleware',
-                'django.contrib.messages.middleware.MessageMiddleware',
-                'django.middleware.transaction.TransactionMiddleware',
-                'oscar.apps.basket.middleware.BasketMiddleware',
-            ),
-            DEBUG=False,
-            SOUTH_TESTS_MIGRATE=False,
-            HAYSTACK_CONNECTIONS={
-                'default': {
-                    'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
-                },
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+            }
+        },
+        INSTALLED_APPS=[
+            'django.contrib.auth',
+            'django.contrib.admin',
+            'django.contrib.contenttypes',
+            'django.contrib.sessions',
+            'django.contrib.sites',
+            'django.contrib.flatpages',
+            'django.contrib.staticfiles',
+            'paypal',
+            'compressor',
+            'south',
+        ] + get_core_apps(),
+        MIDDLEWARE_CLASSES=(
+            'django.middleware.common.CommonMiddleware',
+            'django.contrib.sessions.middleware.SessionMiddleware',
+            'django.middleware.csrf.CsrfViewMiddleware',
+            'django.contrib.auth.middleware.AuthenticationMiddleware',
+            'django.contrib.messages.middleware.MessageMiddleware',
+            'django.middleware.transaction.TransactionMiddleware',
+            'oscar.apps.basket.middleware.BasketMiddleware',
+        ),
+        DEBUG=False,
+        SOUTH_TESTS_MIGRATE=False,
+        HAYSTACK_CONNECTIONS={
+            'default': {
+                'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
             },
-            TEMPLATE_DIRS=(OSCAR_MAIN_TEMPLATE_DIR,),
-            SITE_ID=1,
-            ROOT_URLCONF='tests.urls',
-            NOSE_ARGS=['-s', '--with-spec'],
-            **extra_settings
-        )
+        },
+        TEMPLATE_DIRS=(OSCAR_MAIN_TEMPLATE_DIR,),
+        SITE_ID=1,
+        ROOT_URLCONF='tests.urls',
+        COMPRESS_ENABLED=False,
+        STATIC_URL='/',
+        NOSE_ARGS=['-s', '--with-spec'],
+        **extra_settings
+    )
 
 from django_nose import NoseTestSuiteRunner
 
@@ -91,7 +95,8 @@ def run_tests(*test_args):
     # Run tests
     test_runner = NoseTestSuiteRunner(verbosity=1)
 
-    c = coverage(source=['paypal'], omit=['*migrations*', '*tests*'])
+    c = coverage(source=['paypal'], omit=['*migrations*', '*tests*'],
+                 auto_data=True)
     c.start()
     num_failures = test_runner.run_tests(test_args)
     c.stop()

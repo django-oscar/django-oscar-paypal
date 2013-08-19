@@ -18,7 +18,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'db.sqlite',                      # Or path to database file if using sqlite3.
+        'NAME': location('db.sqlite'),                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -51,7 +51,7 @@ USE_L10N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = location("assets")
+MEDIA_ROOT = location("public/media")
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -132,19 +132,13 @@ LOGGING = {
     },
     'handlers': {
         'null': {
-            'level':'DEBUG',
-            'class':'django.utils.log.NullHandler',
+            'level': 'DEBUG',
+            'class': 'django.utils.log.NullHandler',
         },
-        'console':{
-            'level':'DEBUG',
-            'class':'logging.StreamHandler',
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
             'formatter': 'verbose'
-        },
-        'paypal_file': {
-             'level': 'DEBUG',
-             'class': 'logging.FileHandler',
-             'filename': '/tmp/paypal.log',
-             'formatter': 'verbose'
         },
         'mail_admins': {
             'level': 'ERROR',
@@ -153,9 +147,9 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers':['null'],
+            'handlers': ['null'],
             'propagate': True,
-            'level':'INFO',
+            'level': 'INFO',
         },
         'django.request': {
             'handlers': ['mail_admins'],
@@ -165,17 +159,17 @@ LOGGING = {
         'oscar.checkout': {
             'handlers': ['console'],
             'propagate': True,
-            'level':'INFO',
+            'level': 'INFO',
         },
         'django.db.backends': {
-            'handlers':['null'],
+            'handlers': ['null'],
             'propagate': False,
-            'level':'DEBUG',
+            'level': 'DEBUG',
         },
         'paypal.express': {
-            'handlers': ['console', 'paypal_file'],
+            'handlers': ['console'],
             'propagate': True,
-            'level':'DEBUG',
+            'level': 'DEBUG',
         },
     }
 }
@@ -223,6 +217,8 @@ INSTALLED_APPS = (
     'paypal',
     'apps.shipping',
     'apps.checkout',
+    'south',
+    'compressor'
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -240,6 +236,25 @@ DEBUG_TOOLBAR_CONFIG = {
 # Oscar settings
 from oscar.defaults import *
 OSCAR_ALLOW_ANON_CHECKOUT = True
+
+# Add Payflow dashboard stuff to settings
+from django.utils.translation import ugettext_lazy as _
+OSCAR_DASHBOARD_NAVIGATION.append(
+    {
+        'label': _('PayPal'),
+        'icon': 'icon-globe',
+        'children': [
+            {
+                'label': _('PayFlow transactions'),
+                'url_name': 'paypal-payflow-list',
+            },
+            {
+                'label': _('Express transactions'),
+                'url_name': 'paypal-express-list',
+            },
+        ]
+    })
+
 
 # Haystack settings
 HAYSTACK_CONNECTIONS = {
@@ -263,9 +278,11 @@ PAYPAL_API_USERNAME = 'sdk-three_api1.sdk.com'
 PAYPAL_API_PASSWORD = 'QFZCWN5HZM8VBG7Q'
 PAYPAL_API_SIGNATURE = 'A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU'
 
+PAYPAL_PAYFLOW_CURRENCY = 'GBP'
+PAYPAL_PAYFLOW_DASHBOARD_FORMS = True
+
 # See http://stackoverflow.com/questions/9164332/how-do-i-get-an-application-id-for-the-paypal-sandbox
 PAYPAL_API_APPLICATION_ID = 'APP-80W284485P519543T'
-
 PAYPAL_CURRENCY = 'GBP'
 
 # Private settings (eg my PayPal sandbox details)

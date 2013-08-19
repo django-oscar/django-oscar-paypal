@@ -3,10 +3,10 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 from oscar.core.application import Application
 
-from paypal.payflow import views
+from paypal.express.dashboard import views
 
 
-class PayFlowDashboardApplication(Application):
+class ExpressDashboardApplication(Application):
     name = None
     list_view = views.TransactionListView
     detail_view = views.TransactionDetailView
@@ -14,9 +14,9 @@ class PayFlowDashboardApplication(Application):
     def get_urls(self):
         urlpatterns = patterns('',
             url(r'^transactions/$', self.list_view.as_view(),
-                name='paypal-payflow-list'),
+                name='paypal-express-list'),
             url(r'^transactions/(?P<pk>\d+)/$', self.detail_view.as_view(),
-                name='paypal-payflow-detail'),
+                name='paypal-express-detail'),
         )
         return self.post_process_urls(urlpatterns)
 
@@ -24,4 +24,4 @@ class PayFlowDashboardApplication(Application):
         return staff_member_required
 
 
-application = PayFlowDashboardApplication()
+application = ExpressDashboardApplication()

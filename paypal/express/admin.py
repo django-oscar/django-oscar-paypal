@@ -3,8 +3,8 @@ from paypal import models
 
 
 class ExpressTransactionAdmin(admin.ModelAdmin):
-    list_display = ['method', 'amount', 'currency', 'correlation_id', 'ack', 'token',
-                    'date_created']
+    list_display = ['method', 'amount', 'currency', 'correlation_id', 'ack',
+                    'token', 'error_code', 'error_message', 'date_created']
     readonly_fields = [
         'method',
         'version',

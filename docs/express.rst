@@ -8,10 +8,13 @@ where they enter their shipping and billing information before arriving back on
 the merchant site to confirm the order.  It can also be used purely for payment,
 with shipping details being collected on the merchant site.
 
+Oscar also supports a dashboard for PayPal Express transactions, which
+integrates with Oscar's dashboard.
+
 See the `PDF documentation`_ for the gory details of PayPal Express.
 
 .. _`PayPal Express`: https://www.paypal.com/uk/cgi-bin/webscr?cmd=_additional-payment-ref-impl1
-.. _`PDF documentation`: https://cms.paypal.com/cms_content/US/en_US/files/developer/PP_ExpressCheckout_IntegrationGuide.pdf
+.. _`PDF documentation`: https://www.paypalobjects.com/webstatic/en_US/developer/docs/pdf/pp_expresscheckout_integrationguide.pdf
 
 ---------------
 Getting started
@@ -35,36 +38,55 @@ follows::
     from django.contrib import admin
     from oscar.app import shop
 
+    from paypal.express.dashboard.app import application 
+
     urlpatterns = patterns('',
         (r'^admin/', include(admin.site.urls)),
         (r'^checkout/paypal/', include('paypal.express.urls')),
+        # Optional
+        (r'^dashboard/paypal/express/', include(application.urls)), 
         (r'', include(shop.urls)),
+
+If you are using the dashboard views, extend the dashboard navigation to include
+the appropriate links::
+
+    from django.utils.translation import ugettext_lazy as _
+    OSCAR_DASHBOARD_NAVIGATION.append(
+        {
+            'label': _('PayPal'),
+            'icon': 'icon-globe',
+            'children': [
+                {
+                    'label': _('Express transactions'),
+                    'url_name': 'paypal-express-list',
+                },
+            ]
+        })
 
 Finally, you need to modify oscar's basket template to include the button that
 links to PayPal.  This can be done by creating a new template
-``templates/basket/basket.html`` with content::
+``templates/basket/partials/basket_content.html`` with content::
 
-    {% extends 'templates/basket/basket.html' %}
+    {% extends 'oscar/basket/partials/basket_content.html' %}
 
     {% block formactions %}
     <div class="form-actions">
-        <a href="{% url paypal-redirect %}"><img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"></a>
+        {% if anon_checkout_allowed or request.user.is_authenticated %}
+            <a href="{% url paypal-redirect %}"><img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"></a>
+        {% endif %}
         <a href="{% url checkout:index %}" class="pull-right btn btn-large btn-primary">Proceed to checkout</a>
     </div>
     {% endblock %}
 
-Note that we extending the ``basket/basket.html`` template from oscar and
-overriding the ``formactions`` block.  For this trick to work, you need to
-ensure that you have ``OSCAR_PARENT_TEMPLATE_DIR`` in your ``TEMPLATE_DIRS``
-setting::
+Note that we are extending the ``basket/partials/basket_content.html`` template
+from oscar and overriding the ``formactions`` block.  For this trick to work,
+you need to ensure that you have ``OSCAR_MAIN_TEMPLATE_DIR`` in your
+``TEMPLATE_DIRS`` after your local templates setting::
 
-    import os
-    location = lambda x: os.path.join(os.path.dirname(os.path.realpath(__file__)), x)
-    from oscar import OSCAR_PARENT_TEMPLATE_DIR
+    from oscar import OSCAR_MAIN_TEMPLATE_DIR
     TEMPLATE_DIRS = (
         location('templates'),
-        os.path.join(OSCAR_PARENT_TEMPLATE_DIR, 'templates'),
-        OSCAR_PARENT_TEMPLATE_DIR,
+        OSCAR_MAIN_TEMPLATE_DIR,
     )
 
 If anything is unclear or not workin as expected then review how the 'sandbox`
