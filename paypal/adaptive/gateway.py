@@ -61,10 +61,11 @@ def pay(receivers, currency, return_url, cancel_url,
         params.append(('receiverList.receiver(%d).primary' % index,
                        'true' if receiver.is_primary else 'false'))
         # The primary receiver should have the total amount as their amount
-        if is_chained and receiver.is_primary:
-            total = receiver.amount
-            continue
-        total += receiver.amount
+        if is_chained:
+            if receiver.is_primary:
+                total = receiver.amount
+        else:
+            total += receiver.amount
 
     # Add optional params
     if fees_payer:
