@@ -2,7 +2,7 @@
 Express checkout
 ================
 
-`PayPal Express` is an API for integrating PayPal payments into an ecommerce
+`PayPal Express`_ is an API for integrating PayPal payments into an ecommerce
 site.  A typical implementation involves redirecting the user to PayPal's site
 where they enter their shipping and billing information before arriving back on
 the merchant site to confirm the order.  It can also be used purely for payment,

@@ -89,6 +89,11 @@ class PaymentDetailsView(views.PaymentDetailsView):
         self.add_payment_event('Authorised', total_incl_tax)
 
 
+# -----------------
+# Adaptive payments
+# -----------------
+
+
 class AdaptivePaymentsView(generic.RedirectView):
     permanent = False
 
@@ -96,12 +101,17 @@ class AdaptivePaymentsView(generic.RedirectView):
         # This is just a dummy chained transaction set up to test the end to
         # end process.  It doesn't actually use the submitted basket at all but
         # hard-codes some test users from a PayPal sandbox account.
+
+        # If one of the receivers is set as primary, then a "chained" payment
+        # is triggered - otherwise a "parallel" payment is used.
         receivers = (
             gateway.Receiver(email='david._1332854868_per@gmail.com',
-                             amount=D('12.00'), is_primary=True),
+                             amount=D('12.00'), is_primary=False),
             gateway.Receiver(email='david._1359545821_pre@gmail.com',
                              amount=D('12.00'), is_primary=False),
         )
+        # Normally, you should put the order number into the URL so you can
+        # close the basket when a success response is received.
         return_url = utils.absolute_url(
             self.request, reverse('checkout:adaptive-payments-success'))
         cancel_url = utils.absolute_url(

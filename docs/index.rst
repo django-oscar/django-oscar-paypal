@@ -43,6 +43,7 @@ Table of contents
 
     express
     payflow
+    adaptive
     contributing
 
 

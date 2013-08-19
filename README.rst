@@ -8,14 +8,19 @@ PayPal package for django-oscar
 .. image:: https://pypip.in/d/django-oscar-paypal/badge.png
     :target: https://crate.io/packages/django-oscar-paypal/
 
-This package provides integration between django-oscar_ and both `PayPal
-Express`_ and `PayPal Payflow Pro`_.
+This package provides integration between django-oscar_ and several PayPal
+products, including:
+
+- `PayPal Express`_, 
+- `PayPal Payflow Pro`_.
+- `PayPal Adaptive Payments`_
 
 .. _django-oscar: https://github.com/tangentlabs/django-oscar
 .. _`PayPal Express`: https://www.paypal.com/uk/cgi-bin/webscr?cmd=_additional-payment-ref-impl1
 .. _`PayPal Payflow Pro`: https://merchant.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=merchant/payment_gateway
+.. _`PayPal Adaptive Payments`: https://developer.paypal.com/webapps/developer/docs/classic/products/adaptive-payments/
 
-These payment options can be used individually or both together.  Further, the
+These payment options can be used individually or together.  Further, the
 package is structured so that it can be used without Oscar if you so wish.
 
 * `Full documentation`_
@@ -34,7 +39,7 @@ Support
 Having problems or got a question?
 
 * Have a look at the sandbox installation as this is a sample Oscar project
-  integrated with both PayPal options.  See the `contributing guide`_ within the
+  integrated with all PayPal products.  See the `contributing guide`_ within the
   docs for instructions on how to set up the sandbox locally.
 * Ping `@django_oscar`_ with quick queries.
 * Ask more detailed questions on the Oscar mailing list: django-oscar@googlegroups.com.
@@ -56,6 +61,10 @@ Tests
 
 Changelog
 ---------
+
+0.6
+~~~
+* Support the "Pay" API of Adaptive Payments
 
 0.5
 ~~~
