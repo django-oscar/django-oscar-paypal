@@ -57,6 +57,10 @@ Tests
 Changelog
 ---------
 
+0.6
+~~~
+* Add support for ``NO_SHIPPING`` option with PayPal Express.
+
 0.5
 ~~~
 * Addresses a `security issue`_ where baskets could be manipulated while the
