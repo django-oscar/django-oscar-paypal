@@ -224,11 +224,8 @@ class SuccessResponseView(PaymentDetailsView):
                 'active_address_fields': non_empty_fields,
                 'notes': self.txn.value('NOTETEXT'),
             }
-        ctx['shipping_method'] = {
-            'name': self.txn.value('SHIPPINGOPTIONNAME'),
-            'description': '',
-            'basket_charge_incl_tax': D(self.txn.value('SHIPPINGAMT')),
-        }
+
+        ctx['shipping_method'] = self.get_shipping_method()
         ctx['order_total_incl_tax'] = D(self.txn.value('PAYMENTREQUEST_0_AMT'))
 
         return ctx
@@ -297,7 +294,12 @@ class SuccessResponseView(PaymentDetailsView):
         method = FixedPrice(charge)
         basket = basket if basket else self.request.basket
         method.set_basket(basket)
-        method.name = self.txn.value('SHIPPINGOPTIONNAME')
+        name = self.txn.value('SHIPPINGOPTIONNAME')
+        if not name:
+            # Look to see if there is a method in the session
+            session_method = self.checkout_session.shipping_method(basket)
+            if session_method:
+                method.name = session_method.name
         return method
 
 
