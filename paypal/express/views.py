@@ -300,6 +300,8 @@ class SuccessResponseView(PaymentDetailsView):
             session_method = self.checkout_session.shipping_method(basket)
             if session_method:
                 method.name = session_method.name
+        else:
+            method.name = name
         return method
 
 
