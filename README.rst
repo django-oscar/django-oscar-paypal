@@ -59,7 +59,7 @@ Changelog
 
 0.6.1
 ~~~~~
-* Persist shipping method name to when using PayPal Express as a payment method
+* Persist shipping method name when using PayPal Express as a payment method
   only. 
 
 0.6
