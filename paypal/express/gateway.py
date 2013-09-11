@@ -106,7 +106,7 @@ def _fetch_response(method, extra_params):
 
 def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_url=None,
             action=SALE, user=None, user_address=None, shipping_method=None,
-            shipping_address=None, no_shipping=False):
+            shipping_address=None, no_shipping=False, paypal_params={}):
     """
     Register the transaction with PayPal to get a token which we use in the
     redirect URL.  This is the 'SetExpressCheckout' from their documentation.
@@ -114,6 +114,44 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     There are quite a few options that can be passed to PayPal to configure
     this request - most are controlled by PAYPAL_* settings.
     """
+
+    # extra params
+    _params = {
+        'CUSTOMERSERVICENUMBER': getattr(settings, 'PAYPAL_CUSTOMER_SERVICES_NUMBER', None),
+        'SOLUTIONTYPE': getattr(settings, 'PAYPAL_SOLUTION_TYPE', None),
+        'LANDINGPAGE': getattr(settings, 'PAYPAL_LANDING_PAGE', None),
+        'BRANDNAME': getattr(settings, 'PAYPAL_BRAND_NAME', None),
+
+        'PAGESTYLE': getattr(settings, 'PAYPAL_PAGESTYLE', None),
+        'HDRIMG': getattr(settings, 'PAYPAL_HEADER_IMG', None),
+        'PAYFLOWCOLOR': getattr(settings, 'PAYPAL_PAYFLOW_COLOR', None),
+
+        # Think these settings maybe deprecated in latest version of PayPal's API
+        'HDRBACKCOLOR': getattr(settings, 'PAYPAL_HEADER_BACK_COLOR', None),
+        'HDRBORDERCOLOR': getattr(settings, 'PAYPAL_HEADER_BORDER_COLOR', None),
+
+        'LOCALECODE': getattr(settings, 'PAYPAL_LOCALE', None),
+
+        'REQCONFIRMSHIPPING': getattr(settings, 'PAYPAL_CONFIRM_SHIPPING', None),
+        'ALLOWNOTE': getattr(settings, 'PAYPAL_ALLOW_NOTE', True),
+        'CALLBACKTIMEOUT': getattr(settings, 'PAYPAL_CALLBACK_TIMEOUT', 3)
+    }
+    _params.update(paypal_params)
+
+    # locale
+    locale = _params.get('LOCALECODE', None)
+    if locale:
+        valid_choices = ('AU', 'DE', 'FR', 'GB', 'IT', 'ES', 'JP', 'US')
+        if locale not in valid_choices:
+            raise ImproperlyConfigured(
+                "'%s' is not a valid locale code" % locale)
+
+    # bool values become integers
+    _params.update((k, int(v)) for k, v in _params.iteritems() if isinstance(v, bool))
+
+    # remove None values
+    params = dict((k, v) for k, v in _params.iteritems() if v is not None)
+
     # PayPal have an upper limit on transactions.  It's in dollars which is a
     # fiddly to work with.  Lazy solution - only check when dollars are used as
     # the PayPal currency.
@@ -126,13 +164,13 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         raise exceptions.PayPalError('Zero value basket is not allowed')
 
     # PAYMENTREQUEST_0_AMT should include tax, shipping and handling
-    params = {
+    params.update({
         'PAYMENTREQUEST_0_AMT': amount,
         'PAYMENTREQUEST_0_CURRENCYCODE': currency,
         'RETURNURL': return_url,
         'CANCELURL': cancel_url,
         'PAYMENTREQUEST_0_PAYMENTACTION': action,
-    }
+    })
 
     # Add item details
     index = 0
@@ -202,49 +240,9 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         basket.total_incl_tax)
     params['PAYMENTREQUEST_0_TAXAMT'] = _format_currency(D('0.00'))
 
-    # Customer services number
-    customer_service_num = getattr(
-        settings, 'PAYPAL_CUSTOMER_SERVICES_NUMBER', None)
-    if customer_service_num:
-        params['CUSTOMERSERVICENUMBER'] = customer_service_num
-
-    # Display settings
-    page_style = getattr(settings, 'PAYPAL_PAGESTYLE', None)
-    header_image = getattr(settings, 'PAYPAL_HEADER_IMG', None)
-    if page_style:
-        params['PAGESTYLE'] = page_style
-    elif header_image:
-        params['LOGOIMG'] = header_image
-    else:
-        # Think these settings maybe deprecated in latest version of PayPal's
-        # API
-        display_params = {
-            'HDRBACKCOLOR': getattr(settings,
-                                    'PAYPAL_HEADER_BACK_COLOR', None),
-            'HDRBORDERCOLOR': getattr(settings,
-                                      'PAYPAL_HEADER_BORDER_COLOR', None),
-        }
-        params.update(x for x in display_params.items() if bool(x[1]))
-
-    # Locale
-    locale = getattr(settings, 'PAYPAL_LOCALE', None)
-    if locale:
-        valid_choices = ('AU', 'DE', 'FR', 'GB', 'IT', 'ES', 'JP', 'US')
-        if locale not in valid_choices:
-            raise ImproperlyConfigured(
-                "'%s' is not a valid locale code" % locale)
-        params['LOCALECODE'] = locale
-
-    # Confirmed shipping address
-    confirm_shipping_addr = getattr(settings, 'PAYPAL_CONFIRM_SHIPPING', None)
-    if confirm_shipping_addr:
-        params['REQCONFIRMSHIPPING'] = 1
-
     # Instant update callback information
     if update_url:
         params['CALLBACK'] = update_url
-        params['CALLBACKTIMEOUT'] = getattr(
-            settings, 'PAYPAL_CALLBACK_TIMEOUT', 3)
 
     # Contact details and address details - we provide these as it would make
     # the PayPal registration process smoother is the user doesn't already have
@@ -276,11 +274,6 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['SHIPTOCOUNTRYCODE'] = shipping_address.country.iso_3166_1_a2
     elif no_shipping:
         params['NOSHIPPING'] = 1
-
-    # Allow customer to specify a shipping note
-    allow_note = getattr(settings, 'PAYPAL_ALLOW_NOTE', True)
-    if allow_note:
-        params['ALLOWNOTE'] = 1
 
     # Shipping charges
     params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(D('0.00'))

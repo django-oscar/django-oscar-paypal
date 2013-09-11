@@ -92,7 +92,12 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
         if user.is_authenticated():
             params['user'] = user
 
+        params['paypal_params'] = self._get_paypal_params()
+
         return get_paypal_url(**params)
+
+    def _get_paypal_params(self):
+        return {}
 
 
 class CancelResponseView(RedirectView):

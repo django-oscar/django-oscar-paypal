@@ -22,7 +22,8 @@ def _get_payment_action():
 
 
 def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
-                   shipping_method=None, host=None, scheme='https'):
+                   shipping_method=None, host=None, scheme='https',
+                   paypal_params={}):
     """
     Return the URL for PayPal Express transaction.
 
@@ -74,7 +75,8 @@ def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
                    shipping_address=shipping_address,
                    user=user,
                    user_address=address,
-                   no_shipping=no_shipping)
+                   no_shipping=no_shipping,
+                   paypal_params=paypal_params)
 
 
 def fetch_transaction_details(token):
