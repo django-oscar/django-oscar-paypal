@@ -38,13 +38,13 @@ follows::
     from django.contrib import admin
     from oscar.app import shop
 
-    from paypal.express.dashboard.app import application 
+    from paypal.express.dashboard.app import application
 
     urlpatterns = patterns('',
         (r'^admin/', include(admin.site.urls)),
         (r'^checkout/paypal/', include('paypal.express.urls')),
         # Optional
-        (r'^dashboard/paypal/express/', include(application.urls)), 
+        (r'^dashboard/paypal/express/', include(application.urls)),
         (r'', include(shop.urls)),
 
 If you are using the dashboard views, extend the dashboard navigation to include
@@ -114,9 +114,36 @@ settings.
 * ``PAYPAL_HEADER_BORDER_COLOR`` - background color (6-char hex value) for header border
 * ``PAYPAL_CALLBACK_TIMEOUT`` - timeout in seconds for the instant update
   callback
+* ``PAYPAL_SOLUTION_TYPE`` - type of checkout flow ('Sole' or 'Mark')
+* ``PAYPAL_LANDING_PAGE`` - type of PayPal page to display ('Billing' or 'Login')
+* ``PAYPAL_BRAND_NAME`` - a label that overrides the business name in the PayPal
+  account on the PayPal hosted checkout pages
+* ``PAYPAL_PAGESTYLE`` - name of the Custom Payment Page Style for payment pages
+  associated with this button or link
+* ``PAYPAL_PAYFLOW_COLOR`` - background color (6-char hex value) for the payment page
+
 
 Some of these options, like the display ones, can be set in your PayPal merchant
 profile.
+
+You can also override the raw paypal params by defining a new
+paypal.express.views.RedirectView and define the ``_get_paypal_params``
+method::
+
+    from paypal.express.views import RedirectView as OscarPaypalRedirectView
+
+
+    class RedirectView(OscarPaypalRedirectView):
+        def _get_paypal_params(self):
+            return {
+                'SOLUTIONTYPE': 'Mark',
+                'LANDINGPAGE': 'Login',
+                'BRANDNAME': 'My Brand name'
+            }
+
+Please note that all the dynamic paypal params (e.g. amount, return_url,
+cancel_url etc.) cannot be overridden by ``_get_paypal_params``.
+
 
 ----------------
 PayPal Dashboard

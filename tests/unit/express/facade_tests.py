@@ -1,3 +1,5 @@
+import urlparse
+
 from decimal import Decimal as D
 from unittest import TestCase
 
@@ -20,6 +22,7 @@ class MockedResponseTests(TestCase):
         with patch('requests.post') as post:
             post.return_value = response
             self.perform_action()
+            self.mocked_post = post
 
     def perform_action(self):
         pass
@@ -28,7 +31,18 @@ class MockedResponseTests(TestCase):
         Transaction.objects.all().delete()
 
 
-class SuccessfulSetExpressCheckoutTests(MockedResponseTests):
+class BaseSetExpressCheckoutTests(MockedResponseTests):
+    def _get_paypal_params(self):
+        return urlparse.parse_qs(self.mocked_post.call_args[0][1])
+
+    def assertPaypalParamEqual(self, key, value):
+        self.assertEqual(self._get_paypal_params()[key], [value])
+
+    def assertPaypalParamDoesNotExist(self, key):
+        self.assertFalse(key in self._get_paypal_params())
+
+
+class SuccessfulSetExpressCheckoutTests(BaseSetExpressCheckoutTests):
     token = 'EC-6469953681606921P'
     response_body = 'TOKEN=EC%2d6469953681606921P&TIMESTAMP=2012%2d03%2d26T17%3a19%3a38Z&CORRELATIONID=50a8d895e928f&ACK=Success&VERSION=60%2e0&BUILD=2649250'
 
@@ -47,6 +61,57 @@ class SuccessfulSetExpressCheckoutTests(MockedResponseTests):
     def test_url_has_correct_keys(self):
         self.assertTrue(self.url.has_query_param('token'))
         self.assertTrue('_express-checkout', self.url.query_param('cmd'))
+
+    def test_corrent_paypal_params(self):
+        for param in [
+                'LOCALECODE', 'HDRIMG', 'LANDINGPAGE', 'PAYFLOWCOLOR',
+                'REQCONFIRMSHIPPING', 'PAGESTYLE', 'SOLUTIONTYPE',
+                'BRANDNAME', 'CUSTOMERSERVICENUMBER'
+            ]:
+            self.assertPaypalParamDoesNotExist(param)
+
+        # defaults
+        self.assertPaypalParamEqual('CALLBACKTIMEOUT', '3')
+        self.assertPaypalParamEqual('ALLOWNOTE', '1')
+
+
+class ExtraPaypalSuccessfulSetExpressCheckoutTests(BaseSetExpressCheckoutTests):
+    token = 'EC-6469953681606921P'
+    response_body = 'TOKEN=EC%2d6469953681606921P&TIMESTAMP=2012%2d03%2d26T17%3a19%3a38Z&CORRELATIONID=50a8d895e928f&ACK=Success&VERSION=60%2e0&BUILD=2649250'
+
+    paypal_params = {
+            'CUSTOMERSERVICENUMBER': '999999999',
+            'SOLUTIONTYPE': 'Mark',
+            'LANDINGPAGE': 'Login',
+            'BRANDNAME': 'My Brand Name',
+            'PAGESTYLE': 'eee',
+            'HDRIMG': 'http://image.jpg',
+            'PAYFLOWCOLOR': '00FF00',
+            'LOCALECODE': 'GB',
+            'REQCONFIRMSHIPPING': True,
+            'ALLOWNOTE': False,
+            'CALLBACKTIMEOUT': 2
+        }
+
+    def perform_action(self):
+        basket = Mock()
+        basket.id = 1
+        basket.total_incl_tax = D('200')
+        basket.all_lines = Mock(return_value=[])
+        basket.offer_discounts = []
+        basket.voucher_discounts = []
+        basket.shipping_discounts = []
+        methods = [Free()]
+        url_str = get_paypal_url(basket, methods, paypal_params=self.paypal_params)
+        self.url = URL.from_string(url_str)
+
+    def test_corrent_paypal_params(self):
+        self.assertTrue(self.url.has_query_param('token'))
+        self.assertTrue('_express-checkout', self.url.query_param('cmd'))
+        for key, value in self.paypal_params.iteritems():
+            if isinstance(value, bool):
+                value = int(value)
+            self.assertPaypalParamEqual(key, str(value))
 
 
 class SuccessfulGetExpressCheckoutTests(MockedResponseTests):
