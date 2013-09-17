@@ -19,6 +19,9 @@ from oscar.core.loading import get_class
 from oscar.apps.shipping.methods import FixedPrice
 
 from paypal.express.facade import get_paypal_url, fetch_transaction_details, confirm_transaction
+from paypal.express.exceptions import (
+    EmptyBasketException, MissingShippingAddressException,
+    MissingShippingMethodException)
 from paypal.exceptions import PayPalError
 
 ShippingAddress = get_model('order', 'ShippingAddress')
@@ -49,6 +52,15 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
             else:
                 url = reverse('basket:summary')
             return url
+        except EmptyBasketException:
+            messages.error(self.request, _("Your basket is empty"))
+            return reverse('basket:summary')
+        except MissingShippingAddressException:
+            messages.error(self.request, _("A shipping address must be specified"))
+            return reverse('checkout:shipping-address')
+        except MissingShippingMethodException:
+            messages.error(self.request, _("A shipping method must be specified"))
+            return reverse('checkout:shipping-method')
         else:
             # Transaction successfully registered with PayPal.  Now freeze the
             # basket so it can't be edited while the customer is on the PayPal
@@ -59,8 +71,7 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
     def _get_redirect_url(self, **kwargs):
         basket = self.request.basket
         if basket.is_empty:
-            messages.error(self.request, _("Your basket is empty"))
-            return reverse('basket:summary')
+            raise EmptyBasketException()
 
         params = {'basket': self.request.basket}
 
@@ -68,14 +79,12 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
         if self.as_payment_method:
             shipping_addr = self.get_shipping_address()
             if not shipping_addr:
-                messages.error(self.request,
-                               _("A shipping address must be specified"))
-                return reverse('checkout:shipping-address')
+                raise MissingShippingAddressException()
+
             shipping_method = self.get_shipping_method()
             if not shipping_method:
-                messages.error(self.request,
-                               _("A shipping method must be specified"))
-                return reverse('checkout:shipping-method')
+                raise MissingShippingMethodException()
+
             params['shipping_address'] = shipping_addr
             params['shipping_method'] = shipping_method
             params['shipping_methods'] = []

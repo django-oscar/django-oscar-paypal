@@ -1,3 +1,5 @@
+from contextlib import nested
+
 from decimal import Decimal as D
 
 from django.test import TestCase
@@ -10,17 +12,6 @@ from oscar.apps.order.models import Order
 from oscar.apps.basket.models import Basket
 
 from purl import URL
-
-
-class EdgeCaseTests(TestCase):
-
-    def setUp(self):
-        self.client = Client()
-
-    def test_empty_basket_shows_error(self):
-        url = reverse('paypal-redirect')
-        response = self.client.get(url)
-        self.assertEqual(reverse('basket:summary'), URL.from_string(response['Location']).path())
 
 
 class MockedPayPalTests(TestCase):
@@ -49,6 +40,51 @@ class MockedPayPalTests(TestCase):
         self.client.post(reverse('basket:add'),
                                  {'product_id': product.id,
                                   'quantity': 1})
+
+
+class EdgeCaseTests(MockedPayPalTests):
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_empty_basket_shows_error(self):
+        url = reverse('paypal-redirect')
+        response = self.client.get(url)
+        self.assertEqual(reverse('basket:summary'), URL.from_string(response['Location']).path())
+
+    def test_missing_shipping_address(self):
+        from paypal.express.views import RedirectView
+        with patch.object(RedirectView, 'as_payment_method') as as_payment_method:
+            as_payment_method.return_value = True
+
+            url = reverse('paypal-redirect')
+            self.add_product_to_basket()
+            response = self.client.get(url)
+            self.assertEqual(
+                reverse('checkout:shipping-address'),
+                URL.from_string(response['Location']).path()
+            )
+
+    def test_missing_shipping_method(self):
+        from paypal.express.views import RedirectView
+
+        with nested(
+                patch.object(RedirectView, 'as_payment_method'),
+                patch.object(RedirectView, 'get_shipping_address'),
+                patch.object(RedirectView, 'get_shipping_method')
+            ) as (as_payment_method, get_shipping_address, get_shipping_method):
+
+            as_payment_method.return_value = True
+            get_shipping_address.return_value = Mock()
+            get_shipping_method.return_value = None
+
+            url = reverse('paypal-redirect')
+            self.add_product_to_basket()
+            response = self.client.get(url)
+            self.assertEqual(
+                reverse('checkout:shipping-method'),
+                URL.from_string(response['Location']).path()
+            )
 
 
 class RedirectToPayPalTests(MockedPayPalTests):
