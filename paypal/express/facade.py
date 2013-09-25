@@ -22,7 +22,7 @@ def _get_payment_action():
 
 
 def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
-                   shipping_method=None, host=None, scheme='https'):
+                   shipping_method=None, host=None, scheme='https', **gateway_kwargs):
     """
     Return the URL for PayPal Express transaction.
 
@@ -74,45 +74,46 @@ def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
                    shipping_address=shipping_address,
                    user=user,
                    user_address=address,
-                   no_shipping=no_shipping)
+                   no_shipping=no_shipping,
+                   **gateway_kwargs)
 
 
-def fetch_transaction_details(token):
+def fetch_transaction_details(token, **gateway_kwargs):
     """
     Fetch the completed details about the PayPal transaction.
     """
-    return get_txn(token)
+    return get_txn(token, **gateway_kwargs)
 
 
-def confirm_transaction(payer_id, token, amount, currency):
+def confirm_transaction(payer_id, token, amount, currency, **gateway_kwargs):
     """
     Confirm the payment action.
     """
     return do_txn(payer_id, token, amount, currency,
-                  action=_get_payment_action())
+                  action=_get_payment_action(), **gateway_kwargs)
 
 
-def refund_transaction(token, amount, currency, note=None):
+def refund_transaction(token, amount, currency, note=None, **gateway_kwargs):
     txn = Transaction.objects.get(token=token,
                                   method=DO_EXPRESS_CHECKOUT)
     is_partial = amount < txn.amount
-    return refund_txn(txn.value('TRANSACTIONID'), is_partial, amount, currency)
+    return refund_txn(txn.value('TRANSACTIONID'), is_partial, amount, currency, **gateway_kwargs)
 
 
-def capture_authorization(token, note=None):
+def capture_authorization(token, note=None, **gateway_kwargs):
     """
     Capture a previous authorization.
     """
     txn = Transaction.objects.get(token=token,
                                   method=DO_EXPRESS_CHECKOUT)
     return do_capture(txn.value('TRANSACTIONID'),
-                      txn.amount, txn.currency, note=note)
+                      txn.amount, txn.currency, note=note, **gateway_kwargs)
 
 
-def void_authorization(token, note=None):
+def void_authorization(token, note=None, **gateway_kwargs):
     """
     Void a previous authorization.
     """
     txn = Transaction.objects.get(token=token,
                                   method=DO_EXPRESS_CHECKOUT)
-    return do_void(txn.value('TRANSACTIONID'), note=note)
+    return do_void(txn.value('TRANSACTIONID'), note=note, **gateway_kwargs)

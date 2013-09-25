@@ -106,7 +106,7 @@ def _fetch_response(method, extra_params):
 
 def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_url=None,
             action=SALE, user=None, user_address=None, shipping_method=None,
-            shipping_address=None, no_shipping=False):
+            shipping_address=None, no_shipping=False, **gateway_kwargs):
     """
     Register the transaction with PayPal to get a token which we use in the
     redirect URL.  This is the 'SetExpressCheckout' from their documentation.
@@ -316,6 +316,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     params['PAYMENTREQUEST_0_AMT'] = _format_currency(
         params['PAYMENTREQUEST_0_AMT'])
 
+    params.update(gateway_kwargs)
     txn = _fetch_response(SET_EXPRESS_CHECKOUT, params)
 
     # Construct return URL
@@ -328,15 +329,17 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     return '%s?%s' % (url, urllib.urlencode(params))
 
 
-def get_txn(token):
+def get_txn(token, **gateway_kwargs):
     """
     Fetch details of a transaction from PayPal using the token as
     an identifier.
     """
-    return _fetch_response(GET_EXPRESS_CHECKOUT, {'TOKEN': token})
+    params = {'TOKEN': token}
+    params.update(gateway_kwargs)
+    return _fetch_response(GET_EXPRESS_CHECKOUT, params)
 
 
-def do_txn(payer_id, token, amount, currency, action=SALE):
+def do_txn(payer_id, token, amount, currency, action=SALE, **gateway_kwargs):
     """
     DoExpressCheckoutPayment
     """
@@ -347,11 +350,12 @@ def do_txn(payer_id, token, amount, currency, action=SALE):
         'PAYMENTREQUEST_0_CURRENCYCODE': currency,
         'PAYMENTREQUEST_0_PAYMENTACTION': action,
     }
+    params.update(gateway_kwargs)
     return _fetch_response(DO_EXPRESS_CHECKOUT, params)
 
 
 def do_capture(txn_id, amount, currency, complete_type='Complete',
-               note=None):
+               note=None, **gateway_kwargs):
     """
     Capture payment from a previous transaction
 
@@ -365,21 +369,23 @@ def do_capture(txn_id, amount, currency, complete_type='Complete',
     }
     if note:
         params['NOTE'] = note
+    params.update(gateway_kwargs)
     return _fetch_response(DO_CAPTURE, params)
 
 
-def do_void(txn_id, note=None):
+def do_void(txn_id, note=None, **gateway_kwargs):
     params = {
         'AUTHORIZATIONID': txn_id,
     }
     if note:
         params['NOTE'] = note
+    params.update(gateway_kwargs)
     return _fetch_response(DO_VOID, params)
 
 
 FULL_REFUND = 'Full'
 PARTIAL_REFUND = 'Partial'
-def refund_txn(txn_id, is_partial=False, amount=None, currency=None):
+def refund_txn(txn_id, is_partial=False, amount=None, currency=None, **gateway_kwargs):
     params = {
         'TRANSACTIONID': txn_id,
         'REFUNDTYPE': PARTIAL_REFUND if is_partial else FULL_REFUND,
@@ -387,4 +393,5 @@ def refund_txn(txn_id, is_partial=False, amount=None, currency=None):
     if is_partial:
         params['AMT'] = amount
         params['CURRENCYCODE'] = currency
+    params.update(gateway_kwargs)
     return _fetch_response(REFUND_TRANSACTION, params)
