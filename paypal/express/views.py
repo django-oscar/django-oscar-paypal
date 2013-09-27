@@ -19,6 +19,7 @@ from oscar.core.loading import get_class
 from oscar.apps.shipping.methods import FixedPrice
 
 from paypal.express.facade import get_paypal_url, fetch_transaction_details, confirm_transaction
+from paypal.express.mixins import GatewayViewMixin
 from paypal.exceptions import PayPalError
 
 ShippingAddress = get_model('order', 'ShippingAddress')
@@ -27,7 +28,7 @@ Basket = get_model('basket', 'Basket')
 Repository = get_class('shipping.repository', 'Repository')
 
 
-class RedirectView(CheckoutSessionMixin, RedirectView):
+class RedirectView(GatewayViewMixin, CheckoutSessionMixin, RedirectView):
     """
     Initiate the transaction with Paypal and redirect the user
     to PayPal's Express Checkout to perform the transaction.
@@ -91,7 +92,8 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
 
         if user.is_authenticated():
             params['user'] = user
-
+            
+        params.update(self.get_gateway_kwargs())
         return get_paypal_url(**params)
 
 
@@ -109,7 +111,7 @@ class CancelResponseView(RedirectView):
         return reverse('basket:summary')
 
 
-class SuccessResponseView(PaymentDetailsView):
+class SuccessResponseView(GatewayViewMixin, PaymentDetailsView):
     template_name_preview = 'paypal/express/preview.html'
     preview = True
 
@@ -186,7 +188,7 @@ class SuccessResponseView(PaymentDetailsView):
     def fetch_paypal_data(self, payer_id, token):
         self.payer_id = payer_id
         self.token = token
-        self.txn = fetch_transaction_details(token)
+        self.txn = fetch_transaction_details(token, **self.get_gateway_kwargs())
 
     def get_error_response(self):
         # We bypass the normal session checks for shipping address and shipping
@@ -243,7 +245,8 @@ class SuccessResponseView(PaymentDetailsView):
 
         try:
             txn = confirm_transaction(payer_id, token, amount=self.txn.amount,
-                                      currency=self.txn.currency)
+                                      currency=self.txn.currency,
+                                      **self.get_gateway_kwargs())
         except PayPalError:
             raise UnableToTakePayment()
         if not txn.is_successful:
