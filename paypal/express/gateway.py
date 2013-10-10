@@ -119,11 +119,14 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     # the PayPal currency.
     amount = basket.total_incl_tax
     if currency == 'USD' and amount > 10000:
-        raise exceptions.PayPalError(
-            'PayPal can only be used for orders up to 10000 USD')
+        msg = 'PayPal can only be used for orders up to 10000 USD'
+        logger.error(msg)
+        raise exceptions.PayPalError(msg)
 
     if amount <= 0:
-        raise exceptions.PayPalError('Zero value basket is not allowed')
+        msg = 'Zero value basket is not allowed'
+        logger.error(msg)
+        raise exceptions.PayPalError(msg)
 
     # PAYMENTREQUEST_0_AMT should include tax, shipping and handling
     params = {
