@@ -57,6 +57,10 @@ Tests
 Changelog
 ---------
 
+0.7
+~~~
+* Remove Oscar from ``install_requires``
+
 0.6.1
 ~~~~~
 * Persist shipping method name when using PayPal Express as a payment method
