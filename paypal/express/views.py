@@ -97,6 +97,9 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
         return get_paypal_url(**params)
 
     def _get_paypal_params(self):
+        """
+        Return any additional PayPal parameters
+        """
         return {}
 
 

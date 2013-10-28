@@ -106,7 +106,7 @@ def _fetch_response(method, extra_params):
 
 def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_url=None,
             action=SALE, user=None, user_address=None, shipping_method=None,
-            shipping_address=None, no_shipping=False, paypal_params={}):
+            shipping_address=None, no_shipping=False, paypal_params=None):
     """
     Register the transaction with PayPal to get a token which we use in the
     redirect URL.  This is the 'SetExpressCheckout' from their documentation.
@@ -114,31 +114,36 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     There are quite a few options that can be passed to PayPal to configure
     this request - most are controlled by PAYPAL_* settings.
     """
-
-    # extra params
+    # Default parameters (taken from global settings).  These can be overridden
+    # and customised using the paypal_params parameter.
     _params = {
-        'CUSTOMERSERVICENUMBER': getattr(settings, 'PAYPAL_CUSTOMER_SERVICES_NUMBER', None),
+        'CUSTOMERSERVICENUMBER': getattr(
+            settings, 'PAYPAL_CUSTOMER_SERVICES_NUMBER', None),
         'SOLUTIONTYPE': getattr(settings, 'PAYPAL_SOLUTION_TYPE', None),
         'LANDINGPAGE': getattr(settings, 'PAYPAL_LANDING_PAGE', None),
         'BRANDNAME': getattr(settings, 'PAYPAL_BRAND_NAME', None),
 
+        # Display settings
         'PAGESTYLE': getattr(settings, 'PAYPAL_PAGESTYLE', None),
         'HDRIMG': getattr(settings, 'PAYPAL_HEADER_IMG', None),
         'PAYFLOWCOLOR': getattr(settings, 'PAYPAL_PAYFLOW_COLOR', None),
 
-        # Think these settings maybe deprecated in latest version of PayPal's API
+        # Think these settings maybe deprecated in latest version of PayPal's
+        # API
         'HDRBACKCOLOR': getattr(settings, 'PAYPAL_HEADER_BACK_COLOR', None),
-        'HDRBORDERCOLOR': getattr(settings, 'PAYPAL_HEADER_BORDER_COLOR', None),
+        'HDRBORDERCOLOR': getattr(
+            settings, 'PAYPAL_HEADER_BORDER_COLOR', None),
 
         'LOCALECODE': getattr(settings, 'PAYPAL_LOCALE', None),
 
-        'REQCONFIRMSHIPPING': getattr(settings, 'PAYPAL_CONFIRM_SHIPPING', None),
+        'REQCONFIRMSHIPPING': getattr(
+            settings, 'PAYPAL_CONFIRM_SHIPPING', None),
         'ALLOWNOTE': getattr(settings, 'PAYPAL_ALLOW_NOTE', True),
         'CALLBACKTIMEOUT': getattr(settings, 'PAYPAL_CALLBACK_TIMEOUT', 3)
     }
-    _params.update(paypal_params)
+    if paypal_params:
+        _params.update(paypal_params)
 
-    # locale
     locale = _params.get('LOCALECODE', None)
     if locale:
         valid_choices = ('AU', 'DE', 'FR', 'GB', 'IT', 'ES', 'JP', 'US')
@@ -146,10 +151,10 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
             raise ImproperlyConfigured(
                 "'%s' is not a valid locale code" % locale)
 
-    # bool values become integers
+    # Boolean values become integers
     _params.update((k, int(v)) for k, v in _params.iteritems() if isinstance(v, bool))
 
-    # remove None values
+    # Remove None values
     params = dict((k, v) for k, v in _params.iteritems() if v is not None)
 
     # PayPal have an upper limit on transactions.  It's in dollars which is a

@@ -23,9 +23,9 @@ def _get_payment_action():
 
 def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
                    shipping_method=None, host=None, scheme='https',
-                   paypal_params={}):
+                   paypal_params=None):
     """
-    Return the URL for PayPal Express transaction.
+    Return the URL for a PayPal Express transaction.
 
     This involves registering the txn with PayPal to get a one-time
     URL.  If a shipping method and shipping address are passed, then these are
