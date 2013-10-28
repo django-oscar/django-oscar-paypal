@@ -172,7 +172,7 @@ class SuccessResponseView(PaymentDetailsView):
 
         # Lookup the frozen basket that this txn corresponds to
         try:
-            basket = Basket.objects.get(id=kwargs['basket_id'],
+            self.basket = Basket.objects.get(id=kwargs['basket_id'],
                                         status=Basket.FROZEN)
         except Basket.DoesNotExist:
             messages.error(
@@ -181,7 +181,7 @@ class SuccessResponseView(PaymentDetailsView):
                   "PayPal transaction"))
             return HttpResponseRedirect(reverse('basket:summary'))
 
-        return self.submit(basket, order_kwargs=order_kwargs)
+        return self.submit(self.basket, order_kwargs=order_kwargs)
 
     def fetch_paypal_data(self, payer_id, token):
         self.payer_id = payer_id
