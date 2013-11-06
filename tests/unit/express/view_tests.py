@@ -1,3 +1,5 @@
+from contextlib import nested
+
 from decimal import Decimal as D
 
 from django.test import TestCase
@@ -10,17 +12,6 @@ from oscar.apps.order.models import Order
 from oscar.apps.basket.models import Basket
 
 from purl import URL
-
-
-class EdgeCaseTests(TestCase):
-
-    def setUp(self):
-        self.client = Client()
-
-    def test_empty_basket_shows_error(self):
-        url = reverse('paypal-redirect')
-        response = self.client.get(url)
-        self.assertEqual(reverse('basket:summary'), URL.from_string(response['Location']).path())
 
 
 class MockedPayPalTests(TestCase):
@@ -49,6 +40,51 @@ class MockedPayPalTests(TestCase):
         self.client.post(reverse('basket:add'),
                                  {'product_id': product.id,
                                   'quantity': 1})
+
+
+class EdgeCaseTests(MockedPayPalTests):
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_empty_basket_shows_error(self):
+        url = reverse('paypal-redirect')
+        response = self.client.get(url)
+        self.assertEqual(reverse('basket:summary'), URL.from_string(response['Location']).path())
+
+    def test_missing_shipping_address(self):
+        from paypal.express.views import RedirectView
+        with patch.object(RedirectView, 'as_payment_method') as as_payment_method:
+            as_payment_method.return_value = True
+
+            url = reverse('paypal-redirect')
+            self.add_product_to_basket()
+            response = self.client.get(url)
+            self.assertEqual(
+                reverse('checkout:shipping-address'),
+                URL.from_string(response['Location']).path()
+            )
+
+    def test_missing_shipping_method(self):
+        from paypal.express.views import RedirectView
+
+        with nested(
+                patch.object(RedirectView, 'as_payment_method'),
+                patch.object(RedirectView, 'get_shipping_address'),
+                patch.object(RedirectView, 'get_shipping_method')
+            ) as (as_payment_method, get_shipping_address, get_shipping_method):
+
+            as_payment_method.return_value = True
+            get_shipping_address.return_value = Mock()
+            get_shipping_method.return_value = None
+
+            url = reverse('paypal-redirect')
+            self.add_product_to_basket()
+            response = self.client.get(url)
+            self.assertEqual(
+                reverse('checkout:shipping-method'),
+                URL.from_string(response['Location']).path()
+            )
 
 
 class RedirectToPayPalTests(MockedPayPalTests):
@@ -147,3 +183,37 @@ class SubmitOrderTests(MockedPayPalTests):
 
     def test_shipping_address_includes_line2(self):
         self.assertEqual('line2', self.order.shipping_address.line2)
+
+
+class SubmitOrderErrorsTests(MockedPayPalTests):
+    fixtures = ['countries.json']
+
+    def perform_action(self):
+        self.add_product_to_basket(price=D('6.99'))
+
+        # Explicitly freeze basket
+        basket = Basket.objects.all()[0]
+        basket.freeze()
+        url = reverse('paypal-place-order', kwargs={'basket_id': basket.id})
+        self.response = self.client.post(
+            url, {'action': 'place_order',
+                  'payer_id': '12345',
+                  'token': 'EC-8P797793UC466090M'})
+
+    def patch_http_post(self, post):
+        get_response = 'TOKEN=EC%2d6WY34243AN3588740&CHECKOUTSTATUS=PaymentActionCompleted&TIMESTAMP=2012%2d04%2d19T10%3a07%3a46Z&CORRELATIONID=7e9c5efbda3c0&ACK=Success&VERSION=88%2e0&BUILD=2808426&EMAIL=david%2e_1332854868_per%40gmail%2ecom&PAYERID=7ZTRBDFYYA47W&PAYERSTATUS=verified&FIRSTNAME=David&LASTNAME=Winterbottom&COUNTRYCODE=GB&SHIPTONAME=David%20Winterbottom&SHIPTOSTREET=1%20Main%20Terrace&SHIPTOSTREET2=line2&SHIPTOCITY=Wolverhampton&SHIPTOSTATE=West%20Midlands&SHIPTOZIP=W12%204LQ&SHIPTOCOUNTRYCODE=GB&SHIPTOCOUNTRYNAME=United%20Kingdom&ADDRESSSTATUS=Confirmed&CURRENCYCODE=GBP&AMT=33%2e98&SHIPPINGAMT=0%2e00&HANDLINGAMT=0%2e00&TAXAMT=0%2e00&INSURANCEAMT=0%2e00&SHIPDISCAMT=0%2e00&PAYMENTREQUEST_0_CURRENCYCODE=GBP&PAYMENTREQUEST_0_AMT=33%2e98&PAYMENTREQUEST_0_SHIPPINGAMT=0%2e00&PAYMENTREQUEST_0_HANDLINGAMT=0%2e00&PAYMENTREQUEST_0_TAXAMT=0%2e00&PAYMENTREQUEST_0_INSURANCEAMT=0%2e00&PAYMENTREQUEST_0_SHIPDISCAMT=0%2e00&PAYMENTREQUEST_0_TRANSACTIONID=51963679RW630412N&PAYMENTREQUEST_0_INSURANCEOPTIONOFFERED=false&PAYMENTREQUEST_0_SHIPTONAME=David%20Winterbottom&PAYMENTREQUEST_0_SHIPTOSTREET=1%20Main%20Terrace&PAYMENTREQUEST_0_SHIPTOSTREET2=line2&PAYMENTREQUEST_0_SHIPTOCITY=Wolverhampton&PAYMENTREQUEST_0_SHIPTOSTATE=West%20Midlands&PAYMENTREQUEST_0_SHIPTOZIP=W12%204LQ&PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE=GB&PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME=United%20Kingdom&PAYMENTREQUESTINFO_0_TRANSACTIONID=51963679RW630412N&PAYMENTREQUESTINFO_0_ERRORCODE=0'
+        error_response = 'Error'
+        def side_effect(url, payload):
+            if 'GetExpressCheckoutDetails' in payload:
+                return self.get_mock_response(get_response)
+            elif 'DoExpressCheckoutPayment' in payload:
+                return self.get_mock_response(error_response)
+        post.side_effect = side_effect
+
+    def test_paypal_error(self):
+        self.assertTrue('error' in self.response.context_data)
+
+        error = self.response.context_data['error']
+        self.assertEqual(error, "A problem occurred while processing payment for this "
+                      "order - no payment has been taken.  Please "
+                      "contact customer services if this problem persists")

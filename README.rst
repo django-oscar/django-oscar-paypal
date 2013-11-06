@@ -57,6 +57,19 @@ Tests
 Changelog
 ---------
 
+0.7
+~~~
+* Remove Oscar from ``install_requires``
+
+0.6.1
+~~~~~
+* Persist shipping method name when using PayPal Express as a payment method
+  only. 
+
+0.6
+~~~
+* Add support for ``NO_SHIPPING`` option with PayPal Express.
+
 0.5
 ~~~
 * Addresses a `security issue`_ where baskets could be manipulated while the

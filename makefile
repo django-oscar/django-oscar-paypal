@@ -1,8 +1,10 @@
 install:
-	pip install -r requirements.txt --use-mirrors
+	pip install django-oscar
+	pip install -r requirements.txt
 	python setup.py develop
 
 upgrade:
+	pip install -U django-oscar
 	pip install -U -r requirements.txt --use-mirrors
 	python setup.py develop --upgrade
 

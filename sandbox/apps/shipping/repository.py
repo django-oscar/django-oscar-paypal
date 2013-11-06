@@ -10,7 +10,12 @@ class Repository(CoreRepository):
     Oscar's default behaviour is to only have one which means you can't test
     the shipping features of PayPal.
     """
+    methods = [Free(), FixedPrice(D('10.00'))]
 
     def get_shipping_methods(self, user, basket, shipping_addr=None, **kwargs):
-        methods = [Free(), FixedPrice(D('10.00')), FixedPrice(D('20.00'))]
-        return self.prime_methods(basket, methods)
+        return self.prime_methods(basket, self.methods)
+
+    def find_by_code(self, code, basket):
+        for method in self.methods:
+            if code == method.code:
+                return self.prime_method(basket, method)

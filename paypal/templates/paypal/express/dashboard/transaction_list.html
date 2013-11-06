@@ -38,6 +38,7 @@
                     <th>{% trans "Token" %}</th>
                     <th>{% trans "Error code" %}</th>
                     <th>{% trans "Error message" %}</th>
+                    <th>{% trans "Date" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -46,10 +47,11 @@
                         <td><a href="{% url 'paypal-express-detail' txn.id %}">{{ txn.correlation_id|default:"-" }}</a></td>
                         <td>{{ txn.method }}</td>
                         <td>{{ txn.ack }}</td>
-                        <td>{{ txn.amount|currency|default:"-" }} {{ txt.currency }}</td>
-                        <td>{{ txt.token|default:'-' }}</td>
-                        <td>{{ txt.error_code|default:'-' }}</td>
-                        <td>{{ txt.error_message|default:'-' }}</td>
+                        <td>{{ txn.amount|currency|default:"-" }} {{ txn.currency }}</td>
+                        <td>{{ txn.token|default:'-' }}</td>
+                        <td>{{ txn.error_code|default:'-' }}</td>
+                        <td>{{ txn.error_message|default:'-' }}</td>
+                        <td>{{ txn.date_created }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

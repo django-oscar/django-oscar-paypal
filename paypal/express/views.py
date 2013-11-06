@@ -19,6 +19,9 @@ from oscar.core.loading import get_class
 from oscar.apps.shipping.methods import FixedPrice
 
 from paypal.express.facade import get_paypal_url, fetch_transaction_details, confirm_transaction
+from paypal.express.exceptions import (
+    EmptyBasketException, MissingShippingAddressException,
+    MissingShippingMethodException)
 from paypal.exceptions import PayPalError
 
 ShippingAddress = get_model('order', 'ShippingAddress')
@@ -49,6 +52,15 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
             else:
                 url = reverse('basket:summary')
             return url
+        except EmptyBasketException:
+            messages.error(self.request, _("Your basket is empty"))
+            return reverse('basket:summary')
+        except MissingShippingAddressException:
+            messages.error(self.request, _("A shipping address must be specified"))
+            return reverse('checkout:shipping-address')
+        except MissingShippingMethodException:
+            messages.error(self.request, _("A shipping method must be specified"))
+            return reverse('checkout:shipping-method')
         else:
             # Transaction successfully registered with PayPal.  Now freeze the
             # basket so it can't be edited while the customer is on the PayPal
@@ -59,13 +71,12 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
     def _get_redirect_url(self, **kwargs):
         basket = self.request.basket
         if basket.is_empty:
-            messages.error(self.request, _("Your basket is empty"))
-            return reverse('basket:summary')
+            raise EmptyBasketException()
 
         params = {
             'basket': self.request.basket,
             'shipping_methods': []          # setup a default empty list
-            }                               # to support no_shipping
+        }                                   # to support no_shipping
 
         user = self.request.user
         if self.as_payment_method:
@@ -73,15 +84,12 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
                 # only check for shipping details if required.
                 shipping_addr = self.get_shipping_address()
                 if not shipping_addr:
-                    messages.error(self.request,
-                                   _("A shipping address must be specified"))
-                    return reverse('checkout:shipping-address')
+                    raise MissingShippingAddressException()
 
                 shipping_method = self.get_shipping_method()
                 if not shipping_method:
-                    messages.error(self.request,
-                                   _("A shipping method must be specified"))
-                    return reverse('checkout:shipping-method')
+                    raise MissingShippingMethodException()
+
                 params['shipping_address'] = shipping_addr
                 params['shipping_method'] = shipping_method
                 params['shipping_methods'] = []
@@ -94,12 +102,23 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
             # Determine the localserver's hostname to use when
             # in testing mode
             params['host'] = self.request.META['HTTP_HOST']
-            params['scheme'] = 'http'
+            if settings.PAYPAL_SANDBOX_MODE:
+                params['scheme'] = 'http'
+            else:
+                params['scheme'] = 'https'
 
         if user.is_authenticated():
             params['user'] = user
 
+        params['paypal_params'] = self._get_paypal_params()
+
         return get_paypal_url(**params)
+
+    def _get_paypal_params(self):
+        """
+        Return any additional PayPal parameters
+        """
+        return {}
 
 
 class CancelResponseView(RedirectView):
@@ -179,7 +198,7 @@ class SuccessResponseView(PaymentDetailsView):
 
         # Lookup the frozen basket that this txn corresponds to
         try:
-            basket = Basket.objects.get(id=kwargs['basket_id'],
+            self.basket = Basket.objects.get(id=kwargs['basket_id'],
                                         status=Basket.FROZEN)
         except Basket.DoesNotExist:
             messages.error(
@@ -188,7 +207,7 @@ class SuccessResponseView(PaymentDetailsView):
                   "PayPal transaction"))
             return HttpResponseRedirect(reverse('basket:summary'))
 
-        return self.submit(basket, order_kwargs=order_kwargs)
+        return self.submit(self.basket, order_kwargs=order_kwargs)
 
     def fetch_paypal_data(self, payer_id, token):
         self.payer_id = payer_id
@@ -231,11 +250,8 @@ class SuccessResponseView(PaymentDetailsView):
                 'active_address_fields': non_empty_fields,
                 'notes': self.txn.value('NOTETEXT'),
             }
-        ctx['shipping_method'] = {
-            'name': self.txn.value('SHIPPINGOPTIONNAME'),
-            'description': '',
-            'basket_charge_incl_tax': D(self.txn.value('SHIPPINGAMT')),
-        }
+
+        ctx['shipping_method'] = self.get_shipping_method()
         ctx['order_total_incl_tax'] = D(self.txn.value('PAYMENTREQUEST_0_AMT'))
 
         return ctx
@@ -305,7 +321,14 @@ class SuccessResponseView(PaymentDetailsView):
         method = FixedPrice(charge)
         basket = basket if basket else self.request.basket
         method.set_basket(basket)
-        method.name = self.txn.value('SHIPPINGOPTIONNAME')
+        name = self.txn.value('SHIPPINGOPTIONNAME')
+        if not name:
+            # Look to see if there is a method in the session
+            session_method = self.checkout_session.shipping_method(basket)
+            if session_method:
+                method.name = session_method.name
+        else:
+            method.name = name
         return method
 
 
