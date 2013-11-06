@@ -16,3 +16,6 @@ htmlcov
 # Sensitive data
 TODO
 integration.py
+
+# Sandbox
+sandbox/public/media
