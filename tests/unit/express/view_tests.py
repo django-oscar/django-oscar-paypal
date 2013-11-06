@@ -15,6 +15,7 @@ from purl import URL
 
 
 class MockedPayPalTests(TestCase):
+    fixtures = ['countries.json']
     response_body = None
 
     def setUp(self):
@@ -144,12 +145,10 @@ class PreviewOrderTests(MockedPayPalTests):
                 'payer_id', 'token', 'paypal_user_email',
                 'paypal_amount')
         for k in keys:
-            self.assertTrue(k in self.response.context,
-                           "%s not in context" % k)
+            self.assertTrue(k in self.response.context, "%s not in context" % k)
 
 
 class SubmitOrderTests(MockedPayPalTests):
-    fixtures = ['countries.json']
 
     def perform_action(self):
         self.add_product_to_basket(price=D('6.99'))
@@ -186,7 +185,6 @@ class SubmitOrderTests(MockedPayPalTests):
 
 
 class SubmitOrderErrorsTests(MockedPayPalTests):
-    fixtures = ['countries.json']
 
     def perform_action(self):
         self.add_product_to_basket(price=D('6.99'))
