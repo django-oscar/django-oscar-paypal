@@ -29,7 +29,7 @@ class AdaptiveTransaction(base.ResponseModel):
 
     # return status
     status = models.CharField(max_length=16, null=True, blank=True)
-    payment_token = models.CharField(max_length=32, null=True, blank=True)
+    request_token = models.CharField(max_length=32, null=True, blank=True)
 
     def __unicode__(self):
         return self.correlation_id
