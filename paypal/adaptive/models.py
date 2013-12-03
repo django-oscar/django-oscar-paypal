@@ -27,6 +27,10 @@ class AdaptiveTransaction(base.ResponseModel):
     error_id = models.CharField(max_length=32, null=True, blank=True)
     error_message = models.CharField(max_length=256, null=True, blank=True)
 
+    # return status
+    status = models.CharField(max_length=16, null=True, blank=True)
+    payment_token = models.CharField(max_length=32, null=True, blank=True)
+
     def __unicode__(self):
         return self.correlation_id
 

@@ -3,6 +3,7 @@ Adaptive payments:
 
 https://www.x.com/developers/paypal/documentation-tools/adaptive-payments/gs_AdaptivePayments
 """
+import random
 import collections
 from decimal import Decimal as D
 from django.conf import settings
@@ -22,12 +23,17 @@ Fees = type('Feeds', (), {
 })
 
 
+def generate_token(length=32):
+    return ''.join([chr(random.choice(range(ord('a'), ord('z'))))\
+                    for _ in range(0, length)])
+
 def payment_details(pay_key):
     """
     Fetch the payment details for a given transaction
     """
     params = [("payKey", pay_key)]
-    return _request('PaymentDetails', params)
+    request_token = generate_token()
+    return _request('PaymentDetails', params, request_token)
 
 
 def pay(receivers, currency, return_url, cancel_url,
@@ -42,11 +48,12 @@ def pay(receivers, currency, return_url, cancel_url,
     }
     # Set core params
     action = "Pay"
+    payment_token = generate_token()
     params = [
         ("actionType", action.upper()),
         ("currencyCode", currency),
-        ("returnUrl", return_url),
-        ("cancelUrl", cancel_url),
+        ("returnUrl", "%s?token=%s" % (return_url, payment_token)),
+        ("cancelUrl", "%s?token=%s" % (cancel_url, payment_token)),
     ]
 
     # Chained payment?
@@ -76,7 +83,7 @@ def pay(receivers, currency, return_url, cancel_url,
         params.append(('memo', memo))
 
     # We pass the total so it can be added to the txn model for better audit
-    return _request(action, params, headers, {'amount': total})
+    return _request(action, params, payment_token, headers, {'amount': total})
 
 
 def details(pay_key):
@@ -84,10 +91,11 @@ def details(pay_key):
     Fetch details of a previous payment
     """
     params = [("payKey", pay_key)]
-    return _request("PaymentDetails", params)
+    request_token = generate_token()
+    return _request("PaymentDetails", params, request_token)
 
 
-def _request(action, params, headers=None, txn_fields=None):
+def _request(action, params, request_token, headers=None, txn_fields=None):
     """
     Make a request to PayPal
     """
@@ -128,6 +136,7 @@ def _request(action, params, headers=None, txn_fields=None):
 
     # Create model that represents request/response
     return models.AdaptiveTransaction.objects.create(
+        request_token=request_token,
         action=action,
         is_sandbox=is_sandbox,
         raw_request=pairs['_raw_request'],
