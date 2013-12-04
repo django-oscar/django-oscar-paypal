@@ -40,6 +40,7 @@ class TestPayOperation(TestCase):
         self.assertEqual('d59ed693b9244', txn.correlation_id)
         self.assertTrue('AP-9WC20815W6814813H' in txn.redirect_url)
         self.assertEqual(D('28.00'), txn.amount)
+        self.assertIsNotNone(txn.request_token)
 
     def test_unsuccessful_create(self, post):
         receivers = (
@@ -62,6 +63,7 @@ class TestPayOperation(TestCase):
 
         self.assertFalse(txn.is_successful)
         self.assertEqual('f8840ca36f442', txn.correlation_id)
+        self.assertIsNotNone(txn.request_token)
 
 
 class TestPaymentDetailsOperation(TestCase):

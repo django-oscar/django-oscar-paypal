@@ -28,7 +28,8 @@ class AdaptiveTransaction(base.ResponseModel):
     error_message = models.CharField(max_length=256, null=True, blank=True)
 
     # return status
-    status = models.CharField(max_length=16, null=True, blank=True)
+    status = models.CharField(max_length=16, default="request", null=True,
+                              blank=True)
     request_token = models.CharField(max_length=32, null=True, blank=True)
 
     def __unicode__(self):
