@@ -77,16 +77,19 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
 
         user = self.request.user
         if self.as_payment_method:
-            shipping_addr = self.get_shipping_address()
-            if not shipping_addr:
-                raise MissingShippingAddressException()
 
-            shipping_method = self.get_shipping_method()
-            if not shipping_method:
-                raise MissingShippingMethodException()
+            if self.request.basket.is_shipping_required():
+                shipping_addr = self.get_shipping_address()
+                if not shipping_addr:
+                    raise MissingShippingAddressException()
 
-            params['shipping_address'] = shipping_addr
-            params['shipping_method'] = shipping_method
+                shipping_method = self.get_shipping_method()
+                if not shipping_method:
+                    raise MissingShippingMethodException()
+
+                params['shipping_address'] = shipping_addr
+                params['shipping_method'] = shipping_method
+
             params['shipping_methods'] = []
         else:
             shipping_methods = Repository().get_shipping_methods(user, basket)
@@ -283,6 +286,10 @@ class SuccessResponseView(PaymentDetailsView):
         Return a created shipping address instance, created using
         the data returned by PayPal.
         """
+        basket = basket if basket else self.request.basket
+        if not basket.is_shipping_required():
+            return None
+
         # Determine names - PayPal uses a single field
         ship_to_name = self.txn.value('PAYMENTREQUEST_0_SHIPTONAME')
         if ship_to_name is None:
@@ -310,9 +317,12 @@ class SuccessResponseView(PaymentDetailsView):
         """
         Return the shipping method used
         """
+        basket = basket if basket else self.request.basket
+        if not basket.is_shipping_required():
+            return None
+
         charge = D(self.txn.value('PAYMENTREQUEST_0_SHIPPINGAMT'))
         method = FixedPrice(charge)
-        basket = basket if basket else self.request.basket
         method.set_basket(basket)
         name = self.txn.value('SHIPPINGOPTIONNAME')
         if not name:
