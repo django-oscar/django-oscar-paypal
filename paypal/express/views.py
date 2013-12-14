@@ -16,7 +16,7 @@ from oscar.apps.checkout.views import PaymentDetailsView, CheckoutSessionMixin
 from oscar.apps.payment.exceptions import PaymentError, UnableToTakePayment
 from oscar.apps.payment.models import SourceType, Source
 from oscar.core.loading import get_class
-from oscar.apps.shipping.methods import FixedPrice
+from oscar.apps.shipping.methods import FixedPrice, NoShippingRequired
 
 from paypal.express.facade import get_paypal_url, fetch_transaction_details, confirm_transaction
 from paypal.express.exceptions import (
@@ -286,7 +286,7 @@ class SuccessResponseView(PaymentDetailsView):
         Return a created shipping address instance, created using
         the data returned by PayPal.
         """
-        basket = basket if basket else self.request.basket
+        basket = basket if basket else self.basket
         if not basket.is_shipping_required():
             return None
 
@@ -317,9 +317,9 @@ class SuccessResponseView(PaymentDetailsView):
         """
         Return the shipping method used
         """
-        basket = basket if basket else self.request.basket
+        basket = basket if basket else self.basket
         if not basket.is_shipping_required():
-            return None
+            return NoShippingRequired()
 
         charge = D(self.txn.value('PAYMENTREQUEST_0_SHIPPINGAMT'))
         method = FixedPrice(charge)
