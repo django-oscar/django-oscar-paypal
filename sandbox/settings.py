@@ -172,6 +172,11 @@ LOGGING = {
             'propagate': True,
             'level': 'DEBUG',
         },
+        'paypal.payflow': {
+            'handlers': ['console'],
+            'propagate': True,
+            'level': 'DEBUG',
+        },
     }
 }
 
