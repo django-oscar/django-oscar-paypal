@@ -136,11 +136,12 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
 
         'LOCALECODE': getattr(settings, 'PAYPAL_LOCALE', None),
 
-        'REQCONFIRMSHIPPING': getattr(
-            settings, 'PAYPAL_CONFIRM_SHIPPING', None),
         'ALLOWNOTE': getattr(settings, 'PAYPAL_ALLOW_NOTE', True),
         'CALLBACKTIMEOUT': getattr(settings, 'PAYPAL_CALLBACK_TIMEOUT', 3)
     }
+    confirm_shipping_addr = getattr(settings, 'PAYPAL_CONFIRM_SHIPPING', None)
+    if confirm_shipping_addr and not no_shipping:
+        _params['REQCONFIRMSHIPPING'] = 1
     if paypal_params:
         _params.update(paypal_params)
 
@@ -258,7 +259,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     if user:
         params['EMAIL'] = user.email
     if user_address:
-        params['SHIPTONAME'] = user_address.name()
+        params['SHIPTONAME'] = user_address.name
         params['SHIPTOSTREET'] = user_address.line1
         params['SHIPTOSTREET2'] = user_address.line2
         params['SHIPTOCITY'] = user_address.line4
@@ -273,13 +274,14 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         # It's recommend not to set 'confirmed shipping' if supplying the
         # shipping address directly.
         params['REQCONFIRMSHIPPING'] = 0
-        params['SHIPTONAME'] = shipping_address.name()
+        params['SHIPTONAME'] = shipping_address.name
         params['SHIPTOSTREET'] = shipping_address.line1
         params['SHIPTOSTREET2'] = shipping_address.line2
         params['SHIPTOCITY'] = shipping_address.line4
         params['SHIPTOSTATE'] = shipping_address.state
         params['SHIPTOZIP'] = shipping_address.postcode
         params['SHIPTOCOUNTRYCODE'] = shipping_address.country.iso_3166_1_a2
+
     elif no_shipping:
         params['NOSHIPPING'] = 1
 

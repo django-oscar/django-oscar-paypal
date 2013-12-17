@@ -28,6 +28,7 @@ ShippingAddress = get_model('order', 'ShippingAddress')
 Country = get_model('address', 'Country')
 Basket = get_model('basket', 'Basket')
 Repository = get_class('shipping.repository', 'Repository')
+Selector = get_class('partner.strategy', 'Selector')
 
 
 class RedirectView(CheckoutSessionMixin, RedirectView):
@@ -73,21 +74,27 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
         if basket.is_empty:
             raise EmptyBasketException()
 
-        params = {'basket': self.request.basket}
+        params = {
+            'basket': self.request.basket,
+            'shipping_methods': []          # setup a default empty list
+        }                                   # to support no_shipping
 
         user = self.request.user
         if self.as_payment_method:
-            shipping_addr = self.get_shipping_address()
-            if not shipping_addr:
-                raise MissingShippingAddressException()
+            if basket.is_shipping_required():
+                # only check for shipping details if required.
+                shipping_addr = self.get_shipping_address(basket)
+                if not shipping_addr:
+                    raise MissingShippingAddressException()
 
-            shipping_method = self.get_shipping_method()
-            if not shipping_method:
-                raise MissingShippingMethodException()
+                shipping_method = self.get_shipping_method()
+                if not shipping_method:
+                    raise MissingShippingMethodException()
 
-            params['shipping_address'] = shipping_addr
-            params['shipping_method'] = shipping_method
-            params['shipping_methods'] = []
+                params['shipping_address'] = shipping_addr
+                params['shipping_method'] = shipping_method
+                params['shipping_methods'] = []
+
         else:
             shipping_methods = Repository().get_shipping_methods(user, basket)
             params['shipping_methods'] = shipping_methods
@@ -155,14 +162,17 @@ class SuccessResponseView(PaymentDetailsView):
 
         # Lookup the frozen basket that this txn corresponds to
         try:
-            self.basket = Basket.objects.get(id=kwargs['basket_id'],
-                                             status=Basket.FROZEN)
+            kwargs['basket'] = Basket.objects.get(
+                id=kwargs['basket_id'], status=Basket.FROZEN)
         except Basket.DoesNotExist:
             messages.error(
                 self.request,
                 _("No basket was found that corresponds to your "
                   "PayPal transaction"))
             return HttpResponseRedirect(reverse('basket:summary'))
+        else:
+            # Assign strategy to basket instance
+            kwargs['basket'].strategy = Selector().strategy(self.request)
 
         return super(SuccessResponseView, self).get(request, *args, **kwargs)
 
@@ -187,21 +197,29 @@ class SuccessResponseView(PaymentDetailsView):
             messages.error(self.request, _("A problem occurred communicating with PayPal - please try again later"))
             return HttpResponseRedirect(reverse('basket:summary'))
 
-        # Pass the user email so it can be stored with the order
-        order_kwargs = {'guest_email': self.txn.value('EMAIL')}
-
         # Lookup the frozen basket that this txn corresponds to
         try:
-            self.basket = Basket.objects.get(id=kwargs['basket_id'],
-                                        status=Basket.FROZEN)
+            basket = Basket.objects.get(
+                id=kwargs['basket_id'], status=Basket.FROZEN)
         except Basket.DoesNotExist:
             messages.error(
                 self.request,
                 _("No basket was found that corresponds to your "
                   "PayPal transaction"))
             return HttpResponseRedirect(reverse('basket:summary'))
+        else:
+            # Assign strategy to basket instance
+            basket.strategy = Selector().strategy(self.request)
 
-        return self.submit(self.basket, order_kwargs=order_kwargs)
+        submission = self.build_submission(basket=basket)
+        return self.submit(**submission)
+
+    def build_submission(self, **kwargs):
+        submission = super(
+            SuccessResponseView, self).build_submission(**kwargs)
+        # Pass the user email so it can be stored with the order
+        submission['order_kwargs'] = {'guest_email': self.txn.value('EMAIL')}
+        return submission
 
     def fetch_paypal_data(self, payer_id, token):
         self.payer_id = payer_id
@@ -221,7 +239,6 @@ class SuccessResponseView(PaymentDetailsView):
 
         # This context generation only runs when in preview mode
         ctx.update({
-            'frozen_basket': self.basket,
             'payer_id': self.payer_id,
             'token': self.token,
             'paypal_user_email': self.txn.value('EMAIL'),
@@ -245,12 +262,12 @@ class SuccessResponseView(PaymentDetailsView):
                 'notes': self.txn.value('NOTETEXT'),
             }
 
-        ctx['shipping_method'] = self.get_shipping_method()
+        ctx['shipping_method'] = self.get_shipping_method(ctx['basket'])
         ctx['order_total_incl_tax'] = D(self.txn.value('PAYMENTREQUEST_0_AMT'))
 
         return ctx
 
-    def handle_payment(self, order_number, total_incl_tax, **kwargs):
+    def handle_payment(self, order_number, total, **kwargs):
         """
         Complete payment with PayPal - this calls the 'DoExpressCheckout'
         method to capture the money from the initial transaction.
@@ -276,9 +293,10 @@ class SuccessResponseView(PaymentDetailsView):
                         amount_allocated=txn.amount,
                         amount_debited=txn.amount)
         self.add_payment_source(source)
-        self.add_payment_event('Settled', txn.amount)
+        self.add_payment_event('Settled', txn.amount,
+                               reference=txn.correlation_id)
 
-    def create_shipping_address(self, basket=None):
+    def get_shipping_address(self, basket):
         """
         Return a created shipping address instance, created using
         the data returned by PayPal.
@@ -295,7 +313,7 @@ class SuccessResponseView(PaymentDetailsView):
             first_name = parts[0]
             last_name = " ".join(parts[1:])
 
-        return ShippingAddress.objects.create(
+        return ShippingAddress(
             first_name=first_name,
             last_name=last_name,
             line1=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET'),
@@ -306,13 +324,15 @@ class SuccessResponseView(PaymentDetailsView):
             country=Country.objects.get(iso_3166_1_a2=self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'))
         )
 
-    def get_shipping_method(self, basket=None):
+    def get_shipping_method(self, basket, shipping_address=None, **kwargs):
         """
         Return the shipping method used
         """
-        charge = D(self.txn.value('PAYMENTREQUEST_0_SHIPPINGAMT'))
-        method = FixedPrice(charge)
-        basket = basket if basket else self.request.basket
+        # Instantiate a new FixedPrice shipping method instance
+        charge_incl_tax = D(self.txn.value('PAYMENTREQUEST_0_SHIPPINGAMT'))
+        # Assume no tax for now
+        charge_excl_tax = charge_incl_tax
+        method = FixedPrice(charge_excl_tax, charge_incl_tax)
         method.set_basket(basket)
         name = self.txn.value('SHIPPINGOPTIONNAME')
         if not name:
@@ -387,5 +407,5 @@ class ShippingOptionsView(View):
 
     def get_shipping_methods(self, user, basket, shipping_address):
         repo = Repository()
-        return repo.get_shipping_methods(user, basket,
-                                         shipping_addr=shipping_address)
+        return repo.get_shipping_methods(
+            user, basket, shipping_addr=shipping_address)
