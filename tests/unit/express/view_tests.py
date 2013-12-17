@@ -1,3 +1,4 @@
+import random
 from contextlib import nested
 
 from decimal import Decimal as D
@@ -7,11 +8,56 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 from mock import patch, Mock
 
-from oscar_testsupport.factories import create_product
 from oscar.apps.order.models import Order
 from oscar.apps.basket.models import Basket
+from oscar.core.loading import get_classes
 
 from purl import URL
+
+
+Partner, StockRecord = get_classes('partner.models', ('Partner',
+                                                      'StockRecord'))
+
+(ProductClass,
+ Product,
+ ProductAttribute,
+ ProductAttributeValue) = get_classes('catalogue.models', (
+    'ProductClass', 'Product', 'ProductAttribute', 'ProductAttributeValue'))
+
+
+def create_product(price=None, title=u"Dummy title",
+                   product_class=u"Dummy item class", partner=u"Dummy partner",
+                   partner_sku=None, upc=None, num_in_stock=10,
+                   attributes=None, **kwargs):
+    """
+    Helper method for creating products that are used in tests.
+
+    Ported from oscar_testsupport. Where the function is present:
+        Oscar 0.4: oscar.test.helpers
+        Oscar 0.5: oscar_testsupport
+        Oscar 0.6: oscar.test.factories
+    """
+    ic, __ = ProductClass._default_manager.get_or_create(name=product_class)
+    item = Product(title=title, product_class=ic, upc=upc, **kwargs)
+
+    if attributes:
+        for key, value in attributes.items():
+            setattr(item.attr, key, value)
+
+    item.save()
+
+    if price is not None or partner_sku or num_in_stock is not None:
+        if not partner_sku:
+            partner_sku = 'sku_%d_%d' % (item.id, random.randint(0, 10000))
+        if price is None:
+            price = D('10.00')
+
+        partner, __ = Partner._default_manager.get_or_create(name=partner)
+        StockRecord._default_manager.create(product=item, partner=partner,
+                                            partner_sku=partner_sku,
+                                            price_excl_tax=price,
+                                            num_in_stock=num_in_stock)
+    return item
 
 
 class MockedPayPalTests(TestCase):
