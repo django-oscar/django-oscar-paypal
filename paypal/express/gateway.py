@@ -258,7 +258,11 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     if user:
         params['EMAIL'] = user.email
     if user_address:
-        params['SHIPTONAME'] = user_address.name()
+        address_name = user_address.name
+        if callable(address_name):
+            address_name = address_name()
+
+        params['SHIPTONAME'] = address_name
         params['SHIPTOSTREET'] = user_address.line1
         params['SHIPTOSTREET2'] = user_address.line2
         params['SHIPTOCITY'] = user_address.line4
@@ -269,11 +273,15 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     # Shipping details (if already set) - we override the SHIPTO* fields and
     # set a flag to indicate that these can't be altered on the PayPal side.
     if shipping_method and shipping_address:
+        address_name = shipping_address.name
+        if callable(address_name):
+            address_name = address_name()
+
         params['ADDROVERRIDE'] = 1
         # It's recommend not to set 'confirmed shipping' if supplying the
         # shipping address directly.
         params['REQCONFIRMSHIPPING'] = 0
-        params['SHIPTONAME'] = shipping_address.name()
+        params['SHIPTONAME'] = address_name
         params['SHIPTOSTREET'] = shipping_address.line1
         params['SHIPTOSTREET2'] = shipping_address.line2
         params['SHIPTOCITY'] = shipping_address.line4
