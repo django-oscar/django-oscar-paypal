@@ -1,5 +1,6 @@
 # Sandbox
 South>=0.7.3,<0.8
+Django==1.6.1
 
 # Testing
 mock>=1.0.1,<1.1
@@ -9,7 +10,7 @@ coveralls>=0.1.1,<0.2
 tox==1.6.1
 
 # Development
-django-extensions>=0.8,<0.9
+django-extensions==1.2.5
 django-debug-toolbar>=0.9.4,<0.10
 pinocchio>=0.3.1,<0.4
 WebTest>=2.0.4,<2.1
