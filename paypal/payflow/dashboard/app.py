@@ -3,7 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 from oscar.core.application import Application
 
-from paypal.payflow import views
+from . import views
 
 
 class PayFlowDashboardApplication(Application):
