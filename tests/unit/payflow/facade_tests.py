@@ -14,8 +14,6 @@ See page 49 of the PDF for information on PayPal's testing set-up
 """
 
 
-
-
 class TestAuthorize(TestCase):
 
     def setUp(self):

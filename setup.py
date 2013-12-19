@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 from paypal import VERSION
 
 
-MIN_OSCAR_VERSION = (0, 4)
+MIN_OSCAR_VERSION = (0, 6)
 try:
     import oscar
 except ImportError:

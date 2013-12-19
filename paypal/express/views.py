@@ -28,6 +28,7 @@ ShippingAddress = get_model('order', 'ShippingAddress')
 Country = get_model('address', 'Country')
 Basket = get_model('basket', 'Basket')
 Repository = get_class('shipping.repository', 'Repository')
+
 Selector = get_class('partner.strategy', 'Selector')
 
 
@@ -87,7 +88,8 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
                 if not shipping_addr:
                     raise MissingShippingAddressException()
 
-                shipping_method = self.get_shipping_method()
+                shipping_method = self.get_shipping_method(
+                    basket, shipping_addr)
                 if not shipping_method:
                     raise MissingShippingMethodException()
 
@@ -172,7 +174,8 @@ class SuccessResponseView(PaymentDetailsView):
             return HttpResponseRedirect(reverse('basket:summary'))
         else:
             # Assign strategy to basket instance
-            kwargs['basket'].strategy = Selector().strategy(self.request)
+            if Selector:
+                kwargs['basket'].strategy = Selector().strategy(self.request)
 
         return super(SuccessResponseView, self).get(request, *args, **kwargs)
 
@@ -207,10 +210,9 @@ class SuccessResponseView(PaymentDetailsView):
                 _("No basket was found that corresponds to your "
                   "PayPal transaction"))
             return HttpResponseRedirect(reverse('basket:summary'))
-        else:
-            # Assign strategy to basket instance
-            basket.strategy = Selector().strategy(self.request)
 
+        # Assign strategy to basket instance
+        basket.strategy = Selector().strategy(self.request)
         submission = self.build_submission(basket=basket)
         return self.submit(**submission)
 
@@ -276,7 +278,8 @@ class SuccessResponseView(PaymentDetailsView):
             payer_id = self.request.POST['payer_id']
             token = self.request.POST['token']
         except KeyError:
-            raise PaymentError("Unable to determine PayPal transaction details")
+            raise PaymentError(
+                "Unable to determine PayPal transaction details")
 
         try:
             txn = confirm_transaction(payer_id, token, amount=self.txn.amount,
@@ -287,7 +290,8 @@ class SuccessResponseView(PaymentDetailsView):
             raise UnableToTakePayment()
 
         # Record payment source and event
-        source_type, is_created = SourceType.objects.get_or_create(name='PayPal')
+        source_type, is_created = SourceType.objects.get_or_create(
+            name='PayPal')
         source = Source(source_type=source_type,
                         currency=txn.currency,
                         amount_allocated=txn.amount,
