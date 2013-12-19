@@ -16,7 +16,7 @@ from oscar.apps.checkout.views import PaymentDetailsView, CheckoutSessionMixin
 from oscar.apps.payment.exceptions import PaymentError, UnableToTakePayment
 from oscar.apps.payment.models import SourceType, Source
 from oscar.core.loading import get_class
-from oscar.apps.shipping.methods import FixedPrice
+from oscar.apps.shipping.methods import FixedPrice, NoShippingRequired
 
 from paypal.express.facade import get_paypal_url, fetch_transaction_details, confirm_transaction
 from paypal.express.exceptions import (
@@ -83,7 +83,7 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
         user = self.request.user
         if self.as_payment_method:
             if basket.is_shipping_required():
-                # only check for shipping details if required.
+                # Only check for shipping details if required.
                 shipping_addr = self.get_shipping_address(basket)
                 if not shipping_addr:
                     raise MissingShippingAddressException()
@@ -246,26 +246,6 @@ class SuccessResponseView(PaymentDetailsView):
             'paypal_user_email': self.txn.value('EMAIL'),
             'paypal_amount': D(self.txn.value('AMT')),
         })
-        # We convert the PayPal response values into those that match Oscar's
-        # normal context so we can re-use the preview template as is
-        shipping_address_fields = [
-            self.txn.value('PAYMENTREQUEST_0_SHIPTONAME'),
-            self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET'),
-            self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET2'),
-            self.txn.value('PAYMENTREQUEST_0_SHIPTOCITY'),
-            self.txn.value('PAYMENTREQUEST_0_SHIPTOSTATE'),
-            self.txn.value('PAYMENTREQUEST_0_SHIPTOZIP'),
-            self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME'),
-        ]
-        non_empty_fields = filter(bool, shipping_address_fields)
-        if non_empty_fields:
-            ctx['shipping_address'] = {
-                'active_address_fields': non_empty_fields,
-                'notes': self.txn.value('NOTETEXT'),
-            }
-
-        ctx['shipping_method'] = self.get_shipping_method(ctx['basket'])
-        ctx['order_total_incl_tax'] = D(self.txn.value('PAYMENTREQUEST_0_AMT'))
 
         return ctx
 
@@ -332,6 +312,9 @@ class SuccessResponseView(PaymentDetailsView):
         """
         Return the shipping method used
         """
+        if not basket.is_shipping_required():
+            return NoShippingRequired()
+
         # Instantiate a new FixedPrice shipping method instance
         charge_incl_tax = D(self.txn.value('PAYMENTREQUEST_0_SHIPPINGAMT'))
         # Assume no tax for now
