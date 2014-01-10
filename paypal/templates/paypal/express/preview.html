@@ -30,8 +30,8 @@
     Regrettably, we need to duplicate the order_contents block from Oscar's core checkout/checkout/html template.
     This is because we want to render the frozen basket details here not the current open basket.  As of Oscar 0.5.1,
     the basket middlware injects the current open basket into the template context which stops us from being able to
-    automatically render the frozen basket using the default template.  This will be fixed in 0.6, after which we can
-    remove this block
+    automatically render the frozen basket using the default template.  This will be fixed in 0.6.  We can remove this block 
+    when we no longer support Oscar < 0.6
 {% endcomment %}
 {% block order_contents %}
     <div class="sub-header">
