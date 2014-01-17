@@ -28,5 +28,6 @@ setup(name='django-oscar-paypal',
       install_requires=[
           'django-oscar>=0.4,<0.6',
           'requests>=1.0',
-          'purl>=0.4'],
+          'purl>=0.4',
+          'ordereddict>=1.1'],
       )
