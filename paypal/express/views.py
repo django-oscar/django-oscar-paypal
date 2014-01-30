@@ -379,7 +379,7 @@ class ShippingOptionsView(View):
             pairs.append(('L_SHIPPINGOPTIONLABEL%d' % index,
                           unicode(method.name)))
             pairs.append(('L_SHIPPINGOPTIONAMOUNT%d' % index,
-                          method.basket_charge_incl_tax()))
+                          method.charge_incl_tax))
             # For now, we assume tax and insurance to be zero
             pairs.append(('L_TAXAMT%d' % index, D('0.00')))
             pairs.append(('L_INSURANCEAMT%d' % index, D('0.00')))
