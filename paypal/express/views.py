@@ -28,7 +28,7 @@ ShippingAddress = get_model('order', 'ShippingAddress')
 Country = get_model('address', 'Country')
 Basket = get_model('basket', 'Basket')
 Repository = get_class('shipping.repository', 'Repository')
-
+Applicator = get_class('offer.utils', 'Applicator')
 Selector = get_class('partner.strategy', 'Selector')
 
 
@@ -144,40 +144,52 @@ class SuccessResponseView(PaymentDetailsView):
 
     def get(self, request, *args, **kwargs):
         """
-        Fetch details about the successful transaction from
-        PayPal.  We use these details to show a preview of
-        the order with a 'submit' button to place it.
+        Fetch details about the successful transaction from PayPal.  We use
+        these details to show a preview of the order with a 'submit' button to
+        place it.
         """
         try:
             payer_id = request.GET['PayerID']
             token = request.GET['token']
         except KeyError:
             # Manipulation - redirect to basket page with warning message
-            messages.error(self.request, _("Unable to determine PayPal transaction details"))
+            messages.error(
+                self.request, _("Unable to determine PayPal transaction details"))
             return HttpResponseRedirect(reverse('basket:summary'))
 
         try:
             self.fetch_paypal_data(payer_id, token)
         except PayPalError:
-            messages.error(self.request, _("A problem occurred communicating with PayPal - please try again later"))
+            messages.error(
+                self.request, _("A problem occurred communicating with PayPal - please try again later"))
             return HttpResponseRedirect(reverse('basket:summary'))
 
-        # Lookup the frozen basket that this txn corresponds to
-        try:
-            kwargs['basket'] = Basket.objects.get(
-                id=kwargs['basket_id'], status=Basket.FROZEN)
-        except Basket.DoesNotExist:
+        # Reload frozen basket which is specified in the URL
+        kwargs['basket'] = self.load_frozen_basket(kwargs['basket_id'])
+        if not kwargs['basket']:
             messages.error(
                 self.request,
                 _("No basket was found that corresponds to your "
                   "PayPal transaction"))
             return HttpResponseRedirect(reverse('basket:summary'))
-        else:
-            # Assign strategy to basket instance
-            if Selector:
-                kwargs['basket'].strategy = Selector().strategy(self.request)
 
         return super(SuccessResponseView, self).get(request, *args, **kwargs)
+
+    def load_frozen_basket(self, basket_id):
+        # Lookup the frozen basket that this txn corresponds to
+        try:
+            basket = Basket.objects.get(id=basket_id, status=Basket.FROZEN)
+        except Basket.DoesNotExist:
+            return None
+
+        # Assign strategy to basket instance
+        if Selector:
+            basket.strategy = Selector().strategy(self.request)
+
+        # Re-apply any offers
+        Applicator().apply(self.request, basket)
+
+        return basket
 
     def post(self, request, *args, **kwargs):
         """
@@ -200,19 +212,15 @@ class SuccessResponseView(PaymentDetailsView):
             messages.error(self.request, _("A problem occurred communicating with PayPal - please try again later"))
             return HttpResponseRedirect(reverse('basket:summary'))
 
-        # Lookup the frozen basket that this txn corresponds to
-        try:
-            basket = Basket.objects.get(
-                id=kwargs['basket_id'], status=Basket.FROZEN)
-        except Basket.DoesNotExist:
+        # Reload frozen basket which is specified in the URL
+        basket = self.load_frozen_basket(kwargs['basket_id'])
+        if not basket:
             messages.error(
                 self.request,
                 _("No basket was found that corresponds to your "
                   "PayPal transaction"))
             return HttpResponseRedirect(reverse('basket:summary'))
 
-        # Assign strategy to basket instance
-        basket.strategy = Selector().strategy(self.request)
         submission = self.build_submission(basket=basket)
         return self.submit(**submission)
 
