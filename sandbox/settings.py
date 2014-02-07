@@ -13,6 +13,8 @@ ADMINS = (
 )
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+USE_TZ = True
+
 MANAGERS = ADMINS
 
 DATABASES = {
