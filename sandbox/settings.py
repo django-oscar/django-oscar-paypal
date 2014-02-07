@@ -65,7 +65,6 @@ MEDIA_URL = '/media/'
 #ADMIN_MEDIA_PREFIX = '/media/admin/'
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = (location('static/'),)
 STATIC_ROOT = location('public')
 
 # Make this unique, and don't share it with anybody.
@@ -219,6 +218,8 @@ DEBUG_TOOLBAR_CONFIG = {
 # Oscar settings
 from oscar.defaults import *
 OSCAR_ALLOW_ANON_CHECKOUT = True
+
+OSCAR_SHOP_TAGLINE = 'PayPal'
 
 # Add Payflow dashboard stuff to settings
 from django.utils.translation import ugettext_lazy as _
