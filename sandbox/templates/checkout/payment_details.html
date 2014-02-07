@@ -3,29 +3,28 @@
 {% load i18n %}
 
 {% block payment_details %}
-    <div class="sub-header">
-        <h2>{% trans "How would you like to pay?" %}</h2>
+    <div class="well">
+        <div class="sub-header">
+            <h3>{% trans "PayPal Express" %}</h3>
+        </div>
+        <p>{% trans "Click on the below icon to use Express Checkout but where the shipping address and method is already chosen on the merchant site." %}</p>
+        <div style="overflow:auto"><a href="{% url 'paypal-direct-payment' %}" title="{% trans "Pay with PayPal" %}"><img src="https://www.paypal.com/en_US/i/logo/PayPal_mark_37x23.gif" align="left" style="margin-right:7px;"></a>&nbsp;</div>
     </div>
 
-    <div class="sub-header">
-		<h3>{% trans "PayPal Express" %}</h3>
-	</div>
-	<p>{% trans "Click on the below icon to use Express Checkout but where the shipping address and method is already chosen on the merchant site." %}</p>
-
-	<div style="overflow:auto"><a href="{% url 'paypal-direct-payment' %}" title="{% trans "Pay with PayPal" %}"><img src="https://www.paypal.com/en_US/i/logo/PayPal_mark_37x23.gif" align="left" style="margin-right:7px;"></a>&nbsp;</div>
-
-    <div class="sub-header">
-		<h3>{% trans "PayPal PayFlow Pro" %}</h3>
-	</div>
-	<form method="post" action="{% url 'checkout:preview' %}" class="form-stacked">
-		{% csrf_token %}
-		<h4>{% trans "Bankcard" %}</h4>
-		{% include "partials/form_fields.html" with form=bankcard_form %}
-		<h4>{% trans "Billing address" %}</h4>
-		{% include "partials/form_fields.html" with form=billing_address_form %}
-		<div class="form-actions">
-			<button type="submit" class="btn btn-large btn-primary">{% trans "Continue" %}</button>
-		</div>
-	</form>
+    <div class="well">
+        <div class="sub-header">
+            <h3>{% trans "PayPal PayFlow Pro" %}</h3>
+        </div>
+        <form method="post" action="{% url 'checkout:preview' %}" class="form-stacked">
+            {% csrf_token %}
+            <h4>{% trans "Bankcard" %}</h4>
+            {% include "partials/form_fields.html" with form=bankcard_form %}
+            <h4>{% trans "Billing address" %}</h4>
+            {% include "partials/form_fields.html" with form=billing_address_form %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-large btn-primary">{% trans "Continue" %}</button>
+            </div>
+        </form>
+    </div>
 
 {% endblock %}
