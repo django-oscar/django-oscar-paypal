@@ -40,7 +40,5 @@ setup(name='django-oscar-paypal',
           'Operating System :: Unix',
           'Programming Language :: Python',
           'Topic :: Other/Nonlisted Topic'],
-      install_requires=[
-          'requests>=1.0',
-          'purl>=0.4'],
+      install_requires=['requests>=1.0',],
       )
