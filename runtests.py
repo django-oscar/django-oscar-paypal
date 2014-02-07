@@ -91,6 +91,7 @@ if not settings.configured:
         ROOT_URLCONF='tests.urls',
         COMPRESS_ENABLED=False,
         STATIC_URL='/',
+        STATIC_ROOT='/static/',
         NOSE_ARGS=['-s', '--with-spec'],
         **extra_settings
     )
