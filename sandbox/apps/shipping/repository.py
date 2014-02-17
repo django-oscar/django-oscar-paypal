@@ -11,15 +11,6 @@ class Repository(CoreRepository):
     the shipping features of PayPal.
     """
 
-    def get_methods(self):
-        return [Free(), FixedPrice(D('10.00'), D('10.00'))]
-
-    def get_shipping_methods(self, user, basket, shipping_addr=None,
-                             request=None, **kwargs):
-        methods = self.get_methods()
+    def get_shipping_methods(self, user, basket, shipping_addr=None, **kwargs):
+        methods = [Free(), FixedPrice(D('10.00')), FixedPrice(D('20.00'))]
         return self.prime_methods(basket, methods)
-
-    def find_by_code(self, code, basket):
-        for method in self.get_methods():
-            if code == method.code:
-                return self.prime_method(basket, method)

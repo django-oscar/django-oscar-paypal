@@ -30,8 +30,8 @@ class TransactionDetailView(generic.DetailView):
         orig_txn = self.get_object()
         if not getattr(settings, 'PAYPAL_PAYFLOW_DASHBOARD_FORMS', False):
             messages.error(self.request, _("Dashboard actions not permitted"))
-            return http.HttpResponseRedirect(
-                reverse('paypal-payflow-detail', kwargs={'pk': orig_txn.id}))
+            return http.HttpResponseRedirect(reverse('paypal-payflow-detail',
+                                                     kwargs={'pk': orig_txn.id}))
         dispatch_map = {
             'credit': self.credit,
             'void': self.void,
@@ -46,13 +46,11 @@ class TransactionDetailView(generic.DetailView):
         try:
             txn = facade.delayed_capture(orig_txn.comment1)
         except Exception, e:
-            messages.error(
-                self.request, _("Unable to settle transaction - %s") % e)
-            return http.HttpResponseRedirect(
-                reverse('paypal-payflow-detail', kwargs={'pk': orig_txn.id}))
+            messages.error(self.request, _("Unable to settle transaction - %s") % e)
+            return http.HttpResponseRedirect(reverse('paypal-payflow-detail',
+                                                     kwargs={'pk': orig_txn.id}))
         else:
-            messages.success(
-                self.request, _("Transaction %s settled") % orig_txn.pnref)
+            messages.success(self.request, _("Transaction %s settled") % orig_txn.pnref)
             return http.HttpResponseRedirect(reverse('paypal-payflow-detail',
                                                      kwargs={'pk': txn.id}))
 

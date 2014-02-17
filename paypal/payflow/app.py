@@ -1,9 +1,9 @@
-from django.conf.urls import patterns, url
+from django.conf.urls.defaults import patterns, url
 from django.contrib.admin.views.decorators import staff_member_required
 
 from oscar.core.application import Application
 
-from . import views
+from paypal.payflow import views
 
 
 class PayFlowDashboardApplication(Application):

@@ -65,21 +65,6 @@ if not settings.configured:
             'django.middleware.transaction.TransactionMiddleware',
             'oscar.apps.basket.middleware.BasketMiddleware',
         ),
-        TEMPLATE_CONTEXT_PROCESSORS = (
-            "django.contrib.auth.context_processors.auth",
-            "django.core.context_processors.request",
-            "django.core.context_processors.debug",
-            "django.core.context_processors.i18n",
-            "django.core.context_processors.media",
-            "django.core.context_processors.static",
-            "django.contrib.messages.context_processors.messages",
-            # Oscar specific
-            'oscar.apps.search.context_processors.search_form',
-            'oscar.apps.promotions.context_processors.promotions',
-            'oscar.apps.checkout.context_processors.checkout',
-            'oscar.core.context_processors.metadata',
-            'oscar.apps.customer.notifications.context_processors.notifications',
-        ),
         DEBUG=False,
         SOUTH_TESTS_MIGRATE=False,
         HAYSTACK_CONNECTIONS={
@@ -92,7 +77,6 @@ if not settings.configured:
         ROOT_URLCONF='tests.urls',
         COMPRESS_ENABLED=False,
         STATIC_URL='/',
-        STATIC_ROOT='/static/',
         NOSE_ARGS=['-s', '--with-spec'],
         **extra_settings
     )

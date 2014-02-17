@@ -7,7 +7,7 @@ from django.views import generic
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.checkout import views
-from oscar.apps.payment import forms, models
+from oscar.apps.payment import forms, exceptions, models
 
 from paypal.payflow import facade
 from paypal.adaptive import gateway
@@ -66,15 +66,18 @@ class PaymentDetailsView(views.PaymentDetailsView):
                 'billing_address': billing_address_form.cleaned_data})
 
     def handle_payment(self, order_number, total_incl_tax, **kwargs):
-
-        """ Make submission to PayPal """
-        # Using authorization here (two-stage model).  You could use sale to
-        # perform the auth and capture in one step.  The choice is dependent
-        # on your business model.
-        facade.authorize(order_number,
-                         total_incl_tax,
-                         kwargs['bankcard'],
-                         kwargs['billing_address'])
+        # Make submission to PayPal.
+        try:
+            # Using authorization here (two-stage model).  You could use sale
+            # to perform the auth and capture in one step.  The choice is
+            # dependent on your business model.
+            facade.authorize(order_number,
+                             total_incl_tax,
+                             kwargs['bankcard'],
+                             kwargs['billing_address'])
+        except facade.NotApproved, e:
+            # Submission failed
+            raise exceptions.UnableToTakePayment(e.message)
 
         # Record payment source and event
         source_type, is_created = models.SourceType.objects.get_or_create(

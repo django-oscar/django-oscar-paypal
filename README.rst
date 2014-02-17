@@ -62,27 +62,9 @@ Tests
 Changelog
 ---------
 
-0.8
-~~~
-* Support Oscar 0.6
-* Fix bug with offers not being applied to basket on return from PayPal site.
-
-0.7
-~~~
-* Remove Oscar from ``install_requires``
-
-0.6.2
-~~~~~
-* Support the "Pay" API of Adaptive Payments
-
-0.6.1
-~~~~~
-* Persist shipping method name when using PayPal Express as a payment method
-  only.
-
 0.6
 ~~~
-* Add support for ``NO_SHIPPING`` option with PayPal Express.
+* Support the "Pay" API of Adaptive Payments
 
 0.5
 ~~~

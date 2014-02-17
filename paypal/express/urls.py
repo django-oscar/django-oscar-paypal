@@ -1,4 +1,4 @@
-from django.conf.urls import *
+from django.conf.urls.defaults import *
 from django.views.decorators.csrf import csrf_exempt
 
 from paypal.express import views
