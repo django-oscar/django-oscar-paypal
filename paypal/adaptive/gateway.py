@@ -4,14 +4,20 @@ Adaptive payments:
 https://www.x.com/developers/paypal/documentation-tools/adaptive-payments/gs_AdaptivePayments
 """
 import random
-import collections
+from collections import namedtuple
+try:
+    from collections import OrderedDict
+except ImportError:
+    # python 2.6 implementation
+    from ordereddict import OrderedDict
+
 from decimal import Decimal as D
 from django.conf import settings
 
 from paypal import gateway, models
 
 # Custom tuple for submitting receiver information
-Receiver = collections.namedtuple('Receiver', 'email amount is_primary')
+Receiver = namedtuple('Receiver', 'email amount is_primary')
 
 # Enum class for who pays the fees
 # See pg 80 of the guide
@@ -26,6 +32,7 @@ Fees = type('Feeds', (), {
 def generate_token(length=32):
     return ''.join([chr(random.choice(range(ord('a'), ord('z'))))\
                     for _ in range(0, length)])
+
 
 def payment_details(pay_key):
     """
@@ -131,7 +138,7 @@ def _request(action, params, request_token, headers=None, txn_fields=None):
     # We use an OrderedDict as the key-value pairs have to be in the correct
     # order(!).  Otherwise, PayPal returns error 'Invalid request: {0}'
     # with errorId 580001.  All very silly.
-    param_dict = collections.OrderedDict(params)
+    param_dict = OrderedDict(params)
     pairs = gateway.post(url, param_dict, request_headers)
 
     # Create model that represents request/response
