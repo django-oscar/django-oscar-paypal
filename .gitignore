@@ -13,12 +13,6 @@ htmlcov
 .coverage
 .coveralls.yml
 
-# Database
-sandbox/db.sqlite
-
 # Sensitive data
 TODO
 integration.py
-
-# Sandbox
-sandbox/public/media

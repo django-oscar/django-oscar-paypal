@@ -1,7 +1,7 @@
 from decimal import Decimal as D
 
 from django.test import TestCase
-from oscar.apps.payment.models import Bankcard
+from oscar.apps.payment.utils import Bankcard
 from oscar.apps.payment import exceptions
 import mock
 
@@ -12,7 +12,6 @@ from paypal.payflow import codes
 """
 See page 49 of the PDF for information on PayPal's testing set-up
 """
-
 
 class TestAuthorize(TestCase):
 
@@ -58,7 +57,7 @@ class TestSale(TestCase):
 
     def setUp(self):
         self.card = Bankcard(
-            number='4111111111111111',
+            card_number='4111111111111111',
             name='John Doe',
             expiry_date='12/13',
         )

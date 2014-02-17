@@ -13,8 +13,6 @@ ADMINS = (
 )
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-USE_TZ = True
-
 MANAGERS = ADMINS
 
 DATABASES = {
@@ -27,7 +25,6 @@ DATABASES = {
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
-ATOMIC_REQUESTS = True
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -67,6 +64,7 @@ MEDIA_URL = '/media/'
 #ADMIN_MEDIA_PREFIX = '/media/admin/'
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (location('static/'),)
 STATIC_ROOT = location('public')
 
 # Make this unique, and don't share it with anybody.
@@ -100,6 +98,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.transaction.TransactionMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'oscar.apps.basket.middleware.BasketMiddleware',
@@ -172,16 +171,11 @@ LOGGING = {
             'propagate': True,
             'level': 'DEBUG',
         },
-        'paypal.payflow': {
-            'handlers': ['console'],
-            'propagate': True,
-            'level': 'DEBUG',
-        },
     }
 }
 
 
-INSTALLED_APPS = [
+INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -193,16 +187,39 @@ INSTALLED_APPS = [
     # External apps
     'django_extensions',
     'debug_toolbar',
+    'haystack',
     # Apps from oscar
+    'oscar',
+    'oscar.apps.analytics',
+    'oscar.apps.order',
+    'oscar.apps.catalogue',
+    'oscar.apps.catalogue.reviews',
+    'oscar.apps.basket',
+    'oscar.apps.payment',
+    'oscar.apps.offer',
+    'oscar.apps.address',
+    'oscar.apps.partner',
+    'oscar.apps.customer',
+    'oscar.apps.promotions',
+    'oscar.apps.search',
+    'oscar.apps.voucher',
+    'oscar.apps.dashboard',
+    'oscar.apps.dashboard.reports',
+    'oscar.apps.dashboard.users',
+    'oscar.apps.dashboard.orders',
+    'oscar.apps.dashboard.offers',
+    'oscar.apps.dashboard.ranges',
+    'oscar.apps.dashboard.vouchers',
+    'oscar.apps.dashboard.promotions',
+    'oscar.apps.dashboard.catalogue',
+    'oscar.apps.dashboard.communications',
+    'sorl.thumbnail',
     'paypal',
+    'apps.shipping',
+    'apps.checkout',
     'south',
     'compressor'
-]
-
-from oscar import get_core_apps
-INSTALLED_APPS = INSTALLED_APPS + get_core_apps([
-    'apps.shipping',
-    'apps.checkout'])
+)
 
 AUTHENTICATION_BACKENDS = (
     'oscar.apps.customer.auth_backends.Emailbackend',
@@ -219,8 +236,6 @@ DEBUG_TOOLBAR_CONFIG = {
 # Oscar settings
 from oscar.defaults import *
 OSCAR_ALLOW_ANON_CHECKOUT = True
-
-OSCAR_SHOP_TAGLINE = 'PayPal'
 
 # Add Payflow dashboard stuff to settings
 from django.utils.translation import ugettext_lazy as _
@@ -268,9 +283,7 @@ PAYPAL_API_USERNAME = 'sdk-three_api1.sdk.com'
 PAYPAL_API_PASSWORD = 'QFZCWN5HZM8VBG7Q'
 PAYPAL_API_SIGNATURE = 'A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU'
 
-# Standard currency is GBP
-PAYPAL_CURRENCY = PAYPAL_PAYFLOW_CURRENCY = 'GBP'
-
+PAYPAL_PAYFLOW_CURRENCY = 'GBP'
 PAYPAL_PAYFLOW_DASHBOARD_FORMS = True
 
 # See http://stackoverflow.com/questions/9164332/how-do-i-get-an-application-id-for-the-paypal-sandbox

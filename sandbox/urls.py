@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls.defaults import patterns, include, url
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -6,7 +6,7 @@ from django.conf.urls.static import static
 from django.views.generic import TemplateView
 
 from apps.app import application
-from paypal.payflow.dashboard.app import application as payflow
+from paypal.payflow.app import application as payflow
 from paypal.express.dashboard.app import application as express_dashboard
 from paypal.adaptive.dashboard.app import application as adaptive_dashboard
 
