@@ -38,6 +38,7 @@
                     <th>{% trans "Token" %}</th>
                     <th>{% trans "Error code" %}</th>
                     <th>{% trans "Error message" %}</th>
+                    <th>{% trans "Date" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -50,6 +51,7 @@
                         <td>{{ txn.token|default:'-' }}</td>
                         <td>{{ txn.error_code|default:'-' }}</td>
                         <td>{{ txn.error_message|default:'-' }}</td>
+                        <td>{{ txn.date_created }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

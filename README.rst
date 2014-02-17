@@ -11,7 +11,7 @@ PayPal package for django-oscar
 This package provides integration between django-oscar_ and several PayPal
 products, including:
 
-- `PayPal Express`_, 
+- `PayPal Express`_,
 - `PayPal Payflow Pro`_.
 - `PayPal Adaptive Payments`_
 
@@ -62,9 +62,24 @@ Tests
 Changelog
 ---------
 
+0.8
+~~~
+* Support Oscar 0.6
+* Fix bug with offers not being applied to basket on return from PayPal site.
+* Support the "Pay" API of Adaptive Payments
+
+0.7
+~~~
+* Remove Oscar from ``install_requires``
+
+0.6.1
+~~~~~
+* Persist shipping method name when using PayPal Express as a payment method
+  only.
+
 0.6
 ~~~
-* Support the "Pay" API of Adaptive Payments
+* Add support for ``NO_SHIPPING`` option with PayPal Express.
 
 0.5
 ~~~

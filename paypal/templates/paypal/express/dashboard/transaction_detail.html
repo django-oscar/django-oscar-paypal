@@ -36,11 +36,14 @@
         <tbody>
             <tr><th>{% trans "Correlation ID" %}</th><td>{{ txn.correlation_id }}</td></tr>
             <tr><th>{% trans "Method" %}</th><td>{{ txn.method }}</td></tr>
-            <tr><th>{% trans "Amount" %}</th><td>{{ txn.amount|currency|default:"-" }}</td></tr>
+            <tr><th>{% trans "Amount" %}</th><td>{{ txn.amount|default:"-" }}</td></tr>
+            <tr><th>{% trans "Currency" %}</th><td>{{ txn.currency }}</td></tr>
             <tr><th>{% trans "Result" %}</th><td>{{ txn.ack }}</td></tr>
             <tr><th>{% trans "Token" %}</th><td>{{ txn.token|default:"-" }}</td></tr>
             <tr><th>{% trans "Error code" %}</th><td>{{ txn.error_code|default:'-' }}</td></tr>
             <tr><th>{% trans "Error message" %}</th><td>{{ txn.error_message|default:"-" }}</td></tr>
+            <tr><th>{% trans "Request params" %}</th><td>{{ txn.request|safe }}</td></tr>
+            <tr><th>{% trans "Response params" %}</th><td>{{ txn.response|safe }}</td></tr>
             <tr><th>{% trans "Raw request" %}</th><td>{{ txn.raw_request }}</td></tr>
             <tr><th>{% trans "Raw response" %}</th><td>{{ txn.raw_response }}</td></tr>
             <tr><th>{% trans "Date" %}</th><td>{{ txn.date_created }}</td></tr>

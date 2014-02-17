@@ -85,7 +85,7 @@ class TestOrderTotal(TestCase):
 
     def test_includes_default_shipping_charge(self):
         basket = create_mock_basket(D('10.00'))
-        shipping_methods = [FixedPrice(D('2.50'))]
+        shipping_methods = [FixedPrice(D('2.50'), D('2.50'))]
 
         with patch('paypal.express.gateway._fetch_response') as mock_fetch:
             gateway.set_txn(basket, shipping_methods, 'GBP', 'http://example.com',
