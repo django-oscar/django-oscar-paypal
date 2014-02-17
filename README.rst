@@ -66,11 +66,14 @@ Changelog
 ~~~
 * Support Oscar 0.6
 * Fix bug with offers not being applied to basket on return from PayPal site.
-* Support the "Pay" API of Adaptive Payments
 
 0.7
 ~~~
 * Remove Oscar from ``install_requires``
+
+0.6.2
+~~~~~
+* Support the "Pay" API of Adaptive Payments
 
 0.6.1
 ~~~~~
