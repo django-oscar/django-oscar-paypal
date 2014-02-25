@@ -1,6 +1,5 @@
 import requests
 import time
-import urllib
 import urlparse
 
 from paypal import exceptions
@@ -17,10 +16,12 @@ def post(url, params):
     for k in params.keys():
         if type(params[k]) == unicode:
             params[k] = params[k].encode('utf-8')
-    payload = urllib.urlencode(params.items())
+
+    # paylfow is not expecting urlencoding (e.g. %, +), therefore don't use urllib.urlencode().
+    payload = '&'.join(['%s=%s' % (key, val) for (key, val) in params.items()])
 
     start_time = time.time()
-    response = requests.post(url, payload)
+    response = requests.post(url, payload, headers={'content-type': 'text/namevalue; charset=utf-8'})
     if response.status_code != requests.codes.ok:
         raise exceptions.PayPalError("Unable to communicate with PayPal")
 
