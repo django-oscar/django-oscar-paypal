@@ -4,7 +4,9 @@
 {% load url from future %}
 
 {% block title %}
-    {% trans "PayPal Payflow transaction" %} {{ txn.pnref }} | {{ block.super }}
+    {% blocktrans with pnref=txn.pnref %}
+        PayPal Payflow transaction {{ pnref }}
+    {% endblocktrans %} | {{ block.super }}
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -17,16 +19,21 @@
             <a href="{% url 'paypal-payflow-list' %}">{% trans "PayPal Payflow" %}</a>
             <span class="divider">/</span>
         </li>
-        <li class="active"><a href=".">{% trans "Transaction" %} {{ txn.pnref }}</a></li>
+        <li class="active">
+            {% blocktrans with pnref=txn.pnref %}
+                Transaction {{ pnref }}
+            {% endblocktrans %}
+        </li>
     </ul>
 {% endblock %}
 
+{% block headertext %}
+    {% blocktrans with pnref=txn.pnref %}
+        Transaction {{ pnref }}
+    {% endblocktrans %}
+{% endblock %}
+
 {% block dashboard_content %}
-
-    <div class="sub-header">
-        <h2>{% trans "Transaction" %} {{ txn.pnref }}</h2>
-    </div>
-
     <table class="table table-striped table-bordered">
         <tbody>
             <tr><th>{% trans "Payflow transaction ID (PNREF)" %}</th><td>{{ txn.pnref }}</td></tr>
