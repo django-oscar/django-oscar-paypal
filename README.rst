@@ -64,6 +64,14 @@ Tests
 Changelog
 ---------
 
+0.8.1
+~~~~~
+* Ensure sandbox demo site works correctly with Oscar 0.6
+* Fix a bug with Payflow Pro using wrong bankcard attribute for expiry dates.
+* Remove Oscar version verification in ``setup.py``
+* Use content-type ``text/namevalue`` when submitting key-value pairs to
+  PayPal.
+
 0.8
 ~~~
 * Support Oscar 0.6
