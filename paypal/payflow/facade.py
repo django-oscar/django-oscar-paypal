@@ -3,9 +3,7 @@ Bridging module between Oscar and the gateway module (which is Oscar agnostic)
 """
 from oscar.apps.payment import exceptions
 
-from paypal.payflow import gateway
-from paypal.payflow import models
-from paypal.payflow import codes
+from paypal.payflow import gateway, models, codes
 
 
 def authorize(order_number, amt, bankcard, billing_address=None):
@@ -25,11 +23,11 @@ def authorize(order_number, amt, bankcard, billing_address=None):
     :amt: Amount for transaction
     :bankcard: Instance of Oscar's Bankcard class (which is just a dumb wrapper
                around the pertinent bankcard attributes).
-    :billing_address: A dict of billing address information (which can come from
-                      the `cleaned_data` of a billing address form).
+    :billing_address: A dict of billing address information (which can
+                      come from the `cleaned_data` of a billing address form).
     """
-    return _submit_payment_details(gateway.authorize, order_number, amt, bankcard,
-                                   billing_address)
+    return _submit_payment_details(
+        gateway.authorize, order_number, amt, bankcard, billing_address)
 
 
 def sale(order_number, amt, bankcard, billing_address=None):
@@ -54,12 +52,9 @@ def sale(order_number, amt, bankcard, billing_address=None):
                                    billing_address)
 
 
-def _submit_payment_details(gateway_fn, order_number, amt, bankcard, billing_address=None):
-    # Oscar's bankcard class returns dates in form '01/02' - we strip the '/' to
-    # conform to PayPal's conventions.
-    exp_date = bankcard.expiry_date.replace('/', '')
-
-    # Remap address fields if set
+def _submit_payment_details(
+        gateway_fn, order_number, amt, bankcard, billing_address=None):
+    # Remap address fields if set.
     address_fields = {}
     if billing_address:
         address_fields.update({
@@ -75,7 +70,7 @@ def _submit_payment_details(gateway_fn, order_number, amt, bankcard, billing_add
         order_number,
         card_number=bankcard.card_number,
         cvv=bankcard.cvv,
-        expiry_date=exp_date,
+        expiry_date=bankcard.expiry_month("%m%y"),
         amt=amt,
         **address_fields)
     if not txn.is_approved:
