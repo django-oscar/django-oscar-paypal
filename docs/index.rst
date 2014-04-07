@@ -31,7 +31,11 @@ Install::
 
     pip install django-oscar-paypal
 
-add ``paypal`` to your ``INSTALLED_APPS``, and run::
+By default, this won't install Oscar as well. To install Oscar, run::
+
+    pip install "django-oscar-paypal[oscar]"
+
+Finally, add ``paypal`` to your ``INSTALLED_APPS``, and run::
 
     python manage.py syncdb
 
@@ -44,7 +48,6 @@ Table of contents
     express
     payflow
     contributing
-
 
 Indices and tables
 ==================
