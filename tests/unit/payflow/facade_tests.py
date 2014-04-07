@@ -1,13 +1,12 @@
 from decimal import Decimal as D
+import datetime
 
 from django.test import TestCase
 from oscar.apps.payment.models import Bankcard
 from oscar.apps.payment import exceptions
 import mock
 
-from paypal.payflow import facade
-from paypal.payflow import models
-from paypal.payflow import codes
+from paypal.payflow import facade, models, codes
 
 """
 See page 49 of the PDF for information on PayPal's testing set-up
@@ -20,7 +19,7 @@ class TestAuthorize(TestCase):
         self.card = Bankcard(
             card_number='4111111111111111',
             name='John Doe',
-            expiry_date='12/13',
+            expiry_date=datetime.date(2015, 8, 1),
         )
 
     def authorize(self):
@@ -60,7 +59,7 @@ class TestSale(TestCase):
         self.card = Bankcard(
             number='4111111111111111',
             name='John Doe',
-            expiry_date='12/13',
+            expiry_date=datetime.date(2015, 8, 1),
         )
 
     def sale(self):
