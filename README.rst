@@ -15,7 +15,7 @@ Express`_ and `PayPal Payflow Pro`_.
 .. _`PayPal Express`: https://www.paypal.com/uk/cgi-bin/webscr?cmd=_additional-payment-ref-impl1
 .. _`PayPal Payflow Pro`: https://merchant.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=merchant/payment_gateway
 
-These payment options can be used individually or both together.  Further, the
+These payment options can be used individually or together.  Further, the
 package is structured so that it can be used without Oscar if you so wish.
 
 * `Full documentation`_
@@ -26,22 +26,29 @@ package is structured so that it can be used without Oscar if you so wish.
 License
 -------
 
-The package is released under the new BSD license.
+The package is released under the `New BSD license`_.
+
+.. _`New BSD license`: https://github.com/tangentlabs/django-oscar-paypal/blob/master/LICENSE
 
 Support
 -------
 
 Having problems or got a question?
 
-* Have a look at the sandbox installation as this is a sample Oscar project
+* Have a look at the sandbox site as this is a sample Oscar project
   integrated with both PayPal options.  See the `contributing guide`_ within the
   docs for instructions on how to set up the sandbox locally.
+
 * Ping `@django_oscar`_ with quick queries.
-* Ask more detailed questions on the Oscar mailing list: django-oscar@googlegroups.com.
-* Use Github for submitting issues and pull requests.
+
+* Ask more detailed questions on the Oscar mailing list: `django-oscar@googlegroups.com`_
+
+* Use Github_ for submitting issues and pull requests.
 
 .. _`@django_oscar`: https://twitter.com/django_oscar
 .. _`contributing guide`: http://django-oscar-paypal.readthedocs.org/en/latest/contributing.html
+.. _`django-oscar@googlegroups.com`: https://groups.google.com/forum/?fromgroups#!forum/django-oscar
+.. _`Github`: http://github.com/tangentlabs/django-oscar-paypal
 
 Tests
 -----
