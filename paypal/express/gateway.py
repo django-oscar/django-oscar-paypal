@@ -4,6 +4,7 @@ from decimal import Decimal as D
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.html import strip_tags
 from django.utils.translation import ugettext as _
 from django.template.defaultfilters import truncatewords
 
@@ -190,7 +191,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
                                                          product.upc else '')
         desc = ''
         if product.description:
-            desc = truncatewords(product.description, 12)
+            desc = truncatewords(strip_tags(product.description), 12)
         params['L_PAYMENTREQUEST_0_DESC%d' % index] = desc
         # Note, we don't include discounts here - they are handled as separate
         # lines - see below

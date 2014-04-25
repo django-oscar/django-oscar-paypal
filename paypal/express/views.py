@@ -101,14 +101,11 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
             shipping_methods = Repository().get_shipping_methods(user, basket)
             params['shipping_methods'] = shipping_methods
 
-        if settings.DEBUG:
-            # Determine the localserver's hostname to use when
-            # in testing mode
-            params['host'] = self.request.META['HTTP_HOST']
-            if getattr(settings, 'PAYPAL_SANDBOX_MODE', False):
-                params['scheme'] = 'http'
-            else:
-                params['scheme'] = 'https'
+        usehttps = getattr(settings, 'PAYPAL_CALLBACK_HTTPS', True)
+        if usehttps:
+            params['scheme'] = 'https'
+        else:
+            params['scheme'] = 'http'
 
         if user.is_authenticated():
             params['user'] = user
