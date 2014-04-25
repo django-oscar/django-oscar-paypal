@@ -1,6 +1,7 @@
 import requests
 import time
 import urlparse
+import urllib
 
 from paypal import exceptions
 
@@ -17,9 +18,7 @@ def post(url, params):
         if type(params[k]) == unicode:
             params[k] = params[k].encode('utf-8')
 
-    # PayPal is not expecting urlencoding (e.g. %, +), therefore don't use
-    # urllib.urlencode().
-    payload = '&'.join(['%s=%s' % (key, val) for (key, val) in params.items()])
+    payload = urllib.urlencode(params.items())
 
     start_time = time.time()
     response = requests.post(
