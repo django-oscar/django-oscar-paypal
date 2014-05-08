@@ -14,10 +14,9 @@
             <span class="divider">/</span>
         </li>
         <li>
-            <a href="{% url 'paypal-express-list' %}">{% trans "PayPal Express" %}</a>
-            <span class="divider">/</span>
+            PayPal <span class="divider">/</span>
         </li>
-        <li class="active">{% trans "Transactions" %}</li>
+        <li class="active">{% trans "Express transactions" %}</li>
     </ul>
 {% endblock %}
 
@@ -47,7 +46,7 @@
                         <td><a href="{% url 'paypal-express-detail' txn.id %}">{{ txn.correlation_id|default:"-" }}</a></td>
                         <td>{{ txn.method }}</td>
                         <td>{{ txn.ack }}</td>
-                        <td>{{ txn.amount|currency|default:"-" }} {{ txn.currency }}</td>
+                        <td>{{ txn.amount|currency:txn.currency }}</td>
                         <td>{{ txn.token|default:'-' }}</td>
                         <td>{{ txn.error_code|default:'-' }}</td>
                         <td>{{ txn.error_message|default:'-' }}</td>

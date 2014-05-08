@@ -21,18 +21,24 @@ class ResponseModel(models.Model):
 
     def request(self):
         request_params = urlparse.parse_qs(self.raw_request)
-        return self._as_table(request_params)
+        return self._as_dl(request_params)
     request.allow_tags = True
 
     def response(self):
-        return self._as_table(self.context)
+        return self._as_dl(self.context)
     response.allow_tags = True
 
     def _as_table(self, params):
         rows = []
         for k, v in sorted(params.items()):
-            rows.append('<tr><th>%s</th><td>%s</td></tr>' % (k, v[0]))
+            rows.append('<tbody><tr><th>%s</th><td>%s</td></tr></tbody>' % (k, v[0]))
         return '<table>%s</table>' % ''.join(rows)
+
+    def _as_dl(self, params):
+        rows = []
+        for k, v in sorted(params.items()):
+            rows.append('<dt>%s</dt><dd>%s</dd>' % (k, v[0]))
+        return '<dl>%s</dl>' % ''.join(rows)
 
     @property
     def context(self):
