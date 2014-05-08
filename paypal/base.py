@@ -38,6 +38,6 @@ class ResponseModel(models.Model):
     def context(self):
         return urlparse.parse_qs(self.raw_response)
 
-    def value(self, key):
+    def value(self, key, default=None):
         ctx = self.context
-        return ctx[key][0].decode('utf8') if key in ctx else None
+        return ctx[key][0].decode('utf8') if key in ctx else default

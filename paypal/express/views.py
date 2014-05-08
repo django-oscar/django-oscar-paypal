@@ -312,9 +312,9 @@ class SuccessResponseView(PaymentDetailsView):
             first_name=first_name,
             last_name=last_name,
             line1=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET'),
-            line2=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET2'),
-            line4=self.txn.value('PAYMENTREQUEST_0_SHIPTOCITY'),
-            state=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTATE'),
+            line2=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET2', default=""),
+            line4=self.txn.value('PAYMENTREQUEST_0_SHIPTOCITY', default=""),
+            state=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTATE', default=""),
             postcode=self.txn.value('PAYMENTREQUEST_0_SHIPTOZIP'),
             country=Country.objects.get(iso_3166_1_a2=self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'))
         )
