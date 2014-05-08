@@ -142,6 +142,9 @@ class SuccessResponseView(PaymentDetailsView):
     template_name_preview = 'paypal/express/preview.html'
     preview = True
 
+    # We don't have the usual pre-conditions
+    pre_conditions = ()
+
     def get(self, request, *args, **kwargs):
         """
         Fetch details about the successful transaction from PayPal.  We use
@@ -330,9 +333,10 @@ class SuccessResponseView(PaymentDetailsView):
         method = FixedPrice(charge_excl_tax, charge_incl_tax)
         method.set_basket(basket)
         name = self.txn.value('SHIPPINGOPTIONNAME')
+
         if not name:
-            # Look to see if there is a method in the session
-            session_method = self.checkout_session.shipping_method(basket)
+            session_method = super(SuccessResponseView, self).get_shipping_method(
+                basket, shipping_address, **kwargs)
             if session_method:
                 method.name = session_method.name
         else:
