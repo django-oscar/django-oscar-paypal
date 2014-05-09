@@ -5,7 +5,7 @@ from decimal import Decimal as D
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext as _
-from django.template.defaultfilters import truncatewords
+from django.template.defaultfilters import truncatewords, striptags
 
 from paypal.express import models
 from paypal import gateway
@@ -28,6 +28,12 @@ SALE, AUTHORIZATION, ORDER = 'Sale', 'Authorization', 'Order'
 API_VERSION = getattr(settings, 'PAYPAL_API_VERSION', '88.0')
 
 logger = logging.getLogger('paypal.express')
+
+
+def _format_description(description):
+    if description:
+        return truncatewords(striptags(description), 12)
+    return ''
 
 
 def _format_currency(amt):
@@ -190,7 +196,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
                                                          product.upc else '')
         desc = ''
         if product.description:
-            desc = truncatewords(product.description, 12)
+            desc = _format_description(product.description)
         params['L_PAYMENTREQUEST_0_DESC%d' % index] = desc
         # Note, we don't include discounts here - they are handled as separate
         # lines - see below
@@ -209,7 +215,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         index += 1
         name = _("Special Offer: %s") % discount['name']
         params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
-        params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
+        params['L_PAYMENTREQUEST_0_DESC%d' % index] = _format_description(name)
         params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
             -discount['discount'])
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
@@ -218,7 +224,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         name = "%s (%s)" % (discount['voucher'].name,
                             discount['voucher'].code)
         params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
-        params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
+        params['L_PAYMENTREQUEST_0_DESC%d' % index] = _format_description(name)
         params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
             -discount['discount'])
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
@@ -226,7 +232,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         index += 1
         name = _("Shipping Offer: %s") % discount['name']
         params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
-        params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
+        params['L_PAYMENTREQUEST_0_DESC%d' % index] = _format_description(name)
         params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
             -discount['discount'])
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
