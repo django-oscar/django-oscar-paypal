@@ -1,6 +1,7 @@
 import requests
 import time
 import urlparse
+import urllib
 
 from paypal import exceptions
 
@@ -13,13 +14,12 @@ def post(url, params):
     :url: URL to post to
     :params: Dict of parameters to include in post payload
     """
+
+    # Ensure all values are bytestrings before passing to urllib
     for k in params.keys():
         if type(params[k]) == unicode:
             params[k] = params[k].encode('utf-8')
-
-    # PayPal is not expecting urlencoding (e.g. %, +), therefore don't use
-    # urllib.urlencode().
-    payload = '&'.join(['%s=%s' % (key, val) for (key, val) in params.items()])
+    payload = urllib.urlencode(params.items())
 
     start_time = time.time()
     response = requests.post(
@@ -31,7 +31,7 @@ def post(url, params):
     # Convert response into a simple key-value format
     pairs = {}
     for key, values in urlparse.parse_qs(response.content).items():
-        pairs[key] = values[0]
+        pairs[key.decode('utf-8')] = values[0].decode('utf-8')
 
     # Add audit information
     pairs['_raw_request'] = payload
