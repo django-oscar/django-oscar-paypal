@@ -64,6 +64,12 @@ Tests
 Changelog
 ---------
 
+0.9
+~~~
+* Support Oscar 0.7 (note that this release only works with 0.7.1 onwards)
+* Fix bug around unicode handling
+* Allow scheme of callback URL to be specified in a setting
+
 0.8.1
 ~~~~~
 * Ensure sandbox demo site works correctly with Oscar 0.6
