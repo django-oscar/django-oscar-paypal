@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import urllib
 import logging
 from decimal import Decimal as D

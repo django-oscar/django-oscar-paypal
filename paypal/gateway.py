@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import requests
 import time
 import urlparse
@@ -19,8 +21,12 @@ def post(url, params):
 
     # PayPal is not expecting urlencoding (e.g. %, +), therefore don't use
     # urllib.urlencode().
-    payload = '&'.join(['%s=%s' % (key, val) for (key, val) in params.items()])
-
+    payloads = []
+    for (key, val) in params.items():
+        if type(val) == unicode:
+            val = val.encode('utf-8')
+        payloads.append(b'%s=%s' % (key.encode('utf-8'), val))
+    payload = b'&'.join(payloads)
     start_time = time.time()
     response = requests.post(
         url, payload,
@@ -31,7 +37,7 @@ def post(url, params):
     # Convert response into a simple key-value format
     pairs = {}
     for key, values in urlparse.parse_qs(response.content).items():
-        pairs[key] = values[0]
+        pairs[key.decode('utf-8')] = values[0].decode('utf-8')
 
     # Add audit information
     pairs['_raw_request'] = payload
