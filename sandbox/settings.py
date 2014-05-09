@@ -281,6 +281,7 @@ except ImportError:
 
 # Taken from PayPal's documentation - these should always work in the sandbox
 PAYPAL_SANDBOX_MODE = True
+PAYPAL_CALLBACK_HTTPS = False
 PAYPAL_API_VERSION = '88.0'
 
 # These are the standard PayPal sandbox details from the docs - but I don't

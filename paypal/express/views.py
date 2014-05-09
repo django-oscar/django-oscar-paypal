@@ -112,10 +112,6 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
             # Determine the localserver's hostname to use when
             # in testing mode
             params['host'] = self.request.META['HTTP_HOST']
-            if getattr(settings, 'PAYPAL_SANDBOX_MODE', False):
-                params['scheme'] = 'http'
-            else:
-                params['scheme'] = 'https'
 
         if user.is_authenticated():
             params['user'] = user

@@ -22,7 +22,7 @@ def _get_payment_action():
 
 
 def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
-                   shipping_method=None, host=None, scheme='https',
+                   shipping_method=None, host=None, scheme=None,
                    paypal_params=None):
     """
     Return the URL for a PayPal Express transaction.
@@ -35,6 +35,9 @@ def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
     currency = getattr(settings, 'PAYPAL_CURRENCY', 'GBP')
     if host is None:
         host = Site.objects.get_current().domain
+    if scheme is None:
+        use_https = getattr(settings, 'PAYPAL_CALLBACK_HTTPS', True)
+        scheme = 'https' if use_https else 'http'
     return_url = '%s://%s%s' % (
         scheme, host, reverse('paypal-success-response', kwargs={
             'basket_id': basket.id}))
