@@ -9,7 +9,7 @@ PayPal package for django-oscar
     :target: https://crate.io/packages/django-oscar-paypal/
 
 This package provides integration between django-oscar_ and both `PayPal
-Express`_ and `PayPal Payflow Pro`_.
+Express`_ and `PayPal Payflow Pro`_. 
 
 .. _django-oscar: https://github.com/tangentlabs/django-oscar
 .. _`PayPal Express`: https://www.paypal.com/uk/cgi-bin/webscr?cmd=_additional-payment-ref-impl1
@@ -67,6 +67,7 @@ Changelog
 0.9
 ~~~
 * Support Oscar 0.7 (note that this release only works with 0.7.1 onwards)
+* Drop support for Oscar 0.5
 * Fix bug around unicode handling
 * Allow scheme of callback URL to be specified in a setting
 
