@@ -59,7 +59,10 @@ def _fetch_response(method, extra_params):
     else:
         url = 'https://api-3t.paypal.com/nvp'
 
-    param_str = "\n".join(["%s: %s" % x for x in params.items()])
+    # Print easy-to-read version of params for debugging
+    param_list = params.items()
+    param_list.sort()
+    param_str = "\n".join(["%s: %s" % x for x in param_list])
     logger.debug("Making %s request to %s with params:\n%s", method, url,
                  param_str)
 
