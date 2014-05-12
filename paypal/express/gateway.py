@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext as _
 from django.template.defaultfilters import truncatewords, striptags
+from localflavor.us import us_states
 
 from paypal.express import models
 from paypal import gateway
@@ -290,6 +291,14 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['SHIPTOSTATE'] = shipping_address.state
         params['SHIPTOZIP'] = shipping_address.postcode
         params['SHIPTOCOUNTRYCODE'] = shipping_address.country.iso_3166_1_a2
+
+        # For US addresses, we need to try and convert the state into 2 letter
+        # code - otherwise we can get a 10736 error as the shipping address and
+        # zipcode don't match the state. Very silly really.
+        if params['SHIPTOCOUNTRYCODE'] == 'US':
+            key = params['SHIPTOSTATE'].lower().strip()
+            if key in us_states.STATES_NORMALIZED:
+                params['SHIPTOSTATE'] = us_states.STATES_NORMALIZED[key]
 
     elif no_shipping:
         params['NOSHIPPING'] = 1
