@@ -7,3 +7,7 @@ except ImportError:
 
 class PayPalError(PaymentError):
     pass
+
+
+class PayPalError(PaymentError):
+    pass

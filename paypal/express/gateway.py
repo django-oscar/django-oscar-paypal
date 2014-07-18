@@ -8,7 +8,7 @@ from django.utils.translation import ugettext as _
 from django.template.defaultfilters import truncatewords, striptags
 from localflavor.us import us_states
 
-from paypal.express import models
+from . import models, exceptions as express_exceptions
 from paypal import gateway
 from paypal import exceptions
 
@@ -175,12 +175,12 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     if currency == 'USD' and amount > 10000:
         msg = 'PayPal can only be used for orders up to 10000 USD'
         logger.error(msg)
-        raise exceptions.PayPalError(msg)
+        raise express_exceptions.InvalidBasket(_(msg))
 
     if amount <= 0:
-        msg = 'Zero value basket is not allowed'
+        msg = 'The basket total is zero so no payment is required'
         logger.error(msg)
-        raise exceptions.PayPalError(msg)
+        raise express_exceptions.InvalidBasket(_(msg))
 
     # PAYMENTREQUEST_0_AMT should include tax, shipping and handling
     params.update({

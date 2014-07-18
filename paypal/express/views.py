@@ -22,7 +22,7 @@ from oscar.apps.shipping.methods import FixedPrice, NoShippingRequired
 from paypal.express.facade import get_paypal_url, fetch_transaction_details, confirm_transaction
 from paypal.express.exceptions import (
     EmptyBasketException, MissingShippingAddressException,
-    MissingShippingMethodException)
+    MissingShippingMethodException, InvalidBasket)
 from paypal.exceptions import PayPalError
 
 ShippingAddress = get_model('order', 'ShippingAddress')
@@ -53,20 +53,26 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
             basket = self.request.basket
             url = self._get_redirect_url(basket, **kwargs)
         except PayPalError:
-            messages.error(self.request, _("An error occurred communicating with PayPal"))
+            messages.error(
+                self.request, _("An error occurred communicating with PayPal"))
             if self.as_payment_method:
                 url = reverse('checkout:payment-details')
             else:
                 url = reverse('basket:summary')
             return url
+        except InvalidBasket as e:
+            messages.warning(self.request, e.message)
+            return reverse('basket:summary')
         except EmptyBasketException:
             messages.error(self.request, _("Your basket is empty"))
             return reverse('basket:summary')
         except MissingShippingAddressException:
-            messages.error(self.request, _("A shipping address must be specified"))
+            messages.error(
+                self.request, _("A shipping address must be specified"))
             return reverse('checkout:shipping-address')
         except MissingShippingMethodException:
-            messages.error(self.request, _("A shipping method must be specified"))
+            messages.error(
+                self.request, _("A shipping method must be specified"))
             return reverse('checkout:shipping-method')
         else:
             # Transaction successfully registered with PayPal.  Now freeze the
@@ -177,7 +183,8 @@ class SuccessResponseView(PaymentDetailsView):
                 "Unable to fetch transaction details for token %s: %s",
                 self.token, e)
             messages.error(
-                self.request, _("A problem occurred communicating with PayPal - please try again later"))
+                self.request,
+                _("A problem occurred communicating with PayPal - please try again later"))
             return HttpResponseRedirect(reverse('basket:summary'))
 
         # Reload frozen basket which is specified in the URL
