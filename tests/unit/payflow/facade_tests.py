@@ -49,7 +49,7 @@ class TestAuthorize(TestCase):
             )
             try:
                 self.authorize()
-            except exceptions.UnableToTakePayment, e:
+            except exceptions.UnableToTakePayment as e:
                 self.assertEqual("Invalid account number", e.message)
 
 

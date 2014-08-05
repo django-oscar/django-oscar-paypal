@@ -25,8 +25,8 @@ Partner, StockRecord = get_classes('partner.models', ('Partner',
     'ProductClass', 'Product', 'ProductAttribute', 'ProductAttributeValue'))
 
 
-def create_product(price=None, title=u"Dummy title",
-                   product_class=u"Dummy item class", partner=u"Dummy partner",
+def create_product(price=None, title="Dummy title",
+                   product_class="Dummy item class", partner="Dummy partner",
                    partner_sku=None, upc=None, num_in_stock=10,
                    attributes=None, **kwargs):
     """

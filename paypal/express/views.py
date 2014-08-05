@@ -178,7 +178,7 @@ class SuccessResponseView(PaymentDetailsView):
 
         try:
             self.txn = fetch_transaction_details(self.token)
-        except PayPalError, e:
+        except PayPalError as e:
             logger.warning(
                 "Unable to fetch transaction details for token %s: %s",
                 self.token, e)
