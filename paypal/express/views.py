@@ -11,6 +11,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.db.models import get_model
+from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 
 from oscar.apps.checkout.views import PaymentDetailsView, CheckoutSessionMixin
@@ -409,9 +410,9 @@ class ShippingOptionsView(View):
         ]
         for index, method in enumerate(methods):
             pairs.append(('L_SHIPPINGOPTIONNAME%d' % index,
-                          unicode(method.name)))
+                          six.text_type(method.name)))
             pairs.append(('L_SHIPPINGOPTIONLABEL%d' % index,
-                          unicode(method.name)))
+                          six.text_type(method.name)))
             pairs.append(('L_SHIPPINGOPTIONAMOUNT%d' % index,
                           method.charge_incl_tax))
             # For now, we assume tax and insurance to be zero

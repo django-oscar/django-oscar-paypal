@@ -1,7 +1,8 @@
 import requests
 import time
 import urlparse
-import urllib
+
+from django.utils.http import urlencode
 
 from paypal import exceptions
 
@@ -14,13 +15,7 @@ def post(url, params):
     :url: URL to post to
     :params: Dict of parameters to include in post payload
     """
-
-    # Ensure all values are bytestrings before passing to urllib
-    for k in params.keys():
-        if type(params[k]) == unicode:
-            params[k] = params[k].encode('utf-8')
-    payload = urllib.urlencode(list(params.items()))
-
+    payload = urlencode(params)
     start_time = time.time()
     response = requests.post(
         url, payload,
