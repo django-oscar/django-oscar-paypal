@@ -2,6 +2,7 @@ from decimal import Decimal as D
 import datetime
 
 from django.test import TestCase
+from django.utils import six
 from oscar.apps.payment.models import Bankcard
 from oscar.apps.payment import exceptions
 import mock
@@ -50,7 +51,7 @@ class TestAuthorize(TestCase):
             try:
                 self.authorize()
             except exceptions.UnableToTakePayment as e:
-                self.assertEqual("Invalid account number", e.message)
+                self.assertEqual("Invalid account number", six.text_type(e))
 
 
 class TestSale(TestCase):

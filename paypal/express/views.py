@@ -62,7 +62,7 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
                 url = reverse('basket:summary')
             return url
         except InvalidBasket as e:
-            messages.warning(self.request, e.message)
+            messages.warning(self.request, six.text_type(e))
             return reverse('basket:summary')
         except EmptyBasketException:
             messages.error(self.request, _("Your basket is empty"))
