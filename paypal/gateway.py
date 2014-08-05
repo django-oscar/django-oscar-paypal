@@ -1,8 +1,8 @@
 import requests
 import time
-import urlparse
 
 from django.utils.http import urlencode
+from django.utils.six.moves.urllib.parse import parse_qs
 
 from paypal import exceptions
 
@@ -25,7 +25,7 @@ def post(url, params):
 
     # Convert response into a simple key-value format
     pairs = {}
-    for key, values in urlparse.parse_qs(response.content).items():
+    for key, values in parse_qs(response.content).items():
         pairs[key.decode('utf-8')] = values[0].decode('utf-8')
 
     # Add audit information

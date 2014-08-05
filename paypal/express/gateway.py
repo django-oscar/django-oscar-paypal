@@ -1,9 +1,9 @@
-import urllib
 import logging
 from decimal import Decimal as D
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.http import urlencode
 from django.utils import six
 from django.utils.translation import ugettext as _
 from django.template.defaultfilters import truncatewords, striptags
@@ -345,7 +345,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         url = 'https://www.paypal.com/webscr'
     params = (('cmd', '_express-checkout'),
               ('token', txn.token),)
-    return '%s?%s' % (url, urllib.urlencode(params))
+    return '%s?%s' % (url, urlencode(params))
 
 
 def get_txn(token):

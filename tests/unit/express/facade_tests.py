@@ -1,10 +1,9 @@
-import urlparse
-
 from decimal import Decimal as D
 from unittest import TestCase
 
 from mock import patch, Mock
 from purl import URL
+from django.utils.six.moves.urllib.parse import parse_qs
 from oscar.apps.shipping.methods import Free
 
 from paypal.models import ExpressTransaction as Transaction
@@ -33,7 +32,7 @@ class MockedResponseTests(TestCase):
 
 class BaseSetExpressCheckoutTests(MockedResponseTests):
     def _get_paypal_params(self):
-        return urlparse.parse_qs(self.mocked_post.call_args[0][1])
+        return parse_qs(self.mocked_post.call_args[0][1])
 
     def assertPaypalParamEqual(self, key, value):
         self.assertEqual(self._get_paypal_params()[key], [value])

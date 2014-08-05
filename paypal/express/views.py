@@ -1,5 +1,4 @@
 from decimal import Decimal as D
-import urllib
 import logging
 
 from django.views.generic import RedirectView, View
@@ -11,6 +10,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.db.models import get_model
+from django.utils.http import urlencode
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 
@@ -424,7 +424,7 @@ class ShippingOptionsView(View):
             # No shipping methods available - we flag this up to PayPal indicating that we
             # do not ship to the shipping address.
             pairs.append(('NO_SHIPPING_OPTION_DETAILS', 1))
-        payload = urllib.urlencode(pairs)
+        payload = urlencode(pairs)
         return HttpResponse(payload)
 
     def get_shipping_methods(self, user, basket, shipping_address):
