@@ -1,9 +1,10 @@
-import urllib
 import logging
 from decimal import Decimal as D
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.http import urlencode
+from django.utils import six
 from django.utils.translation import ugettext as _
 from django.template.defaultfilters import truncatewords, striptags
 from localflavor.us import us_states
@@ -61,9 +62,7 @@ def _fetch_response(method, extra_params):
         url = 'https://api-3t.paypal.com/nvp'
 
     # Print easy-to-read version of params for debugging
-    param_list = params.items()
-    param_list.sort()
-    param_str = "\n".join(["%s: %s" % x for x in param_list])
+    param_str = "\n".join(["%s: %s" % x for x in sorted(params.items())])
     logger.debug("Making %s request to %s with params:\n%s", method, url,
                  param_str)
 
@@ -163,10 +162,10 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
                 "'%s' is not a valid locale code" % locale)
 
     # Boolean values become integers
-    _params.update((k, int(v)) for k, v in _params.iteritems() if isinstance(v, bool))
+    _params.update((k, int(v)) for k, v in _params.items() if isinstance(v, bool))
 
     # Remove None values
-    params = dict((k, v) for k, v in _params.iteritems() if v is not None)
+    params = dict((k, v) for k, v in _params.items() if v is not None)
 
     # PayPal have an upper limit on transactions.  It's in dollars which is a
     # fiddly to work with.  Lazy solution - only check when dollars are used as
@@ -315,7 +314,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         if is_default:
             params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(charge)
             params['PAYMENTREQUEST_0_AMT'] += charge
-        params['L_SHIPPINGOPTIONNAME%d' % index] = unicode(method.name)
+        params['L_SHIPPINGOPTIONNAME%d' % index] = six.text_type(method.name)
         params['L_SHIPPINGOPTIONAMOUNT%d' % index] = _format_currency(charge)
 
     # Set shipping charge explicitly if it has been passed
@@ -346,7 +345,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         url = 'https://www.paypal.com/webscr'
     params = (('cmd', '_express-checkout'),
               ('token', txn.token),)
-    return '%s?%s' % (url, urllib.urlencode(params))
+    return '%s?%s' % (url, urlencode(params))
 
 
 def get_txn(token):

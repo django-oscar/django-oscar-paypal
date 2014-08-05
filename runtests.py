@@ -25,12 +25,12 @@ if not settings.configured:
             'PAYPAL_PAYFLOW_PASSWORD': '',
         })
     else:
-        for key, value in locals().items():
+        for key, value in list(locals().items()):
             if key.startswith('PAYPAL'):
                 extra_settings[key] = value
 
     from oscar.defaults import *
-    for key, value in locals().items():
+    for key, value in list(locals().items()):
         if key.startswith('OSCAR'):
             extra_settings[key] = value
     extra_settings['OSCAR_ALLOW_ANON_CHECKOUT'] = True
@@ -118,7 +118,7 @@ def run_tests(*test_args):
 
     if num_failures > 0:
         sys.exit(num_failures)
-    print "Generating HTML coverage report"
+    print("Generating HTML coverage report")
     c.html_report()
 
 

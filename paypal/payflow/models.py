@@ -1,6 +1,7 @@
 import re
 
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
@@ -8,6 +9,7 @@ from paypal.payflow import codes
 from paypal import base
 
 
+@python_2_unicode_compatible
 class PayflowTransaction(base.ResponseModel):
     # This is the linking parameter between the merchant and PayPal.  It is
     # normally set to the order number
@@ -62,7 +64,7 @@ class PayflowTransaction(base.ResponseModel):
     def is_address_verified(self):
         return self.avsaddr == 'Y' and self.avzip == 'Y'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.pnref
 
     @property
