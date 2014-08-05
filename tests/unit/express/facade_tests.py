@@ -108,7 +108,7 @@ class ExtraPaypalSuccessfulSetExpressCheckoutTests(BaseSetExpressCheckoutTests):
     def test_corrent_paypal_params(self):
         self.assertTrue(self.url.has_query_param('token'))
         self.assertTrue('_express-checkout', self.url.query_param('cmd'))
-        for key, value in self.paypal_params.iteritems():
+        for key, value in self.paypal_params.items():
             if isinstance(value, bool):
                 value = int(value)
             self.assertPaypalParamEqual(key, str(value))

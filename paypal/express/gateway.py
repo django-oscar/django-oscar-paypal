@@ -61,9 +61,7 @@ def _fetch_response(method, extra_params):
         url = 'https://api-3t.paypal.com/nvp'
 
     # Print easy-to-read version of params for debugging
-    param_list = params.items()
-    param_list.sort()
-    param_str = "\n".join(["%s: %s" % x for x in param_list])
+    param_str = "\n".join(["%s: %s" % x for x in sorted(params.items())])
     logger.debug("Making %s request to %s with params:\n%s", method, url,
                  param_str)
 
@@ -163,10 +161,10 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
                 "'%s' is not a valid locale code" % locale)
 
     # Boolean values become integers
-    _params.update((k, int(v)) for k, v in _params.iteritems() if isinstance(v, bool))
+    _params.update((k, int(v)) for k, v in _params.items() if isinstance(v, bool))
 
     # Remove None values
-    params = dict((k, v) for k, v in _params.iteritems() if v is not None)
+    params = dict((k, v) for k, v in _params.items() if v is not None)
 
     # PayPal have an upper limit on transactions.  It's in dollars which is a
     # fiddly to work with.  Lazy solution - only check when dollars are used as

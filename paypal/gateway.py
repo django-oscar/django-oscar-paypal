@@ -19,7 +19,7 @@ def post(url, params):
     for k in params.keys():
         if type(params[k]) == unicode:
             params[k] = params[k].encode('utf-8')
-    payload = urllib.urlencode(params.items())
+    payload = urllib.urlencode(list(params.items()))
 
     start_time = time.time()
     response = requests.post(
