@@ -14,6 +14,7 @@ from django.utils.http import urlencode
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 
+import oscar
 from oscar.apps.checkout.views import PaymentDetailsView, CheckoutSessionMixin
 from oscar.apps.payment.exceptions import UnableToTakePayment
 from oscar.apps.payment.models import SourceType, Source
@@ -112,7 +113,8 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
                 params['shipping_methods'] = []
 
         else:
-            shipping_methods = Repository().get_shipping_methods(user, basket)
+            shipping_methods = Repository().get_shipping_methods(
+                user=user, basket=basket)
             params['shipping_methods'] = shipping_methods
 
         if settings.DEBUG:
@@ -158,7 +160,9 @@ class SuccessResponseView(PaymentDetailsView):
     preview = True
 
     # We don't have the usual pre-conditions (Oscar 0.7+)
-    pre_conditions = ()
+    @property
+    def pre_conditions(self):
+        return [] if oscar.VERSION[:2] >= (0, 8) else ()
 
     def get(self, request, *args, **kwargs):
         """
@@ -354,7 +358,6 @@ class SuccessResponseView(PaymentDetailsView):
         # Assume no tax for now
         charge_excl_tax = charge_incl_tax
         method = FixedPrice(charge_excl_tax, charge_incl_tax)
-        method.set_basket(basket)
         name = self.txn.value('SHIPPINGOPTIONNAME')
 
         if not name:
@@ -401,20 +404,27 @@ class ShippingOptionsView(View):
             country=country
         )
         methods = self.get_shipping_methods(user, basket, shipping_address)
-        return self.render_to_response(methods)
+        return self.render_to_response(methods, basket)
 
-    def render_to_response(self, methods):
+    def render_to_response(self, methods, basket):
         pairs = [
             ('METHOD', 'CallbackResponse'),
             ('CURRENCYCODE', self.request.POST.get('CURRENCYCODE', 'GBP')),
         ]
         for index, method in enumerate(methods):
+            if hasattr(method, 'set_basket'):
+                # Oscar < 0.8
+                method.set_basket(basket)
+                charge = method.charge_incl_tax
+            else:
+                cost = method.calculate(basket)
+                charge = cost.incl_tax
+
             pairs.append(('L_SHIPPINGOPTIONNAME%d' % index,
                           six.text_type(method.name)))
             pairs.append(('L_SHIPPINGOPTIONLABEL%d' % index,
                           six.text_type(method.name)))
-            pairs.append(('L_SHIPPINGOPTIONAMOUNT%d' % index,
-                          method.charge_incl_tax))
+            pairs.append(('L_SHIPPINGOPTIONAMOUNT%d' % index, charge))
             # For now, we assume tax and insurance to be zero
             pairs.append(('L_TAXAMT%d' % index, D('0.00')))
             pairs.append(('L_INSURANCEAMT%d' % index, D('0.00')))

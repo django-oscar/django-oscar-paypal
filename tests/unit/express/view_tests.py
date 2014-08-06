@@ -4,7 +4,7 @@ from decimal import Decimal as D
 
 from django.test import TestCase
 from django.test.client import Client
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from mock import patch, Mock
 
 from oscar.apps.order.models import Order
@@ -83,9 +83,13 @@ class MockedPayPalTests(TestCase):
 
     def add_product_to_basket(self, price=D('100.00')):
         product = create_product(price=price)
-        self.client.post(reverse('basket:add'),
-                                 {'product_id': product.id,
-                                  'quantity': 1})
+        try:
+            # Oscar 0.8+
+            url = reverse('basket:add', kwargs={'pk': product.pk})
+        except NoReverseMatch:
+            # Oscar < 0.8
+            url = reverse('basket:add')
+        self.client.post(url, {'product_id': product.id, 'quantity': 1})
 
 
 class EdgeCaseTests(MockedPayPalTests):
