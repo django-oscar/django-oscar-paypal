@@ -1,10 +1,30 @@
 language: python
+
 python:
-  - 2.6
-  - 2.7
+  - '2.7'
+
+env:
+  matrix:
+    - COMBO="Django==1.5.8 django-oscar==0.6.5"
+    - COMBO="Django==1.5.8 django-oscar==0.7.2"
+    - COMBO="Django==1.6.5 django-oscar==0.6.5"
+    - COMBO="Django==1.6.5 django-oscar==0.7.2"
+    - COMBO="Django==1.6.5 South==1.0 https://github.com/tangentlabs/django-oscar/archive/master.tar.gz#egg=django-oscar"
+    - COMBO="https://www.djangoproject.com/download/1.7c2/tarball/#egg=Django https://github.com/tangentlabs/django-oscar/archive/master.tar.gz#egg=django-oscar"
+
+matrix:
+  include:
+    - python: '3.3'
+      env: COMBO="https://www.djangoproject.com/download/1.7c2/tarball/#egg=Django https://github.com/tangentlabs/django-oscar/archive/master.tar.gz#egg=django-oscar"
+    - python: '3.4'
+      env: COMBO="https://www.djangoproject.com/download/1.7c2/tarball/#egg=Django https://github.com/tangentlabs/django-oscar/archive/master.tar.gz#egg=django-oscar"
+
 install:
-  - make install
+  - pip install $COMBO -r requirements.txt
+  - python setup.py develop
+
 script:
-  - ./runtests.py
+  - coverage run ./runtests.py
+
 after_success:
   - coveralls
