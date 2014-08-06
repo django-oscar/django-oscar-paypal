@@ -6,6 +6,7 @@ from oscar.apps.shipping.methods import Free, FixedPrice
 
 from paypal.express import gateway
 from paypal import exceptions
+from paypal.express.exceptions import InvalidBasket
 from paypal.express.models import ExpressTransaction as Transaction
 
 
@@ -101,6 +102,6 @@ class TestOrderTotal(TestCase):
         shipping_methods = [FixedPrice(D('2.50'))]
 
         with patch('paypal.express.gateway._fetch_response') as mock_fetch:
-            with self.assertRaises(exceptions.PayPalError):
+            with self.assertRaises(InvalidBasket):
                 gateway.set_txn(basket, shipping_methods, 'GBP',
                                 'http://example.com', 'http://example.com')
