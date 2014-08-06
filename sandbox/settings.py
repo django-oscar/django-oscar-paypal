@@ -219,7 +219,6 @@ INSTALLED_APPS = [
     'debug_toolbar',
     # Apps from oscar
     'paypal',
-    'south',
     'compressor'
 ]
 
