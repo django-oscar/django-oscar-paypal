@@ -64,6 +64,12 @@ Tests
 Changelog
 ---------
 
+0.9.1
+-----
+
+* Add support for Python 3.3 and 3.4
+* Add preliminary support for (unreleased) Oscar 0.8
+
 0.9
 ~~~
 * Support Oscar 0.7 (note that this release only works with 0.7.1 onwards)
