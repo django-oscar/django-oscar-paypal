@@ -65,7 +65,7 @@ Changelog
 ---------
 
 0.9.1
------
+~~~~~
 
 * Add support for Python 3.3 and 3.4
 * Add preliminary support for (unreleased) Oscar 0.8
