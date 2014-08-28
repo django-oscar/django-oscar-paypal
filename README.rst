@@ -64,6 +64,12 @@ Tests
 Changelog
 ---------
 
+0.9.2
+~~~~~
+
+* Include templates in package (they were missing from 0.9.1)
+* Dynamically load view classes in Express views module
+
 0.9.1
 ~~~~~
 
