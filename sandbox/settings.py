@@ -271,13 +271,6 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
-# Put your own sandbox settings into an integration.py modulde (that is ignored
-# by git).
-try:
-    from integration import *
-except ImportError:
-    pass
-
 # Taken from PayPal's documentation - these should always work in the sandbox
 PAYPAL_SANDBOX_MODE = True
 PAYPAL_CALLBACK_HTTPS = False
@@ -291,5 +284,12 @@ PAYPAL_API_SIGNATURE = 'A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU
 
 # Standard currency is GBP
 PAYPAL_CURRENCY = PAYPAL_PAYFLOW_CURRENCY = 'GBP'
-
 PAYPAL_PAYFLOW_DASHBOARD_FORMS = True
+
+# Put your own sandbox settings into an integration.py modulde (that is ignored
+# by git).
+try:
+    from integration import *  # noqa
+except ImportError:
+    pass
+
