@@ -15,17 +15,20 @@ from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 
 import oscar
-from oscar.apps.checkout.views import PaymentDetailsView, CheckoutSessionMixin
 from oscar.apps.payment.exceptions import UnableToTakePayment
-from oscar.apps.payment.models import SourceType, Source
 from oscar.core.loading import get_class
 from oscar.apps.shipping.methods import FixedPrice, NoShippingRequired
 
-from paypal.express.facade import get_paypal_url, fetch_transaction_details, confirm_transaction
+from paypal.express.facade import (
+    get_paypal_url, fetch_transaction_details, confirm_transaction)
 from paypal.express.exceptions import (
     EmptyBasketException, MissingShippingAddressException,
     MissingShippingMethodException, InvalidBasket)
 from paypal.exceptions import PayPalError
+
+# Load views dynamically
+PaymentDetailsView = get_class('checkout.views', 'PaymentDetailsView')
+CheckoutSessionMixin = get_class('checkout.session', 'CheckoutSessionMixin')
 
 ShippingAddress = get_model('order', 'ShippingAddress')
 Country = get_model('address', 'Country')
@@ -33,7 +36,8 @@ Basket = get_model('basket', 'Basket')
 Repository = get_class('shipping.repository', 'Repository')
 Applicator = get_class('offer.utils', 'Applicator')
 Selector = get_class('partner.strategy', 'Selector')
-
+Source = get_model('payment', 'Source')
+SourceType = get_model('payment', 'SourceType')
 
 logger = logging.getLogger('paypal.express')
 
