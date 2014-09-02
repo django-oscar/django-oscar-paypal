@@ -11,6 +11,5 @@ upgrade:
 sandbox: install
 	-rm -f sandbox/db.sqlite
 	sandbox/manage.py syncdb --noinput
-	sandbox/manage.py migrate
 	sandbox/manage.py loaddata sandbox/fixtures/auth.json countries.json
 	sandbox/manage.py oscar_import_catalogue sandbox/fixtures/catalogue.csv
