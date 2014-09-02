@@ -64,6 +64,14 @@ Tests
 Changelog
 ---------
 
+0.9.3
+~~~~~
+
+* Use the correct key to look up a previous transaction ID (for
+  refund/capture/void operations). `#81`_ 
+
+.. _`#81`: https://github.com/tangentlabs/django-oscar-paypal/pull/81
+
 0.9.2
 ~~~~~
 
