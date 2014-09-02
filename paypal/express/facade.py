@@ -101,7 +101,7 @@ def refund_transaction(token, amount, currency, note=None):
     txn = Transaction.objects.get(token=token,
                                   method=DO_EXPRESS_CHECKOUT)
     is_partial = amount < txn.amount
-    return refund_txn(txn.value('TRANSACTIONID'), is_partial, amount, currency)
+    return refund_txn(txn.value('PAYMENTINFO_0_TRANSACTIONID'), is_partial, amount, currency)
 
 
 def capture_authorization(token, note=None):
@@ -110,7 +110,7 @@ def capture_authorization(token, note=None):
     """
     txn = Transaction.objects.get(token=token,
                                   method=DO_EXPRESS_CHECKOUT)
-    return do_capture(txn.value('TRANSACTIONID'),
+    return do_capture(txn.value('PAYMENTINFO_0_TRANSACTIONID'),
                       txn.amount, txn.currency, note=note)
 
 
@@ -120,4 +120,4 @@ def void_authorization(token, note=None):
     """
     txn = Transaction.objects.get(token=token,
                                   method=DO_EXPRESS_CHECKOUT)
-    return do_void(txn.value('TRANSACTIONID'), note=note)
+    return do_void(txn.value('PAYMENTINFO_0_TRANSACTIONID'), note=note)
