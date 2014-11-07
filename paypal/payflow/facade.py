@@ -68,7 +68,7 @@ def _submit_payment_details(
 
     txn = gateway_fn(
         order_number,
-        card_number=bankcard.card_number,
+        card_number=bankcard.number,
         cvv=bankcard.cvv,
         expiry_date=bankcard.expiry_month("%m%y"),
         amt=amt,

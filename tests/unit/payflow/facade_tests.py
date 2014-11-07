@@ -18,7 +18,7 @@ class TestAuthorize(TestCase):
 
     def setUp(self):
         self.card = Bankcard(
-            card_number='4111111111111111',
+            number='4111111111111111',
             name='John Doe',
             expiry_date=datetime.date(2015, 8, 1),
         )
