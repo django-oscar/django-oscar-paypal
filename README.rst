@@ -64,6 +64,13 @@ Tests
 Changelog
 ---------
 
+0.9.4
+~~~~~
+
+* Use Bankcard.number instead of the deprecated Bankcard.card_number attribute.
+* Add support for Django 1.7 and Oscar 1.0.
+* Drop support for Oscar 0.6 and Django 1.5.
+
 0.9.3
 ~~~~~
 
