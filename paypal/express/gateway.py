@@ -324,7 +324,12 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
 
     # Set shipping charge explicitly if it has been passed
     if shipping_method:
-        max_charge = charge = shipping_method.charge_incl_tax
+        if hasattr(shipping_method, 'charge_incl_tax'):
+            # Oscar < 0.8
+            max_charge = charge = shipping_method.charge_incl_tax
+        else:
+            cost = shipping_method.calculate(basket)
+            charge = cost.incl_tax
         params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(charge)
         params['PAYMENTREQUEST_0_AMT'] += charge
 
