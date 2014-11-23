@@ -64,6 +64,10 @@ Tests
 Changelog
 ---------
 
+0.9.5
+~~~~~
+* Fix issue with missing templates in PyPI package.
+
 0.9.4
 ~~~~~
 
