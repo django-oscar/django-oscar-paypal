@@ -359,6 +359,7 @@ class SuccessResponseView(PaymentDetailsView):
 
         # Instantiate a new FixedPrice shipping method instance
         charge_incl_tax = D(self.txn.value('PAYMENTREQUEST_0_SHIPPINGAMT'))
+
         # Assume no tax for now
         charge_excl_tax = charge_incl_tax
         method = FixedPrice(charge_excl_tax, charge_incl_tax)
