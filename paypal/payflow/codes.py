@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 # Make strings collectable with gettext tools, but don't trnslate them here:
 _ = lambda x: x
 

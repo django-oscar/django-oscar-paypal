@@ -1,7 +1,7 @@
+from __future__ import unicode_literals
 import requests
 import time
 
-from django.utils.encoding import force_text
 from django.utils.http import urlencode
 from django.utils.six.moves.urllib.parse import parse_qs
 
@@ -26,12 +26,12 @@ def post(url, params):
 
     # Convert response into a simple key-value format
     pairs = {}
-    for key, values in parse_qs(response.content).items():
-        pairs[force_text(key)] = force_text(values[0])
+    for key, values in parse_qs(response.text).items():
+        pairs[key] = values[0]
 
     # Add audit information
     pairs['_raw_request'] = payload
-    pairs['_raw_response'] = response.content
+    pairs['_raw_response'] = response.text
     pairs['_response_time'] = (time.time() - start_time) * 1000.0
 
     return pairs

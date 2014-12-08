@@ -1,6 +1,7 @@
 """
 Responsible for briding between Oscar and the PayPal gateway
 """
+from __future__ import unicode_literals
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 from django.conf import settings
