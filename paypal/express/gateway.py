@@ -24,10 +24,9 @@ REFUND_TRANSACTION = 'RefundTransaction'
 
 SALE, AUTHORIZATION, ORDER = 'Sale', 'Authorization', 'Order'
 
-# It's quite difficult to work out what the latest version of the PayPal
-# Express API is.  The best way is to look for the 'web version: ...' string in
-# the source of https://www.sandbox.paypal.com/
-API_VERSION = getattr(settings, 'PAYPAL_API_VERSION', '88.0')
+# The latest version of the PayPal Express API can be found here:
+# https://developer.paypal.com/docs/classic/release-notes/
+API_VERSION = getattr(settings, 'PAYPAL_API_VERSION', '119')
 
 logger = logging.getLogger('paypal.express')
 
