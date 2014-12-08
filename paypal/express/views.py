@@ -9,14 +9,13 @@ from django.contrib import messages
 from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.db.models import get_model
 from django.utils.http import urlencode
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 
 import oscar
 from oscar.apps.payment.exceptions import UnableToTakePayment
-from oscar.core.loading import get_class
+from oscar.core.loading import get_class, get_model
 from oscar.apps.shipping.methods import FixedPrice, NoShippingRequired
 
 from paypal.express.facade import (
@@ -338,7 +337,6 @@ class SuccessResponseView(PaymentDetailsView):
         elif len(parts) > 1:
             first_name = parts[0]
             last_name = " ".join(parts[1:])
-
         return ShippingAddress(
             first_name=first_name,
             last_name=last_name,
