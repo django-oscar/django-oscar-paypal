@@ -1,4 +1,4 @@
-from django.utils.encoding import force_text
+from __future__ import unicode_literals
 from django.utils.six.moves.urllib.parse import parse_qs
 from django.utils.translation import ugettext_lazy as _
 
@@ -47,4 +47,4 @@ class ResponseModel(models.Model):
 
     def value(self, key, default=None):
         ctx = self.context
-        return force_text(ctx[key][0]) if key in ctx else default
+        return ctx[key][0] if key in ctx else default

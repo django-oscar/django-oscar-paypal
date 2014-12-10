@@ -270,7 +270,7 @@ HAYSTACK_CONNECTIONS = {
 # Taken from PayPal's documentation - these should always work in the sandbox
 PAYPAL_SANDBOX_MODE = True
 PAYPAL_CALLBACK_HTTPS = False
-PAYPAL_API_VERSION = '88.0'
+PAYPAL_API_VERSION = '119'
 
 # These are the standard PayPal sandbox details from the docs - but I don't
 # think you can get access to the merchant dashboard.

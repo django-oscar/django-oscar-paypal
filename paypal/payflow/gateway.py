@@ -2,6 +2,7 @@
 Gateway module - this module should be ignorant of Oscar and could be used in a
 non-Oscar project.  All Oscar-related functionality should be in the facade.
 """
+from __future__ import unicode_literals
 import logging
 
 from django.conf import settings
