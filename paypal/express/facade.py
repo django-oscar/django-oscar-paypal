@@ -10,8 +10,7 @@ from django.core.exceptions import ImproperlyConfigured
 from paypal.express.models import ExpressTransaction as Transaction
 from paypal.express.gateway import (
     set_txn, get_txn, do_txn, SALE, AUTHORIZATION, ORDER,
-    do_capture, DO_EXPRESS_CHECKOUT, do_void, refund_txn
-)
+    do_capture, DO_EXPRESS_CHECKOUT, do_void, refund_txn, buyer_pays_on_paypal)
 
 
 def _get_payment_action():
@@ -39,8 +38,10 @@ def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
     if scheme is None:
         use_https = getattr(settings, 'PAYPAL_CALLBACK_HTTPS', True)
         scheme = 'https' if use_https else 'http'
+
+    response_view_name = 'paypal-handle-order' if buyer_pays_on_paypal else 'paypal-success-response'
     return_url = '%s://%s%s' % (
-        scheme, host, reverse('paypal-success-response', kwargs={
+        scheme, host, reverse(response_view_name, kwargs={
             'basket_id': basket.id}))
     cancel_url = '%s://%s%s' % (
         scheme, host, reverse('paypal-cancel-response', kwargs={

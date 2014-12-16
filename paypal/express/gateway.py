@@ -25,11 +25,14 @@ REFUND_TRANSACTION = 'RefundTransaction'
 
 SALE, AUTHORIZATION, ORDER = 'Sale', 'Authorization', 'Order'
 
+
 # The latest version of the PayPal Express API can be found here:
 # https://developer.paypal.com/docs/classic/release-notes/
 API_VERSION = getattr(settings, 'PAYPAL_API_VERSION', '119')
 
 logger = logging.getLogger('paypal.express')
+
+buyer_pays_on_paypal = lambda: getattr(settings, 'PAYPAL_BUYER_PAYS_ON_PAYPAL', False)
 
 
 def _format_description(description):
@@ -353,8 +356,10 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         url = 'https://www.sandbox.paypal.com/webscr'
     else:
         url = 'https://www.paypal.com/webscr'
-    params = (('cmd', '_express-checkout'),
-              ('token', txn.token),)
+    params = [('cmd', '_express-checkout'),
+              ('token', txn.token), ]
+    if buyer_pays_on_paypal():
+        params.append(('useraction', 'commit'))
     return '%s?%s' % (url, urlencode(params))
 
 

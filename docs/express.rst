@@ -124,7 +124,8 @@ settings.
 * ``PAYPAL_PAGESTYLE`` - name of the Custom Payment Page Style for payment pages
   associated with this button or link
 * ``PAYPAL_PAYFLOW_COLOR`` - background color (6-char hex value) for the payment page
-
+* ``PAYPAL_BUYER_PAYS_ON_PAYPAL`` - If ``True`` you can shorten your checkout flow to
+  let buyers complete their purchases on PayPal. The order confirmation page is skipped (defaults to ``False``)
 
 Some of these options, like the display ones, can be set in your PayPal merchant
 profile.

@@ -9,8 +9,10 @@ if not settings.configured:
     extra_settings = {
         'PAYPAL_EXPRESS_URL': 'https://www.sandbox.paypal.com/webscr',
         'PAYPAL_SANDBOX_MODE': True,
-        'PAYPAL_VERSION': '88.0',
+        'PAYPAL_VERSION': '119',
         'PAYPAL_PAYFLOW_TEST_MODE': True,
+        'PAYPAL_BUYER_PAYS_ON_PAYPAL': False,
+        'TEST_ENVIRONMENT': True
     }
     # To specify integration settings (which include passwords, hence why they
     # are not committed), create an integration.py module.
