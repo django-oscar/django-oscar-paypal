@@ -60,7 +60,7 @@ def _submit_payment_details(
     if billing_address:
         address_fields.update({
             'first_name': billing_address['first_name'],
-            'last_name': billing_address['first_name'],
+            'last_name': billing_address['last_name'],
             'street': billing_address['line1'],
             'city': billing_address['line4'],
             'state': billing_address['state'],
