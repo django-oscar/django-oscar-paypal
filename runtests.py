@@ -12,7 +12,6 @@ if not settings.configured:
         'PAYPAL_VERSION': '119',
         'PAYPAL_PAYFLOW_TEST_MODE': True,
         'PAYPAL_BUYER_PAYS_ON_PAYPAL': False,
-        'TEST_ENVIRONMENT': True
     }
     # To specify integration settings (which include passwords, hence why they
     # are not committed), create an integration.py module.

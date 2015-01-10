@@ -5,11 +5,8 @@ from django.views.decorators.csrf import csrf_exempt
 from paypal.express import views
 from paypal.express.gateway import buyer_pays_on_paypal
 
-# we need all urls enabled during tests
-_TEST_ENVIRONMENT = getattr(settings, 'TEST_ENVIRONMENT', False)
 
-
-urlpatterns = patterns('',
+base_patterns = patterns('',
     # Views for normal flow that starts on the basket page
     url(r'^redirect/', views.RedirectView.as_view(), name='paypal-redirect'),
     url(r'^cancel/(?P<basket_id>\d+)/$', views.CancelResponseView.as_view(),
@@ -23,21 +20,24 @@ urlpatterns = patterns('',
         name='paypal-direct-payment'),
 )
 
+buyer_pays_on_paypal_patterns = patterns(
+    '',
+    url(r'^handle-order/(?P<basket_id>\d+)/$',
+        views.SuccessResponseView.as_view(preview=True),
+        name='paypal-handle-order'),
+)
 
-if buyer_pays_on_paypal() or _TEST_ENVIRONMENT:
-    urlpatterns += patterns(
-        '',
-        url(r'^handle-order/(?P<basket_id>\d+)/$',
-            views.SuccessResponseView.as_view(preview=True),
-            name='paypal-handle-order'),
-    )
+buyer_pays_on_website_patterns = patterns(
+    '',
+    url(r'^place-order/(?P<basket_id>\d+)/$', views.SuccessResponseView.as_view(),
+        name='paypal-place-order'),
+    url(r'^preview/(?P<basket_id>\d+)/$',
+        views.SuccessResponseView.as_view(preview=True),
+        name='paypal-success-response'),
+)
 
-if not buyer_pays_on_paypal() or _TEST_ENVIRONMENT:
-    urlpatterns += patterns(
-        '',
-        url(r'^place-order/(?P<basket_id>\d+)/$', views.SuccessResponseView.as_view(),
-            name='paypal-place-order'),
-        url(r'^preview/(?P<basket_id>\d+)/$',
-            views.SuccessResponseView.as_view(preview=True),
-            name='paypal-success-response'),
-    )
+
+if buyer_pays_on_paypal():
+    urlpatterns = base_patterns + buyer_pays_on_paypal_patterns
+else:
+    urlpatterns = base_patterns + buyer_pays_on_website_patterns
