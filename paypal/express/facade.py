@@ -33,7 +33,10 @@ def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
     given to PayPal directly - this is used within when using PayPal as a
     payment method.
     """
-    currency = getattr(settings, 'PAYPAL_CURRENCY', 'GBP')
+    if basket.currency:
+        currency = basket.currency
+    else:
+        currency = getattr(settings, 'PAYPAL_CURRENCY', 'GBP')
     if host is None:
         host = Site.objects.get_current().domain
     if scheme is None:
