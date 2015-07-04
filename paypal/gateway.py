@@ -31,7 +31,7 @@ def post(url, params):
 
     # Add audit information
     pairs['_raw_request'] = payload
-    pairs['_raw_response'] = response.text
+    pairs['_raw_response'] = response.text.encode('utf8')
     pairs['_response_time'] = (time.time() - start_time) * 1000.0
 
     return pairs

@@ -349,6 +349,17 @@ class SuccessResponseView(PaymentDetailsView):
             country=Country.objects.get(iso_3166_1_a2=self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'))
         )
 
+    def _get_shipping_method_by_name(self, name, basket, shipping_address=None):
+        methods = Repository().get_shipping_methods(
+            basket=basket, user=self.request.user,
+            shipping_addr=shipping_address, request=self.request)
+        for method in methods:
+            method_name = method.name
+            if isinstance(method_name, six.text_type):
+                method_name = method.name.encode('utf8')
+            if method_name == name:
+                return method
+
     def get_shipping_method(self, basket, shipping_address=None, **kwargs):
         """
         Return the shipping method used
@@ -361,16 +372,22 @@ class SuccessResponseView(PaymentDetailsView):
 
         # Assume no tax for now
         charge_excl_tax = charge_incl_tax
-        method = FixedPrice(charge_excl_tax, charge_incl_tax)
         name = self.txn.value('SHIPPINGOPTIONNAME')
 
-        if not name:
-            session_method = super(SuccessResponseView, self).get_shipping_method(
-                basket, shipping_address, **kwargs)
-            if session_method:
-                method.name = session_method.name
+        session_method = super(SuccessResponseView, self).get_shipping_method(
+            basket, shipping_address, **kwargs)
+        if not session_method or (name and name != session_method.name):
+            if name:
+                method = self._get_shipping_method_by_name(name, basket, shipping_address)
+            else:
+                method = None
+            if not method:
+                method = FixedPrice(charge_excl_tax, charge_incl_tax)
+                if session_method:
+                    method.name = session_method.name
+                    method.code = session_method.code
         else:
-            method.name = name
+            method = session_method
         return method
 
 
