@@ -354,10 +354,7 @@ class SuccessResponseView(PaymentDetailsView):
             basket=basket, user=self.request.user,
             shipping_addr=shipping_address, request=self.request)
         for method in methods:
-            method_name = method.name
-            if isinstance(method_name, six.text_type):
-                method_name = method.name.encode('utf8')
-            if method_name == name:
+            if method.name == name:
                 return method
 
     def get_shipping_method(self, basket, shipping_address=None, **kwargs):
