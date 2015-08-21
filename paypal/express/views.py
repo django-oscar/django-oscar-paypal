@@ -100,7 +100,6 @@ class RedirectView(CheckoutSessionMixin, RedirectView): # not sure this is good
         }                                   # to support no_shipping
 
         user = self.request.user
-
         if self.as_payment_method:
             if basket.is_shipping_required():
                 # Only check for shipping details if required.
@@ -345,7 +344,6 @@ class SuccessResponseView(PaymentDetailsView):
         elif len(parts) > 1:
             first_name = parts[0]
             last_name = " ".join(parts[1:])
-
         return ShippingAddress(
             first_name=first_name,
             last_name=last_name,
@@ -378,7 +376,6 @@ class SuccessResponseView(PaymentDetailsView):
                 method.name = session_method.name
         else:
             method.name = name
-
         return method
 
 
