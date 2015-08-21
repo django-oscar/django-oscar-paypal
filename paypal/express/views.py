@@ -145,8 +145,9 @@ class CancelResponseView(RedirectView):
 
     def get(self, request, *args, **kwargs):
         basket = get_object_or_404(Basket, id=kwargs['basket_id'],
-                                   status=Basket.FROZEN)
-        basket.thaw()
+                                    owner=self.request.user)
+        if basket.status == Basket.FROZEN:
+            basket.thaw()
         logger.info("Payment cancelled (token %s) - basket #%s thawed",
                     request.GET.get('token', '<no token>'), basket.id)
         return super(CancelResponseView, self).get(request, *args, **kwargs)
