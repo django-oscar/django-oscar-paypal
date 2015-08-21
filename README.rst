@@ -9,7 +9,7 @@ PayPal package for django-oscar
     :target: https://crate.io/packages/django-oscar-paypal/
 
 This package provides integration between django-oscar_ and both `PayPal
-Express`_ and `PayPal Payflow Pro`_.
+Express`_ and `PayPal Payflow Pro`_. 
 
 .. _django-oscar: https://github.com/tangentlabs/django-oscar
 .. _`PayPal Express`: https://www.paypal.com/uk/cgi-bin/webscr?cmd=_additional-payment-ref-impl1
@@ -63,6 +63,44 @@ Tests
 
 Changelog
 ---------
+
+0.9.5
+~~~~~
+* Fix issue with missing templates in PyPI package.
+
+0.9.4
+~~~~~
+
+* Use Bankcard.number instead of the deprecated Bankcard.card_number attribute.
+* Add support for Django 1.7 and Oscar 1.0.
+* Drop support for Oscar 0.6 and Django 1.5.
+
+0.9.3
+~~~~~
+
+* Use the correct key to look up a previous transaction ID (for
+  refund/capture/void operations). `#81`_ 
+
+.. _`#81`: https://github.com/tangentlabs/django-oscar-paypal/pull/81
+
+0.9.2
+~~~~~
+
+* Include templates in package (they were missing from 0.9.1)
+* Dynamically load view classes in Express views module
+
+0.9.1
+~~~~~
+
+* Add support for Python 3.3 and 3.4
+* Add preliminary support for (unreleased) Oscar 0.8
+
+0.9
+~~~
+* Support Oscar 0.7 (note that this release only works with 0.7.1 onwards)
+* Drop support for Oscar 0.5
+* Fix bug around unicode handling
+* Allow scheme of callback URL to be specified in a setting
 
 0.8.1
 ~~~~~

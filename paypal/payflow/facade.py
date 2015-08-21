@@ -1,6 +1,7 @@
 """
 Bridging module between Oscar and the gateway module (which is Oscar agnostic)
 """
+from __future__ import unicode_literals
 from oscar.apps.payment import exceptions
 
 from paypal.payflow import gateway, models, codes
@@ -59,7 +60,7 @@ def _submit_payment_details(
     if billing_address:
         address_fields.update({
             'first_name': billing_address['first_name'],
-            'last_name': billing_address['first_name'],
+            'last_name': billing_address['last_name'],
             'street': billing_address['line1'],
             'city': billing_address['line4'],
             'state': billing_address['state'],
@@ -68,7 +69,7 @@ def _submit_payment_details(
 
     txn = gateway_fn(
         order_number,
-        card_number=bankcard.card_number,
+        card_number=bankcard.number,
         cvv=bankcard.cvv,
         expiry_date=bankcard.expiry_month("%m%y"),
         amt=amt,

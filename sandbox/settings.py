@@ -40,7 +40,29 @@ TIME_ZONE = 'Europe/London'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-gb'
+
+gettext_noop = lambda s: s
+LANGUAGES = (
+    ('en-gb', gettext_noop('British English')),
+    ('zh-cn', gettext_noop('Simplified Chinese')),
+    ('nl', gettext_noop('Dutch')),
+    ('it', gettext_noop('Italian')),
+    ('pl', gettext_noop('Polish')),
+    ('ru', gettext_noop('Russian')),
+    ('sk', gettext_noop('Slovak')),
+    ('pt-br', gettext_noop('Brazilian Portuguese')),
+    ('fr', gettext_noop('French')),
+    ('de', gettext_noop('German')),
+    ('ko', gettext_noop('Korean')),
+    ('uk', gettext_noop('Ukrainian')),
+    ('es', gettext_noop('Spanish')),
+    ('da', gettext_noop('Danish')),
+    ('ar', gettext_noop('Arabic')),
+    ('ca', gettext_noop('Catalan')),
+    ('cs', gettext_noop('Czech')),
+    ('el', gettext_noop('Greek')),
+)
 
 SITE_ID = 1
 
@@ -95,6 +117,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -196,7 +219,6 @@ INSTALLED_APPS = [
     'debug_toolbar',
     # Apps from oscar
     'paypal',
-    'south',
     'compressor'
 ]
 
@@ -212,10 +234,6 @@ AUTHENTICATION_BACKENDS = (
 
 LOGIN_REDIRECT_URL = '/accounts/'
 APPEND_SLASH = True
-
-DEBUG_TOOLBAR_CONFIG = {
-    'INTERCEPT_REDIRECTS': False
-}
 
 # Oscar settings
 from oscar.defaults import *
@@ -249,16 +267,10 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
-# Put your own sandbox settings into an integration.py modulde (that is ignored
-# by git).
-try:
-    from integration import *
-except ImportError:
-    pass
-
 # Taken from PayPal's documentation - these should always work in the sandbox
 PAYPAL_SANDBOX_MODE = True
-PAYPAL_API_VERSION = '88.0'
+PAYPAL_CALLBACK_HTTPS = False
+PAYPAL_API_VERSION = '119'
 
 # These are the standard PayPal sandbox details from the docs - but I don't
 # think you can get access to the merchant dashboard.
@@ -268,5 +280,12 @@ PAYPAL_API_SIGNATURE = 'A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU
 
 # Standard currency is GBP
 PAYPAL_CURRENCY = PAYPAL_PAYFLOW_CURRENCY = 'GBP'
-
 PAYPAL_PAYFLOW_DASHBOARD_FORMS = True
+
+# Put your own sandbox settings into an integration.py modulde (that is ignored
+# by git).
+try:
+    from integration import *  # noqa
+except ImportError:
+    pass
+

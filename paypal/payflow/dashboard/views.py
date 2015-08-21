@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from django.views import generic
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -45,7 +46,7 @@ class TransactionDetailView(generic.DetailView):
     def capture(self, orig_txn):
         try:
             txn = facade.delayed_capture(orig_txn.comment1)
-        except Exception, e:
+        except Exception as e:
             messages.error(
                 self.request, _("Unable to settle transaction - %s") % e)
             return http.HttpResponseRedirect(
@@ -59,7 +60,7 @@ class TransactionDetailView(generic.DetailView):
     def credit(self, orig_txn):
         try:
             txn = facade.credit(orig_txn.comment1)
-        except Exception, e:
+        except Exception as e:
             messages.error(self.request, _("Unable to credit transaction - %s") % e)
             return http.HttpResponseRedirect(reverse('paypal-payflow-detail',
                                                      kwargs={'pk': orig_txn.id}))
@@ -71,7 +72,7 @@ class TransactionDetailView(generic.DetailView):
     def void(self, orig_txn):
         try:
             txn = facade.void(orig_txn.comment1, orig_txn.pnref)
-        except Exception, e:
+        except Exception as e:
             messages.error(self.request, _("Unable to void transaction - %s") % e)
             return http.HttpResponseRedirect(reverse('paypal-payflow-detail',
                                                      kwargs={'pk': orig_txn.id}))

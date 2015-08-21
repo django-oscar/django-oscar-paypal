@@ -1,5 +1,7 @@
+from __future__ import unicode_literals
+
 # Make strings collectable with gettext tools, but don't trnslate them here:
-_ = unicode
+_ = lambda x: x
 
 # Transaction types (TRXTYPE)...
 SALE, CREDIT, AUTHORIZATION, DELAYED_CAPTURE, VOID, DUPLICATE_TRANSACTION = (

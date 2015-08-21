@@ -1,6 +1,7 @@
 """
 Responsible for briding between Oscar and the PayPal gateway
 """
+from __future__ import unicode_literals
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 from django.conf import settings
@@ -22,7 +23,7 @@ def _get_payment_action():
 
 
 def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
-                   shipping_method=None, host=None, scheme='https',
+                   shipping_method=None, host=None, scheme=None,
                    paypal_params=None):
     """
     Return the URL for a PayPal Express transaction.
@@ -32,9 +33,15 @@ def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
     given to PayPal directly - this is used within when using PayPal as a
     payment method.
     """
-    currency = getattr(settings, 'PAYPAL_CURRENCY', 'GBP')
+    if basket.currency:
+        currency = basket.currency
+    else:
+        currency = getattr(settings, 'PAYPAL_CURRENCY', 'GBP')
     if host is None:
         host = Site.objects.get_current().domain
+    if scheme is None:
+        use_https = getattr(settings, 'PAYPAL_CALLBACK_HTTPS', True)
+        scheme = 'https' if use_https else 'http'
     return_url = '%s://%s%s' % (
         scheme, host, reverse('paypal-success-response', kwargs={
             'basket_id': basket.id}))
@@ -98,7 +105,7 @@ def refund_transaction(token, amount, currency, note=None):
     txn = Transaction.objects.get(token=token,
                                   method=DO_EXPRESS_CHECKOUT)
     is_partial = amount < txn.amount
-    return refund_txn(txn.value('TRANSACTIONID'), is_partial, amount, currency)
+    return refund_txn(txn.value('PAYMENTINFO_0_TRANSACTIONID'), is_partial, amount, currency)
 
 
 def capture_authorization(token, note=None):
@@ -107,7 +114,7 @@ def capture_authorization(token, note=None):
     """
     txn = Transaction.objects.get(token=token,
                                   method=DO_EXPRESS_CHECKOUT)
-    return do_capture(txn.value('TRANSACTIONID'),
+    return do_capture(txn.value('PAYMENTINFO_0_TRANSACTIONID'),
                       txn.amount, txn.currency, note=note)
 
 
@@ -117,4 +124,4 @@ def void_authorization(token, note=None):
     """
     txn = Transaction.objects.get(token=token,
                                   method=DO_EXPRESS_CHECKOUT)
-    return do_void(txn.value('TRANSACTIONID'), note=note)
+    return do_void(txn.value('PAYMENTINFO_0_TRANSACTIONID'), note=note)

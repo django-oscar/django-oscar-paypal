@@ -1,10 +1,10 @@
-import urlparse
-
+from __future__ import unicode_literals
 from decimal import Decimal as D
 from unittest import TestCase
 
 from mock import patch, Mock
 from purl import URL
+from django.utils.six.moves.urllib.parse import parse_qs
 from oscar.apps.shipping.methods import Free
 
 from paypal.models import ExpressTransaction as Transaction
@@ -17,7 +17,7 @@ class MockedResponseTests(TestCase):
 
     def setUp(self):
         response = Mock()
-        response.content = self.response_body
+        response.text = self.response_body
         response.status_code = 200
         with patch('requests.post') as post:
             post.return_value = response
@@ -33,7 +33,7 @@ class MockedResponseTests(TestCase):
 
 class BaseSetExpressCheckoutTests(MockedResponseTests):
     def _get_paypal_params(self):
-        return urlparse.parse_qs(self.mocked_post.call_args[0][1])
+        return parse_qs(self.mocked_post.call_args[0][1])
 
     def assertPaypalParamEqual(self, key, value):
         self.assertEqual(self._get_paypal_params()[key], [value])
@@ -108,7 +108,7 @@ class ExtraPaypalSuccessfulSetExpressCheckoutTests(BaseSetExpressCheckoutTests):
     def test_corrent_paypal_params(self):
         self.assertTrue(self.url.has_query_param('token'))
         self.assertTrue('_express-checkout', self.url.query_param('cmd'))
-        for key, value in self.paypal_params.iteritems():
+        for key, value in self.paypal_params.items():
             if isinstance(value, bool):
                 value = int(value)
             self.assertPaypalParamEqual(key, str(value))

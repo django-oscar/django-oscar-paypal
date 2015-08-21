@@ -1,7 +1,9 @@
+from __future__ import unicode_literals
 from decimal import Decimal as D
 import datetime
 
 from django.test import TestCase
+from django.utils import six
 from oscar.apps.payment.models import Bankcard
 from oscar.apps.payment import exceptions
 import mock
@@ -17,7 +19,7 @@ class TestAuthorize(TestCase):
 
     def setUp(self):
         self.card = Bankcard(
-            card_number='4111111111111111',
+            number='4111111111111111',
             name='John Doe',
             expiry_date=datetime.date(2015, 8, 1),
         )
@@ -49,8 +51,8 @@ class TestAuthorize(TestCase):
             )
             try:
                 self.authorize()
-            except exceptions.UnableToTakePayment, e:
-                self.assertEqual("Invalid account number", e.message)
+            except exceptions.UnableToTakePayment as e:
+                self.assertEqual("Invalid account number", six.text_type(e))
 
 
 class TestSale(TestCase):

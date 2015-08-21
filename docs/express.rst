@@ -104,8 +104,10 @@ customised the Express Checkout experience.  Most of these are handled by simple
 settings.
 
 * ``PAYPAL_SANDBOX_MODE`` - whether to use PayPal's sandbox.  Defaults to ``True``.
+* ``PAYPAL_CALLBACK_HTTPS`` - whether to use HTTPS for the callback URLs passed
+  to PayPal. Defaults to ``True``.
 * ``PAYPAL_CURRENCY`` - the currency to use for transactions.  Defaults to ``GBP``.
-* ``PAYPAL_API_VERSION`` - the version of API used (defaults to ``60.0``)
+* ``PAYPAL_API_VERSION`` - the version of API used (defaults to ``119``)
 * ``PAYPAL_ALLOW_NOTE`` - whether to allow the customer to enter a note (defaults to ``True``)
 * ``PAYPAL_CUSTOMER_SERVICES_NUMBER`` - customer services number to display on
   the PayPal review page.

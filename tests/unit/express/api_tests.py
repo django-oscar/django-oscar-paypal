@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from decimal import Decimal as D
 from django.test import TestCase
 from mock import patch, Mock
@@ -6,6 +7,7 @@ from oscar.apps.shipping.methods import Free, FixedPrice
 
 from paypal.express import gateway
 from paypal import exceptions
+from paypal.express.exceptions import InvalidBasket
 from paypal.express.models import ExpressTransaction as Transaction
 
 
@@ -30,7 +32,7 @@ class MockedResponseTestCase(TestCase):
 
     def create_mock_response(self, body, status_code=200):
         response = Mock()
-        response.content = body
+        response.text = body
         response.status_code = status_code
         return response
 
@@ -101,6 +103,6 @@ class TestOrderTotal(TestCase):
         shipping_methods = [FixedPrice(D('2.50'))]
 
         with patch('paypal.express.gateway._fetch_response') as mock_fetch:
-            with self.assertRaises(exceptions.PayPalError):
+            with self.assertRaises(InvalidBasket):
                 gateway.set_txn(basket, shipping_methods, 'GBP',
                                 'http://example.com', 'http://example.com')

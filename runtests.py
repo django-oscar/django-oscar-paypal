@@ -25,12 +25,12 @@ if not settings.configured:
             'PAYPAL_PAYFLOW_PASSWORD': '',
         })
     else:
-        for key, value in locals().items():
+        for key, value in list(locals().items()):
             if key.startswith('PAYPAL'):
                 extra_settings[key] = value
 
     from oscar.defaults import *
-    for key, value in locals().items():
+    for key, value in list(locals().items()):
         if key.startswith('OSCAR'):
             extra_settings[key] = value
     extra_settings['OSCAR_ALLOW_ANON_CHECKOUT'] = True
@@ -53,7 +53,6 @@ if not settings.configured:
             'django.contrib.staticfiles',
             'paypal',
             'compressor',
-            'south',
         ] + get_core_apps(),
         MIDDLEWARE_CLASSES=(
             'django.middleware.common.CommonMiddleware',
@@ -80,7 +79,6 @@ if not settings.configured:
             'oscar.apps.customer.notifications.context_processors.notifications',
         ),
         DEBUG=False,
-        SOUTH_TESTS_MIGRATE=False,
         HAYSTACK_CONNECTIONS={
             'default': {
                 'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
@@ -100,10 +98,6 @@ from django_nose import NoseTestSuiteRunner
 
 
 def run_tests(*test_args):
-    if 'south' in settings.INSTALLED_APPS:
-        from south.management.commands import patch_for_test_db_setup
-        patch_for_test_db_setup()
-
     if not test_args:
         test_args = ['tests']
 
@@ -118,14 +112,8 @@ def run_tests(*test_args):
 
     if num_failures > 0:
         sys.exit(num_failures)
-    print "Generating HTML coverage report"
+    print("Generating HTML coverage report")
     c.html_report()
-
-
-def generate_migration():
-    from south.management.commands.schemamigration import Command
-    com = Command()
-    com.handle(app='paypal', initial=True)
 
 
 if __name__ == '__main__':

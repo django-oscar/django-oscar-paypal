@@ -5,7 +5,9 @@
 {% block formactions %}
 <div class="form-actions">
 	{% if anon_checkout_allowed or request.user.is_authenticated %}
-	<a href="{% url 'paypal-redirect' %}"><img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"></a>
+        {% if basket.total_excl_tax > 0 %}
+            <a href="{% url 'paypal-redirect' %}"><img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"></a>
+        {% endif %}
 	{% endif %}
 	<a href="{% url 'checkout:index' %}" class="pull-right btn btn-large btn-primary">{% trans "Proceed to checkout" %}</a>
 </div>

@@ -1,14 +1,16 @@
-import urllib
+from __future__ import unicode_literals
 import logging
 from decimal import Decimal as D
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.html import strip_tags
+from django.utils.http import urlencode
+from django.utils import six
 from django.utils.translation import ugettext as _
-from django.template.defaultfilters import truncatewords
+from django.template.defaultfilters import truncatewords, striptags
+from localflavor.us import us_states
 
-from paypal.express import models
+from . import models, exceptions as express_exceptions
 from paypal import gateway
 from paypal import exceptions
 
@@ -23,12 +25,17 @@ REFUND_TRANSACTION = 'RefundTransaction'
 
 SALE, AUTHORIZATION, ORDER = 'Sale', 'Authorization', 'Order'
 
-# It's quite difficult to work out what the latest version of the PayPal
-# Express API is.  The best way is to look for the 'web version: ...' string in
-# the source of https://www.sandbox.paypal.com/
-API_VERSION = getattr(settings, 'PAYPAL_API_VERSION', '88.0')
+# The latest version of the PayPal Express API can be found here:
+# https://developer.paypal.com/docs/classic/release-notes/
+API_VERSION = getattr(settings, 'PAYPAL_API_VERSION', '119')
 
 logger = logging.getLogger('paypal.express')
+
+
+def _format_description(description):
+    if description:
+        return truncatewords(striptags(description), 12)
+    return ''
 
 
 def _format_currency(amt):
@@ -54,7 +61,8 @@ def _fetch_response(method, extra_params):
     else:
         url = 'https://api-3t.paypal.com/nvp'
 
-    param_str = "\n".join(["%s: %s" % x for x in params.items()])
+    # Print easy-to-read version of params for debugging
+    param_str = "\n".join(["%s: %s" % x for x in sorted(params.items())])
     logger.debug("Making %s request to %s with params:\n%s", method, url,
                  param_str)
 
@@ -154,10 +162,10 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
                 "'%s' is not a valid locale code" % locale)
 
     # Boolean values become integers
-    _params.update((k, int(v)) for k, v in _params.iteritems() if isinstance(v, bool))
+    _params.update((k, int(v)) for k, v in _params.items() if isinstance(v, bool))
 
     # Remove None values
-    params = dict((k, v) for k, v in _params.iteritems() if v is not None)
+    params = dict((k, v) for k, v in _params.items() if v is not None)
 
     # PayPal have an upper limit on transactions.  It's in dollars which is a
     # fiddly to work with.  Lazy solution - only check when dollars are used as
@@ -166,12 +174,12 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     if currency == 'USD' and amount > 10000:
         msg = 'PayPal can only be used for orders up to 10000 USD'
         logger.error(msg)
-        raise exceptions.PayPalError(msg)
+        raise express_exceptions.InvalidBasket(_(msg))
 
     if amount <= 0:
-        msg = 'Zero value basket is not allowed'
+        msg = 'The basket total is zero so no payment is required'
         logger.error(msg)
-        raise exceptions.PayPalError(msg)
+        raise express_exceptions.InvalidBasket(_(msg))
 
     # PAYMENTREQUEST_0_AMT should include tax, shipping and handling
     params.update({
@@ -191,7 +199,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
                                                          product.upc else '')
         desc = ''
         if product.description:
-            desc = truncatewords(strip_tags(product.description), 12)
+            desc = _format_description(product.description)
         params['L_PAYMENTREQUEST_0_DESC%d' % index] = desc
         # Note, we don't include discounts here - they are handled as separate
         # lines - see below
@@ -210,7 +218,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         index += 1
         name = _("Special Offer: %s") % discount['name']
         params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
-        params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
+        params['L_PAYMENTREQUEST_0_DESC%d' % index] = _format_description(name)
         params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
             -discount['discount'])
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
@@ -219,7 +227,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         name = "%s (%s)" % (discount['voucher'].name,
                             discount['voucher'].code)
         params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
-        params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
+        params['L_PAYMENTREQUEST_0_DESC%d' % index] = _format_description(name)
         params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
             -discount['discount'])
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
@@ -227,7 +235,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         index += 1
         name = _("Shipping Offer: %s") % discount['name']
         params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
-        params['L_PAYMENTREQUEST_0_DESC%d' % index] = truncatewords(name, 12)
+        params['L_PAYMENTREQUEST_0_DESC%d' % index] = _format_description(name)
         params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
             -discount['discount'])
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
@@ -283,6 +291,14 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['SHIPTOZIP'] = shipping_address.postcode
         params['SHIPTOCOUNTRYCODE'] = shipping_address.country.iso_3166_1_a2
 
+        # For US addresses, we need to try and convert the state into 2 letter
+        # code - otherwise we can get a 10736 error as the shipping address and
+        # zipcode don't match the state. Very silly really.
+        if params['SHIPTOCOUNTRYCODE'] == 'US':
+            key = params['SHIPTOSTATE'].lower().strip()
+            if key in us_states.STATES_NORMALIZED:
+                params['SHIPTOSTATE'] = us_states.STATES_NORMALIZED[key]
+
     elif no_shipping:
         params['NOSHIPPING'] = 1
 
@@ -292,18 +308,28 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     for index, method in enumerate(shipping_methods):
         is_default = index == 0
         params['L_SHIPPINGOPTIONISDEFAULT%d' % index] = 'true' if is_default else 'false'
-        charge = method.charge_incl_tax
+        if hasattr(method, 'charge_incl_tax'):
+            # Oscar < 0.8
+            charge = method.charge_incl_tax
+        else:
+            cost = method.calculate(basket)
+            charge = cost.incl_tax
         if charge > max_charge:
             max_charge = charge
         if is_default:
             params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(charge)
             params['PAYMENTREQUEST_0_AMT'] += charge
-        params['L_SHIPPINGOPTIONNAME%d' % index] = unicode(method.name)
+        params['L_SHIPPINGOPTIONNAME%d' % index] = six.text_type(method.name)
         params['L_SHIPPINGOPTIONAMOUNT%d' % index] = _format_currency(charge)
 
     # Set shipping charge explicitly if it has been passed
     if shipping_method:
-        max_charge = charge = shipping_method.charge_incl_tax
+        if hasattr(shipping_method, 'charge_incl_tax'):
+            # Oscar < 0.8
+            max_charge = charge = shipping_method.charge_incl_tax
+        else:
+            cost = shipping_method.calculate(basket)
+            charge = cost.incl_tax
         params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(charge)
         params['PAYMENTREQUEST_0_AMT'] += charge
 
@@ -329,7 +355,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         url = 'https://www.paypal.com/webscr'
     params = (('cmd', '_express-checkout'),
               ('token', txn.token),)
-    return '%s?%s' % (url, urllib.urlencode(params))
+    return '%s?%s' % (url, urlencode(params))
 
 
 def get_txn(token):

@@ -1,11 +1,11 @@
+from __future__ import unicode_literals
 import random
-from contextlib import nested
 
 from decimal import Decimal as D
 
 from django.test import TestCase
 from django.test.client import Client
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from mock import patch, Mock
 
 from oscar.apps.order.models import Order
@@ -25,8 +25,8 @@ Partner, StockRecord = get_classes('partner.models', ('Partner',
     'ProductClass', 'Product', 'ProductAttribute', 'ProductAttributeValue'))
 
 
-def create_product(price=None, title=u"Dummy title",
-                   product_class=u"Dummy item class", partner=u"Dummy partner",
+def create_product(price=None, title="Dummy title",
+                   product_class="Dummy item class", partner="Dummy partner",
                    partner_sku=None, upc=None, num_in_stock=10,
                    attributes=None, **kwargs):
     """
@@ -75,7 +75,7 @@ class MockedPayPalTests(TestCase):
 
     def get_mock_response(self, content=None):
         response = Mock()
-        response.content = self.response_body if content is None else content
+        response.text = self.response_body if content is None else content
         response.status_code = 200
         return response
 
@@ -84,9 +84,13 @@ class MockedPayPalTests(TestCase):
 
     def add_product_to_basket(self, price=D('100.00')):
         product = create_product(price=price)
-        self.client.post(reverse('basket:add'),
-                                 {'product_id': product.id,
-                                  'quantity': 1})
+        try:
+            # Oscar 0.8+
+            url = reverse('basket:add', kwargs={'pk': product.pk})
+        except NoReverseMatch:
+            # Oscar < 0.8
+            url = reverse('basket:add')
+        self.client.post(url, {'product_id': product.id, 'quantity': 1})
 
 
 class EdgeCaseTests(MockedPayPalTests):
@@ -115,23 +119,21 @@ class EdgeCaseTests(MockedPayPalTests):
     def test_missing_shipping_method(self):
         from paypal.express.views import RedirectView
 
-        with nested(
-                patch.object(RedirectView, 'as_payment_method'),
-                patch.object(RedirectView, 'get_shipping_address'),
-                patch.object(RedirectView, 'get_shipping_method')
-            ) as (as_payment_method, get_shipping_address, get_shipping_method):
+        with patch.object(RedirectView, 'as_payment_method') as as_payment_method:
+            with patch.object(RedirectView, 'get_shipping_address') as get_shipping_address:
+                with patch.object(RedirectView, 'get_shipping_method') as get_shipping_method:
 
-            as_payment_method.return_value = True
-            get_shipping_address.return_value = Mock()
-            get_shipping_method.return_value = None
+                    as_payment_method.return_value = True
+                    get_shipping_address.return_value = Mock()
+                    get_shipping_method.return_value = None
 
-            url = reverse('paypal-redirect')
-            self.add_product_to_basket()
-            response = self.client.get(url)
-            self.assertEqual(
-                reverse('checkout:shipping-method'),
-                URL.from_string(response['Location']).path()
-            )
+                    url = reverse('paypal-redirect')
+                    self.add_product_to_basket()
+                    response = self.client.get(url)
+                    self.assertEqual(
+                        reverse('checkout:shipping-method'),
+                        URL.from_string(response['Location']).path()
+                    )
 
 
 class RedirectToPayPalTests(MockedPayPalTests):

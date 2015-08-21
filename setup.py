@@ -19,7 +19,9 @@ setup(
     platforms=['linux'],
     packages=find_packages(exclude=['sandbox*', 'tests*']),
     include_package_data=True,
-    install_requires=['requests>=1.0'],
+    install_requires=[
+        'requests>=1.0',
+        'django-localflavor'],
     extras_require={
         'oscar': ["django-oscar>=0.6"]
     },
@@ -32,5 +34,10 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: Unix',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
         'Topic :: Other/Nonlisted Topic'],
 )
