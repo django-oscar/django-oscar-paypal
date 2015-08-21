@@ -23,6 +23,13 @@ package is structured so that it can be used without Oscar if you so wish.
 .. _`Full documentation`: http://django-oscar-paypal.readthedocs.org/en/latest/
 .. _`Continuous integration status`: http://travis-ci.org/#!/tangentlabs/django-oscar-paypal?branch=master
 
+
+* `Options`_
+
+.. _`PAYPAL_ORDER_SUMMARY_HIDE_OFFER_DISCOUNTS = True`
+.. _`PAYPAL_ORDER_SUMMARY_HIDE_VOUCHER_DISCOUNTS = True`
+.. _`PAYPAL_ORDER_SUMMARY_HIDE_SHIPPING_DISCOUNTS = True`
+
 License
 -------
 
