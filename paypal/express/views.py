@@ -1,7 +1,8 @@
 from decimal import Decimal as D
 import logging
 
-from django.views.generic import RedirectView, View
+from django.views.generic import RedirectView as DjangoRedirectView
+from django.views.generic import View
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -42,7 +43,7 @@ SourceType = get_model('payment', 'SourceType')
 logger = logging.getLogger('paypal.express')
 
 
-class RedirectView(CheckoutSessionMixin, RedirectView): # not sure this is good
+class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
     """
     Initiate the transaction with Paypal and redirect the user
     to PayPal's Express Checkout to perform the transaction.
