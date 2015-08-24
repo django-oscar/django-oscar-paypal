@@ -84,7 +84,7 @@ class RedirectView(CheckoutSessionMixin, RedirectView): # not sure this is good
             # Transaction successfully registered with PayPal.  Now freeze the
             # basket so it can't be edited while the customer is on the PayPal
             # site.
-            #basket.freeze() # how to unfreeze this?
+            basket.freeze()
 
             logger.info("Basket #%s - redirecting to %s", basket.id, url)
 
@@ -145,9 +145,9 @@ class CancelResponseView(RedirectView):
 
     def get(self, request, *args, **kwargs):
         basket = get_object_or_404(Basket, id=kwargs['basket_id'],
-                                    owner=self.request.user)
-        if basket.status == Basket.FROZEN:
-            basket.thaw()
+                                    owner=self.request.user, status=Basket.FROZEN)
+
+        basket.thaw()
         logger.info("Payment cancelled (token %s) - basket #%s thawed",
                     request.GET.get('token', '<no token>'), basket.id)
         return super(CancelResponseView, self).get(request, *args, **kwargs)
@@ -217,7 +217,7 @@ class SuccessResponseView(PaymentDetailsView):
     def load_frozen_basket(self, basket_id):
         # Lookup the frozen basket that this txn corresponds to
         try:
-            basket = self.request.basket
+            basket = Basket.objects.get(id=basket_id, status=Basket.FROZEN, owner=self.request.user)
         except Basket.DoesNotExist:
             return None
 
