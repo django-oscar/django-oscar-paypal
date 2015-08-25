@@ -147,6 +147,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
 
         'ALLOWNOTE': getattr(settings, 'PAYPAL_ALLOW_NOTE', True),
         'CALLBACKTIMEOUT': getattr(settings, 'PAYPAL_CALLBACK_TIMEOUT', 3)
+
     }
     confirm_shipping_addr = getattr(settings, 'PAYPAL_CONFIRM_SHIPPING', None)
     if confirm_shipping_addr and not no_shipping:
@@ -214,31 +215,36 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     # https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_ECCustomizing
 
     # Iterate over the 3 types of discount that can occur
-    for discount in basket.offer_discounts:
-        index += 1
-        name = _("Special Offer: %s") % discount['name']
-        params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
-        params['L_PAYMENTREQUEST_0_DESC%d' % index] = _format_description(name)
-        params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
-            -discount['discount'])
+    if getattr(settings, "PAYPAL_ORDER_SUMMARY_HIDE_OFFER_DISCOUNTS", True):
+        for discount in basket.offer_discounts:
+            index += 1
+            name = _("Special Offer: %s") % discount['name']
+            params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
+            params['L_PAYMENTREQUEST_0_DESC%d' % index] = _format_description(name)
+            params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
+                -discount['discount'])
+            params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
+
+    if getattr(settings, "PAYPAL_ORDER_SUMMARY_HIDE_VOUCHER_DISCOUNTS", True):
+        for discount in basket.voucher_discounts:
+            index += 1
+            name = "%s (%s)" % (discount['voucher'].name,
+                                discount['voucher'].code)
+            params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
+            params['L_PAYMENTREQUEST_0_DESC%d' % index] = _format_description(name)
+            params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
+                -discount['discount'])
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
-    for discount in basket.voucher_discounts:
-        index += 1
-        name = "%s (%s)" % (discount['voucher'].name,
-                            discount['voucher'].code)
-        params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
-        params['L_PAYMENTREQUEST_0_DESC%d' % index] = _format_description(name)
-        params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
-            -discount['discount'])
-        params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
-    for discount in basket.shipping_discounts:
-        index += 1
-        name = _("Shipping Offer: %s") % discount['name']
-        params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
-        params['L_PAYMENTREQUEST_0_DESC%d' % index] = _format_description(name)
-        params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
-            -discount['discount'])
-        params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
+
+    if getattr(settings, "PAYPAL_ORDER_SUMMARY_HIDE_SHIPPING_DISCOUNTS", True):
+        for discount in basket.shipping_discounts:
+            index += 1
+            name = _("Shipping Offer: %s") % discount['name']
+            params['L_PAYMENTREQUEST_0_NAME%d' % index] = name
+            params['L_PAYMENTREQUEST_0_DESC%d' % index] = _format_description(name)
+            params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
+                -discount['discount'])
+            params['L_PAYMENTREQUEST_0_QTY%d' % index] = 1
 
     # We include tax in the prices rather than separately as that's how it's
     # done on most British/Australian sites.  Will need to refactor in the
