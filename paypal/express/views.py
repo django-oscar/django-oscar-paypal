@@ -283,7 +283,7 @@ class SuccessResponseView(PaymentDetailsView):
         return self.submit(**submission)
 
     def build_submission(self, **kwargs):
-        basket = self.request.basket
+        basket = kwargs['basket']
         basket.calculate_tax(
             self.get_shipping_address(basket)
         )
