@@ -70,13 +70,16 @@ class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
             return url
         except InvalidBasket as e:
             messages.warning(self.request, six.text_type(e))
-            return reverse('basket:summary')
-        except EmptyBasketException:
+            logger.exception(e)
+	    return reverse('basket:summary')
+        except EmptyBasketException, e:
             messages.error(self.request, _("Your basket is empty"))
+	    logger.exception(e)
             return reverse('basket:summary')
-        except MissingShippingAddressException:
+        except MissingShippingAddressException, e:
             messages.error(
                 self.request, _("A shipping address must be specified"))
+	    logger.exception(e)
             return reverse('checkout:shipping-address')
         except MissingShippingMethodException:
             messages.error(
