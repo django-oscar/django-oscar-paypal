@@ -205,7 +205,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         # Note, we don't include discounts here - they are handled as separate
         # lines - see below
         params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
-            line.unit_price_incl_tax)
+            line.line_price_incl_tax)
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = line.quantity
 
     # If the order has discounts associated with it, the way PayPal suggests
