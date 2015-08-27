@@ -294,6 +294,10 @@ class SuccessResponseView(PaymentDetailsView):
 
         submission = super(
             SuccessResponseView, self).build_submission(**kwargs)
+
+        # Adding the tax to the total transaction amount to be sent to Paypal 
+        self.txn.amount = self.txn.amount + basket.total_tax
+
         # Pass the user email so it can be stored with the order
         submission['order_kwargs']['guest_email'] = self.txn.value('EMAIL')
         # Pass PP params
