@@ -222,7 +222,7 @@ class SuccessResponseView(PaymentDetailsView):
     def load_frozen_basket(self, basket_id):
         # Lookup the frozen basket that this txn corresponds to
         try:
-            basket = Basket.objects.get(id=basket_id, status=Basket.FROZEN, owner=self.request.user)
+            basket = Basket.objects.get(id=basket_id, status=Basket.FROZEN)
         except Basket.DoesNotExist:
             return None
 
