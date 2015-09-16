@@ -85,6 +85,8 @@ def _fetch_response(method, extra_params):
     )
     if txn.is_successful:
         txn.correlation_id = pairs['CORRELATIONID']
+        if 'PAYMENTINFO_0_TRANSACTIONID' in pairs:
+            txn.txn_id = pairs['PAYMENTINFO_0_TRANSACTIONID']
         if method == SET_EXPRESS_CHECKOUT:
             txn.amount = params['PAYMENTREQUEST_0_AMT']
             txn.currency = params['PAYMENTREQUEST_0_CURRENCYCODE']
