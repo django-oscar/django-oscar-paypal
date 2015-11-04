@@ -53,7 +53,9 @@ if not settings.configured:
             'django.contrib.staticfiles',
             'paypal',
             'compressor',
-        ] + get_core_apps(),
+        ] + get_core_apps([
+            'tests.shipping',
+        ]),
         MIDDLEWARE_CLASSES=(
             'django.middleware.common.CommonMiddleware',
             'django.contrib.sessions.middleware.SessionMiddleware',

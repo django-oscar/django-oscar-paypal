@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
-from django.utils.six.moves.urllib.parse import parse_qs
+from django.utils import six
+from django.utils.six.moves.urllib.parse import parse_qsl
 from django.utils.translation import ugettext_lazy as _
 
 from django.db import models
@@ -21,7 +22,7 @@ class ResponseModel(models.Model):
         app_label = 'paypal'
 
     def request(self):
-        request_params = parse_qs(self.raw_request)
+        request_params = self.context
         return self._as_dl(request_params)
     request.allow_tags = True
 
@@ -43,7 +44,16 @@ class ResponseModel(models.Model):
 
     @property
     def context(self):
-        return parse_qs(self.raw_response)
+        ctx = {}
+        if six.PY2 and isinstance(self.raw_response, six.text_type):
+            self.raw_response = self.raw_response.encode('utf8')
+        for key, val in parse_qsl(self.raw_response):
+            if isinstance(key, six.binary_type):
+                key = key.decode('utf8')
+            if isinstance(val, six.binary_type):
+                val = val.decode('utf8')
+            ctx[key] = [val]
+        return ctx
 
     def value(self, key, default=None):
         ctx = self.context

@@ -3,7 +3,8 @@ import requests
 import time
 
 from django.utils.http import urlencode
-from django.utils.six.moves.urllib.parse import parse_qs
+from django.utils import six
+from django.utils.six.moves.urllib.parse import parse_qsl
 
 from paypal import exceptions
 
@@ -26,12 +27,16 @@ def post(url, params):
 
     # Convert response into a simple key-value format
     pairs = {}
-    for key, values in parse_qs(response.text).items():
-        pairs[key] = values[0]
+    for key, value in parse_qsl(response.content):
+        if isinstance(key, six.binary_type):
+            key = key.decode('utf8')
+        if isinstance(value, six.binary_type):
+            value = value.decode('utf8')
+        pairs[key] = value
 
     # Add audit information
     pairs['_raw_request'] = payload
-    pairs['_raw_response'] = response.text
+    pairs['_raw_response'] = response.content
     pairs['_response_time'] = (time.time() - start_time) * 1000.0
 
     return pairs

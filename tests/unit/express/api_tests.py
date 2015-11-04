@@ -32,7 +32,7 @@ class MockedResponseTestCase(TestCase):
 
     def create_mock_response(self, body, status_code=200):
         response = Mock()
-        response.text = body
+        response.content = body
         response.status_code = status_code
         return response
 
