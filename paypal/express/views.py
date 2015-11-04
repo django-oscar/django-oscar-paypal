@@ -16,6 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 
 import oscar
 from oscar.apps.payment.exceptions import UnableToTakePayment
+from oscar.core.exceptions import ModuleNotFoundError
 from oscar.core.loading import get_class, get_model
 from oscar.apps.shipping.methods import FixedPrice, NoShippingRequired
 
@@ -34,10 +35,14 @@ ShippingAddress = get_model('order', 'ShippingAddress')
 Country = get_model('address', 'Country')
 Basket = get_model('basket', 'Basket')
 Repository = get_class('shipping.repository', 'Repository')
-Applicator = get_class('offer.utils', 'Applicator')
 Selector = get_class('partner.strategy', 'Selector')
 Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
+try:
+    Applicator = get_class('offer.applicator', 'Applicator')
+except ModuleNotFoundError:
+    # fallback for django-oscar<=1.1
+    Applicator = get_class('offer.utils', 'Applicator')
 
 logger = logging.getLogger('paypal.express')
 
@@ -58,9 +63,9 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
         try:
             basket = self.request.basket
             url = self._get_redirect_url(basket, **kwargs)
-        except PayPalError:
+        except PayPalError as ppe:
             messages.error(
-                self.request, _("An error occurred communicating with PayPal"))
+                self.request, ppe.message)
             if self.as_payment_method:
                 url = reverse('checkout:payment-details')
             else:
@@ -225,7 +230,7 @@ class SuccessResponseView(PaymentDetailsView):
             basket.strategy = Selector().strategy(self.request)
 
         # Re-apply any offers
-        Applicator().apply(self.request, basket)
+        Applicator().apply(request=self.request, basket=basket)
 
         return basket
 
