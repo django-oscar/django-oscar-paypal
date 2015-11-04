@@ -219,7 +219,8 @@ INSTALLED_APPS = [
     'debug_toolbar',
     # Apps from oscar
     'paypal',
-    'compressor'
+    'compressor',
+    'widget_tweaks',
 ]
 
 from oscar import get_core_apps
