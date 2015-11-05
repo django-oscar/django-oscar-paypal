@@ -1,34 +1,26 @@
 language: python
 
-python:
-    - '2.7'
-
 env:
-    matrix:
-        # Django 1.6
-        - COMBO="Django==1.6.8 django-oscar==0.7.2"
-        - COMBO="Django==1.6.8 South==1.0.1 django-oscar==1.0"
-        # Django 1.7
-        - COMBO="Django==1.7.1 django-oscar==1.0"
+  # Generated with https://www.dominicrodger.com/tox-and-travis.html
+  - TOX_ENV=py27-django17-oscar10
+  - TOX_ENV=py27-django17-oscar11
+  - TOX_ENV=py27-django18-oscar10
+  - TOX_ENV=py27-django18-oscar11
+  - TOX_ENV=py33-django17-oscar10
+  - TOX_ENV=py33-django17-oscar11
+  - TOX_ENV=py33-django18-oscar10
+  - TOX_ENV=py33-django18-oscar11
+  - TOX_ENV=py34-django17-oscar10
+  - TOX_ENV=py34-django17-oscar11
+  - TOX_ENV=py34-django18-oscar10
+  - TOX_ENV=py34-django18-oscar11
 
-matrix:
-    include:
-        - python: '3.3'
-          env: COMBO="Django==1.6.8 South==1.0.1 django-oscar==1.0"
-        - python: '3.3'
-          env: COMBO="Django==1.7.1 django-oscar==1.0"
-        - python: '3.4'
-          env: COMBO="Django==1.6.8 South==1.0.1 django-oscar==1.0"
-        - python: '3.4'
-          env: COMBO="Django==1.7.1 django-oscar==1.0"
 
 install:
-    - pip install $COMBO -r requirements.txt -e .
+    - pip install tox
 
 script:
-    - coverage run ./runtests.py
+    - tox -e $TOX_ENV
 
-after_success:
-    - coveralls
 notifications:
   email: false
