@@ -62,7 +62,6 @@ if not settings.configured:
             'django.middleware.csrf.CsrfViewMiddleware',
             'django.contrib.auth.middleware.AuthenticationMiddleware',
             'django.contrib.messages.middleware.MessageMiddleware',
-            'django.middleware.transaction.TransactionMiddleware',
             'oscar.apps.basket.middleware.BasketMiddleware',
         ),
         TEMPLATE_CONTEXT_PROCESSORS = (
@@ -93,6 +92,8 @@ if not settings.configured:
         STATIC_URL='/',
         STATIC_ROOT='/static/',
         NOSE_ARGS=['-s', '--with-spec'],
+        # Oscar 1.0 factories assume this setting is present. Fixed in 1.1.
+        OSCAR_INITIAL_ORDER_STATUS='A',
         **extra_settings
     )
 
