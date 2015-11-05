@@ -5,7 +5,7 @@ Contributing
 Do this::
 
     mkvirtualenv oscar-paypal
-    git clone git://github.com/tangentlabs/django-oscar-paypal.git
+    git clone git://github.com/django-oscar/django-oscar-paypal.git
     cd django-oscar-paypal
     make install
 
@@ -23,4 +23,4 @@ and run it::
 
 Use the `Github issue tracker`_ for any problems.
 
-.. _`Github issue tracker`: https://github.com/tangentlabs/django-oscar-paypal/issues
+.. _`Github issue tracker`: https://github.com/django-oscar/django-oscar-paypal/issues

@@ -7,9 +7,7 @@ from paypal import VERSION
 setup(
     name='django-oscar-paypal',
     version=VERSION,
-    url='https://github.com/tangentlabs/django-oscar-paypal',
-    author="David Winterbottom",
-    author_email="david.winterbottom@tangentlabs.co.uk",
+    url='https://github.com/django-oscar/django-oscar-paypal',
     description=(
         "Integration with PayPal Express, PayPal Payflow Pro and Adaptive "
         "Payments for django-oscar"),
@@ -23,7 +21,7 @@ setup(
         'requests>=1.0',
         'django-localflavor'],
     extras_require={
-        'oscar': ["django-oscar>=0.6"]
+        'oscar': ["django-oscar>=1.0"]
     },
     # See http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
