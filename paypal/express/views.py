@@ -122,8 +122,11 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
                 params['shipping_methods'] = []
 
         else:
+            # Maik doubts that this code ever worked. Assigning
+            # shipping method instances to Paypal params
+            # isn't going to work, is it?
             shipping_methods = Repository().get_shipping_methods(
-                user=user, basket=basket)
+                user=user, basket=basket, request=self.request)
             params['shipping_methods'] = shipping_methods
 
         if settings.DEBUG:
@@ -426,7 +429,9 @@ class ShippingOptionsView(View):
             postcode=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOZIP', None),
             country=country
         )
-        methods = self.get_shipping_methods(user, basket, shipping_address)
+        methods = Repository().get_shipping_methods(
+            basket=basket, shipping_addr=shipping_address,
+            request=self.request, user=user)
         return self.render_to_response(methods, basket)
 
     def render_to_response(self, methods, basket):
@@ -459,8 +464,3 @@ class ShippingOptionsView(View):
             pairs.append(('NO_SHIPPING_OPTION_DETAILS', 1))
         payload = urlencode(pairs)
         return HttpResponse(payload)
-
-    def get_shipping_methods(self, user, basket, shipping_address):
-        repo = Repository()
-        return repo.get_shipping_methods(
-            user, basket, shipping_addr=shipping_address)
