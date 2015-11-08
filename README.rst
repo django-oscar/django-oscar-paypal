@@ -67,9 +67,11 @@ Changelog
 * Display original Paypal error message instead of generic error message. `#101`_
 * Bugfix: Hide form buttons as expected. `#94`_
 * Bugfix: Correct signature for call to ``get_shipping_methods``. `#99`_
+* Bugfix: Don't fail in countries without postcode. `#100`_
 
 .. _`#94`: https://github.com/django-oscar/django-oscar-paypal/pull/94
 .. _`#99`: https://github.com/django-oscar/django-oscar-paypal/issues/99
+.. _`#100`: https://github.com/django-oscar/django-oscar-paypal/issues/100
 .. _`#101`: https://github.com/django-oscar/django-oscar-paypal/pull/101
 .. _`#107`: https://github.com/django-oscar/django-oscar-paypal/pull/107
 

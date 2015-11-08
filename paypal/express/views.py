@@ -346,7 +346,7 @@ class SuccessResponseView(PaymentDetailsView):
             line2=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET2', default=""),
             line4=self.txn.value('PAYMENTREQUEST_0_SHIPTOCITY', default=""),
             state=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTATE', default=""),
-            postcode=self.txn.value('PAYMENTREQUEST_0_SHIPTOZIP'),
+            postcode=self.txn.value('PAYMENTREQUEST_0_SHIPTOZIP', default=""),
             country=Country.objects.get(iso_3166_1_a2=self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'))
         )
 
@@ -415,11 +415,11 @@ class ShippingOptionsView(View):
             country = Country()
 
         shipping_address = ShippingAddress(
-            line1=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTREET', None),
-            line2=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTREET2', None),
-            line4=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOCITY', None),
-            state=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTATE', None),
-            postcode=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOZIP', None),
+            line1=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTREET', ''),
+            line2=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTREET2', ''),
+            line4=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOCITY', ''),
+            state=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTATE', ''),
+            postcode=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOZIP', ''),
             country=country
         )
         methods = Repository().get_shipping_methods(
