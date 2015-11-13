@@ -58,8 +58,8 @@ Tests
 Changelog
 ---------
 
-0.9.6
-~~~~~
+0.9.6 (released November 13th, 2015)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Add support for Oscar 1.1 and Django 1.8.
 * Drop support for Django 1.6 and Oscar 0.7.
