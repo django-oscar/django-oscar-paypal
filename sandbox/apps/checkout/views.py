@@ -8,8 +8,16 @@ from paypal.payflow import facade
 
 
 class PaymentDetailsView(views.PaymentDetailsView):
+    """
+    An example view that shows how to integrate BOTH Paypal Express
+    (see get_context_data method)and Payppal Flow (the other methods).
+    Naturally, you will only want to use one of the two.
+    """
 
     def get_context_data(self, **kwargs):
+        """
+        Add data for Paypal Express flow.
+        """
         # Override method so the bankcard and billing address forms can be
         # added to the context.
         ctx = super(PaymentDetailsView, self).get_context_data(**kwargs)

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import random
 
 from decimal import Decimal as D
 
@@ -13,7 +12,7 @@ from mock import patch, Mock
 from oscar.apps.order.models import Order
 from oscar.apps.basket.models import Basket
 from oscar.core.loading import get_classes
-
+from oscar.test.factories import create_product
 from purl import URL
 
 
@@ -25,41 +24,6 @@ Partner, StockRecord = get_classes('partner.models', ('Partner',
  ProductAttribute,
  ProductAttributeValue) = get_classes('catalogue.models', (
     'ProductClass', 'Product', 'ProductAttribute', 'ProductAttributeValue'))
-
-
-def create_product(price=None, title="Dummy title",
-                   product_class="Dummy item class", partner="Dummy partner",
-                   partner_sku=None, upc=None, num_in_stock=10,
-                   attributes=None, **kwargs):
-    """
-    Helper method for creating products that are used in tests.
-
-    Ported from oscar_testsupport. Where the function is present:
-        Oscar 0.4: oscar.test.helpers
-        Oscar 0.5: oscar_testsupport
-        Oscar 0.6: oscar.test.factories
-    """
-    ic, __ = ProductClass._default_manager.get_or_create(name=product_class)
-    item = Product(title=title, product_class=ic, upc=upc, **kwargs)
-
-    if attributes:
-        for key, value in attributes.items():
-            setattr(item.attr, key, value)
-
-    item.save()
-
-    if price is not None or partner_sku or num_in_stock is not None:
-        if not partner_sku:
-            partner_sku = 'sku_%d_%d' % (item.id, random.randint(0, 10000))
-        if price is None:
-            price = D('10.00')
-
-        partner, __ = Partner._default_manager.get_or_create(name=partner)
-        StockRecord._default_manager.create(product=item, partner=partner,
-                                            partner_sku=partner_sku,
-                                            price_excl_tax=price,
-                                            num_in_stock=num_in_stock)
-    return item
 
 
 class MockedPayPalTests(TestCase):
@@ -85,14 +49,9 @@ class MockedPayPalTests(TestCase):
         pass
 
     def add_product_to_basket(self, price=D('100.00')):
-        product = create_product(price=price)
-        try:
-            # Oscar 0.8+
-            url = reverse('basket:add', kwargs={'pk': product.pk})
-        except NoReverseMatch:
-            # Oscar < 0.8
-            url = reverse('basket:add')
-        self.client.post(url, {'product_id': product.id, 'quantity': 1})
+        product = create_product(price=price, num_in_stock=1)
+        url = reverse('basket:add', kwargs={'pk': product.pk})
+        self.client.post(url, {'quantity': 1})
 
 
 class EdgeCaseTests(MockedPayPalTests):

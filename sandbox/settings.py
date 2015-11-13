@@ -215,11 +215,14 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
     'django.contrib.staticfiles',
     # External apps
-    'django_extensions',
+    # 1.5.7 still ships with South migrations in the wrong folder,
+    # 1.5.8 contains a fix. Upgrade when released.
+    # 'django_extensions',
     'debug_toolbar',
     # Apps from oscar
     'paypal',
-    'compressor'
+    'compressor',
+    'widget_tweaks',
 ]
 
 from oscar import get_core_apps

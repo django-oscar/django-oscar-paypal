@@ -122,8 +122,11 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
                 params['shipping_methods'] = []
 
         else:
+            # Maik doubts that this code ever worked. Assigning
+            # shipping method instances to Paypal params
+            # isn't going to work, is it?
             shipping_methods = Repository().get_shipping_methods(
-                user=user, basket=basket)
+                user=user, basket=basket, request=self.request)
             params['shipping_methods'] = shipping_methods
 
         if settings.DEBUG:
@@ -168,10 +171,9 @@ class SuccessResponseView(PaymentDetailsView):
     template_name_preview = 'paypal/express/preview.html'
     preview = True
 
-    # We don't have the usual pre-conditions (Oscar 0.7+)
     @property
     def pre_conditions(self):
-        return [] if oscar.VERSION[:2] >= (0, 8) else ()
+        return []
 
     def get(self, request, *args, **kwargs):
         """
@@ -296,12 +298,6 @@ class SuccessResponseView(PaymentDetailsView):
         submission['payment_kwargs']['txn'] = self.txn
         return submission
 
-    # Warning: This method can be removed when we drop support for Oscar 0.6
-    def get_error_response(self):
-        # We bypass the normal session checks for shipping address and shipping
-        # method as they don't apply here.
-        pass
-
     def handle_payment(self, order_number, total, **kwargs):
         """
         Complete payment with PayPal - this calls the 'DoExpressCheckout'
@@ -350,7 +346,7 @@ class SuccessResponseView(PaymentDetailsView):
             line2=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTREET2', default=""),
             line4=self.txn.value('PAYMENTREQUEST_0_SHIPTOCITY', default=""),
             state=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTATE', default=""),
-            postcode=self.txn.value('PAYMENTREQUEST_0_SHIPTOZIP'),
+            postcode=self.txn.value('PAYMENTREQUEST_0_SHIPTOZIP', default=""),
             country=Country.objects.get(iso_3166_1_a2=self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'))
         )
 
@@ -419,14 +415,16 @@ class ShippingOptionsView(View):
             country = Country()
 
         shipping_address = ShippingAddress(
-            line1=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTREET', None),
-            line2=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTREET2', None),
-            line4=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOCITY', None),
-            state=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTATE', None),
-            postcode=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOZIP', None),
+            line1=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTREET', ''),
+            line2=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTREET2', ''),
+            line4=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOCITY', ''),
+            state=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTATE', ''),
+            postcode=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOZIP', ''),
             country=country
         )
-        methods = self.get_shipping_methods(user, basket, shipping_address)
+        methods = Repository().get_shipping_methods(
+            basket=basket, shipping_addr=shipping_address,
+            request=self.request, user=user)
         return self.render_to_response(methods, basket)
 
     def render_to_response(self, methods, basket):
@@ -435,13 +433,7 @@ class ShippingOptionsView(View):
             ('CURRENCYCODE', self.request.POST.get('CURRENCYCODE', 'GBP')),
         ]
         for index, method in enumerate(methods):
-            if hasattr(method, 'set_basket'):
-                # Oscar < 0.8
-                method.set_basket(basket)
-                charge = method.charge_incl_tax
-            else:
-                cost = method.calculate(basket)
-                charge = cost.incl_tax
+            charge = method.calculate(basket).incl_tax
 
             pairs.append(('L_SHIPPINGOPTIONNAME%d' % index,
                           six.text_type(method.name)))
@@ -459,8 +451,3 @@ class ShippingOptionsView(View):
             pairs.append(('NO_SHIPPING_OPTION_DETAILS', 1))
         payload = urlencode(pairs)
         return HttpResponse(payload)
-
-    def get_shipping_methods(self, user, basket, shipping_address):
-        repo = Repository()
-        return repo.get_shipping_methods(
-            user, basket, shipping_addr=shipping_address)
