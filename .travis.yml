@@ -1,3 +1,6 @@
+# Use Travis new infrastructure
+sudo: false
+
 language: python
 
 env:
