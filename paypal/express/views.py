@@ -114,7 +114,7 @@ class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
 
                 shipping_method = self.get_shipping_method(
                     basket, shipping_addr)
-                c
+                
                 if not shipping_method:
                     raise MissingShippingMethodException()
 
@@ -213,11 +213,11 @@ class SuccessResponseView(PaymentDetailsView):
                 _("No basket was found that corresponds to your "
                   "PayPal transaction"))
             return HttpResponseRedirect(reverse('basket:summary'))
-        else:
-            self.request.basket = kwargs['basket']
+
+        self.request.basket = kwargs['basket']
         logger.info(
             "Basket #%s  showing preview with payer ID %s and token %s",
-            kwargs['baset'].id, self.payer_id, self.token)
+            kwargs['basket'].id, self.payer_id, self.token)
         return super(SuccessResponseView, self).get(request, *args, **kwargs)
 
     def load_frozen_basket(self, basket_id):
@@ -407,17 +407,14 @@ class SuccessResponseView(PaymentDetailsView):
             user=self.request.user, basket=basket,
             shipping_addr=shipping_address, request=self.request)
 
-
-        if shipping_address.country.pk not in [country.pk for country in \
-                                        shipping_method.countries.all()]:
-            countries = ", ".join([country.pk for country in \
-                                    shipping_method.countries.all()])
+        allowed_countries = [country.pk for country in \
+                                        shipping_method.countries.all()]
+        if shipping_address.country.pk not in allowed_countries:
+            countries = ", ".join(allowed_countries)
             message=_("We do not yet ship to countries outside of: {}.".format(
                                 countries))
             messages.error(self.request, _(message))
-            
             return None
-
 
         charge_incl_tax = D(self.txn.value('PAYMENTREQUEST_0_SHIPPINGAMT'))
         # Assume no tax for now
