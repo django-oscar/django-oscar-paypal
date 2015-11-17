@@ -62,7 +62,7 @@ class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
         except PayPalError,e:
             messages.error(
                 self.request, _("An error occurred communicating with PayPal"))
-	    logger.exception(e)
+            logger.exception("An error occurred communicating with PayPal")
             if self.as_payment_method:
                 url = reverse('checkout:payment-details')
             else:
@@ -70,16 +70,16 @@ class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
             return url
         except InvalidBasket as e:
             messages.warning(self.request, six.text_type(e))
-            logger.exception(e)
-	    return reverse('basket:summary')
+            logger.exception("Invalid Basket")
+            return reverse('basket:summary')
         except EmptyBasketException, e:
             messages.error(self.request, _("Your basket is empty"))
-	    logger.exception(e)
+            logger.exception("Empty basket")
             return reverse('basket:summary')
         except MissingShippingAddressException, e:
             messages.error(
                 self.request, _("A shipping address must be specified"))
-	    logger.exception(e)
+            logger.exception("A shipping address must be specified")
             return reverse('checkout:shipping-address')
         except MissingShippingMethodException:
             messages.error(
@@ -114,6 +114,7 @@ class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
 
                 shipping_method = self.get_shipping_method(
                     basket, shipping_addr)
+                
                 if not shipping_method:
                     raise MissingShippingMethodException()
 
@@ -213,10 +214,10 @@ class SuccessResponseView(PaymentDetailsView):
                   "PayPal transaction"))
             return HttpResponseRedirect(reverse('basket:summary'))
 
+        self.request.basket = kwargs['basket']
         logger.info(
-            "Basket #%s - showing preview with payer ID %s and token %s",
+            "Basket #%s  showing preview with payer ID %s and token %s",
             kwargs['basket'].id, self.payer_id, self.token)
-
         return super(SuccessResponseView, self).get(request, *args, **kwargs)
 
     def load_frozen_basket(self, basket_id):
@@ -236,6 +237,12 @@ class SuccessResponseView(PaymentDetailsView):
         return basket
 
     def get_context_data(self, **kwargs):
+        basket = kwargs.get("basket")
+        shipping_method = self.get_shipping_method(basket, shipping_address=self.get_shipping_address(basket))
+
+        if shipping_method is None:
+            return kwargs
+        
         ctx = super(SuccessResponseView, self).get_context_data(**kwargs)
 
         if not hasattr(self, 'payer_id'):
@@ -262,6 +269,7 @@ class SuccessResponseView(PaymentDetailsView):
             "A problem occurred communicating with PayPal "
             "- please try again later"
         )
+
         try:
             self.payer_id = request.POST['payer_id']
             self.token = request.POST['token']
@@ -279,6 +287,7 @@ class SuccessResponseView(PaymentDetailsView):
 
         # Reload frozen basket which is specified in the URL
         basket = self.load_frozen_basket(kwargs['basket_id'])
+        
         if not basket:
             messages.error(self.request, error_msg)
             return HttpResponseRedirect(reverse('basket:summary'))
@@ -309,9 +318,28 @@ class SuccessResponseView(PaymentDetailsView):
 
     # Warning: This method can be removed when we drop support for Oscar 0.6
     def get_error_response(self):
-        # We bypass the normal session checks for shipping address and shipping
-        # method as they don't apply here.
-        pass
+        # Check that the user's basket is not empty
+        if self.request.basket.is_empty:
+            messages.error(self.request, _(
+                "You need to add some items to your basket to checkout"))
+            return HttpResponseRedirect(reverse('basket:summary'))
+
+        if self.request.basket.is_shipping_required():
+            shipping_address = self.get_shipping_address(
+                self.request.basket)
+            shipping_method = self.get_shipping_method(
+                self.request.basket, shipping_address=shipping_address)
+            # Check that shipping address has been completed
+            if not shipping_address:
+                messages.error(
+                    self.request, _("Please choose a shipping address"))
+                return HttpResponseRedirect(
+                    reverse('checkout:shipping-address'))
+
+            # Check that shipping method has been set
+            if not shipping_method:
+                self.request.basket.thaw()
+                return HttpResponseRedirect(reverse('basket:summary')) 
 
     def handle_payment(self, order_number, total, **kwargs):
         """
@@ -374,18 +402,28 @@ class SuccessResponseView(PaymentDetailsView):
         if not basket.is_shipping_required():
             return NoShippingRequired()
 
-        # Instantiate a new FixedPrice shipping method instance
+        code = self.checkout_session.shipping_method_code(basket)
+        shipping_method = Repository().get_default_shipping_method(
+            user=self.request.user, basket=basket,
+            shipping_addr=shipping_address, request=self.request)
+
+        allowed_countries = [country.pk for country in \
+                                        shipping_method.countries.all()]
+        if shipping_address.country.pk not in allowed_countries:
+            countries = ", ".join(allowed_countries)
+            message=_("We do not yet ship to countries outside of {}.".format(
+                                countries))
+            messages.error(self.request, _(message))
+            return None
+
         charge_incl_tax = D(self.txn.value('PAYMENTREQUEST_0_SHIPPINGAMT'))
         # Assume no tax for now
         charge_excl_tax = charge_incl_tax
-        method = FixedPrice(charge_excl_tax, charge_incl_tax)
-        name = self.txn.value('SHIPPINGOPTIONNAME')
+        method = shipping_method
 
-        if not name:
-            session_method = super(SuccessResponseView, self).get_shipping_method(
-                basket, shipping_address, **kwargs)
-            if session_method:
-                method.name = session_method.name
+        name = self.txn.value('SHIPPINGOPTIONNAME')
+        if shipping_method:
+            method.name = shipping_method.name
         else:
             method.name = name
         return method
