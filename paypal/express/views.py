@@ -411,7 +411,7 @@ class SuccessResponseView(PaymentDetailsView):
                                         shipping_method.countries.all()]
         if shipping_address.country.pk not in allowed_countries:
             countries = ", ".join(allowed_countries)
-            message=_("We do not yet ship to countries outside of: {}.".format(
+            message=_("We do not yet ship to countries outside of {}.".format(
                                 countries))
             messages.error(self.request, _(message))
             return None
