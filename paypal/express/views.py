@@ -62,7 +62,7 @@ class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
         except PayPalError,e:
             messages.error(
                 self.request, _("An error occurred communicating with PayPal"))
-            logger.exception(e)
+            logger.exception("An error occurred communicating with PayPal")
             if self.as_payment_method:
                 url = reverse('checkout:payment-details')
             else:
@@ -70,16 +70,16 @@ class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
             return url
         except InvalidBasket as e:
             messages.warning(self.request, six.text_type(e))
-            logger.exception(e)
-            return reverse('basket:summary') # whaaaat
+            logger.exception("Invalid Basket")
+            return reverse('basket:summary')
         except EmptyBasketException, e:
             messages.error(self.request, _("Your basket is empty"))
-            logger.exception(e)
+            logger.exception("Empty basket")
             return reverse('basket:summary')
         except MissingShippingAddressException, e:
             messages.error(
                 self.request, _("A shipping address must be specified"))
-            logger.exception(e)
+            logger.exception("A shipping address must be specified")
             return reverse('checkout:shipping-address')
         except MissingShippingMethodException:
             messages.error(
@@ -300,7 +300,7 @@ class SuccessResponseView(PaymentDetailsView):
         basket.calculate_tax(
             self.get_shipping_address(basket)
         )
-        
+
         submission = super(
             SuccessResponseView, self).build_submission(**kwargs)
 
@@ -402,7 +402,7 @@ class SuccessResponseView(PaymentDetailsView):
         if not basket.is_shipping_required():
             return NoShippingRequired()
 
-        code = self.checkout_session.shipping_method_code(basket) # why is code none for valid orders and showing the not shipping
+        code = self.checkout_session.shipping_method_code(basket)
         shipping_method = Repository().get_default_shipping_method(
             user=self.request.user, basket=basket,
             shipping_addr=shipping_address, request=self.request)
@@ -421,7 +421,7 @@ class SuccessResponseView(PaymentDetailsView):
         charge_excl_tax = charge_incl_tax
         # method = FixedPrice(charge_excl_tax, charge_incl_tax)
         method = shipping_method
-        # why not just return shipping_method
+
         name = self.txn.value('SHIPPINGOPTIONNAME')
         if shipping_method:
             method.name = shipping_method.name
