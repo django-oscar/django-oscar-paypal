@@ -419,7 +419,6 @@ class SuccessResponseView(PaymentDetailsView):
         charge_incl_tax = D(self.txn.value('PAYMENTREQUEST_0_SHIPPINGAMT'))
         # Assume no tax for now
         charge_excl_tax = charge_incl_tax
-        # method = FixedPrice(charge_excl_tax, charge_incl_tax)
         method = shipping_method
 
         name = self.txn.value('SHIPPINGOPTIONNAME')
