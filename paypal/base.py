@@ -47,7 +47,7 @@ class ResponseModel(models.Model):
         ctx = {}
         if six.PY2 and isinstance(self.raw_response, six.text_type):
             self.raw_response = self.raw_response.encode('utf8')
-        for key, val in parse_qsl(self.raw_response):
+        for key, val in parse_qsl(self.raw_response.decode('ASCII')):
             if isinstance(key, six.binary_type):
                 key = key.decode('utf8')
             if isinstance(val, six.binary_type):
