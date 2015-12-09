@@ -66,6 +66,18 @@ def _submit_payment_details(trxtype, order_number, card_number, cvv, expiry_date
         'EMAIL': kwargs.get('user_email', ''),
         'PHONENUM': kwargs.get('billing_phone_number', ''),
     }
+
+    # Allow inclusion of optional parameters in transactions such as:
+    # dict(shipto_first_name='SHIPTOFIRSTNAME', ...)
+    #   OR
+    # dict(bncode='BUTTONSOURCE', ...)
+    OPTIONAL_PARAMS = getattr(settings, 'PAYPAL_PAYFLOW_OPTIONAL_PARAMS', dict())
+    if isinstance(OPTIONAL_PARAMS, dict):
+        # add optional parameters here
+        for key, name in OPTIONAL_PARAMS.items():
+            value = kwargs.get(key)
+            if value:
+                params.update({'{}'.format(name): value})
     return _transaction(params)
 
 
