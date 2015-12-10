@@ -19,6 +19,7 @@ import oscar
 from oscar.apps.payment.exceptions import UnableToTakePayment
 from oscar.core.loading import get_class
 from oscar.apps.shipping.methods import FixedPrice, NoShippingRequired
+from oscar.apps.checkout import utils as checkout_utils
 
 from paypal.express.facade import (
     get_paypal_url, fetch_transaction_details, confirm_transaction)
