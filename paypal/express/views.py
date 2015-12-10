@@ -160,7 +160,7 @@ class RedirectView(ShippingMethodMixin, CheckoutSessionMixin, DjangoRedirectView
                 params['shipping_methods'] = []
 
         else:
-            shipping_method = Repository().get_current_shipping_method()
+            shipping_method = self.get_current_shipping_method()
 
             if shipping_method:
                 params['shipping_methods'] = [shipping_method]
@@ -440,7 +440,7 @@ class SuccessResponseView(PaymentDetailsView):
             return NoShippingRequired()
 
         code = self.checkout_session.shipping_method_code(basket)
-        shipping_method = Repository().get_current_shipping_method()
+        shipping_method = self.get_current_shipping_method()
 
         allowed_countries = [country.pk for country in \
                                         shipping_method.countries.all()]
