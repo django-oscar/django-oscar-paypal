@@ -43,6 +43,31 @@ SourceType = get_model('payment', 'SourceType')
 logger = logging.getLogger('paypal.express')
 
 
+class ShippingMethodMixin(object):
+    def get_current_shipping_method(self):
+        session_data = checkout_utils.CheckoutSessionData(self.request)
+        shipping_method_code = session_data._get('shipping', 'method_code')
+
+        shipping_method = Repository().find_by_code(
+            shipping_method_code,
+            self.request.basket,
+        )
+
+        if not shipping_method:
+            shipping_method = self.get_default_shipping_method(
+                self.request.basket,
+            )
+
+        return shipping_method
+
+    def get_default_shipping_method(self, basket):
+        return Repository().get_default_shipping_method(
+            request=self.request,
+            user=self.request.user,
+            basket=self.request.basket,
+        )
+
+
 class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
     """
     Initiate the transaction with Paypal and redirect the user
@@ -59,32 +84,44 @@ class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
         try:
             basket = self.request.basket
             url = self._get_redirect_url(basket, **kwargs)
-        except PayPalError,e:
+
+        except PayPalError, e:
             messages.error(
                 self.request, _("An error occurred communicating with PayPal"))
+
             logger.exception("An error occurred communicating with PayPal")
+
             if self.as_payment_method:
                 url = reverse('checkout:payment-details')
             else:
                 url = reverse('basket:summary')
+
             return url
+
         except InvalidBasket as e:
             messages.warning(self.request, six.text_type(e))
             logger.exception("Invalid Basket")
             return reverse('basket:summary')
+
         except EmptyBasketException, e:
             messages.error(self.request, _("Your basket is empty"))
             logger.exception("Empty basket")
             return reverse('basket:summary')
+
         except MissingShippingAddressException, e:
             messages.error(
                 self.request, _("A shipping address must be specified"))
             logger.exception("A shipping address must be specified")
             return reverse('checkout:shipping-address')
+
         except MissingShippingMethodException:
             messages.error(
-                self.request, _("A shipping method must be specified"))
+                self.request,
+                _("A shipping method must be specified"),
+            )
+
             return reverse('checkout:shipping-method')
+
         else:
             # Transaction successfully registered with PayPal.  Now freeze the
             # basket so it can't be edited while the customer is on the PayPal
@@ -114,7 +151,7 @@ class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
 
                 shipping_method = self.get_shipping_method(
                     basket, shipping_addr)
-                
+
                 if not shipping_method:
                     raise MissingShippingMethodException()
 
@@ -123,7 +160,7 @@ class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
                 params['shipping_methods'] = []
 
         else:
-            shipping_method = Repository().get_default_shipping_method(
+            shipping_method = Repository().get_current_shipping_method(
                 user=user, basket=basket)
             if shipping_method:
                 params['shipping_methods'] = [shipping_method]
@@ -403,7 +440,7 @@ class SuccessResponseView(PaymentDetailsView):
             return NoShippingRequired()
 
         code = self.checkout_session.shipping_method_code(basket)
-        shipping_method = Repository().get_default_shipping_method(
+        shipping_method = Repository().get_current_shipping_method(
             user=self.request.user, basket=basket,
             shipping_addr=shipping_address, request=self.request)
 
