@@ -68,7 +68,7 @@ class ShippingMethodMixin(object):
         )
 
 
-class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
+class RedirectView(ShippingMethodMixin, CheckoutSessionMixin, DjangoRedirectView):
     """
     Initiate the transaction with Paypal and redirect the user
     to PayPal's Express Checkout to perform the transaction.
@@ -160,8 +160,8 @@ class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
                 params['shipping_methods'] = []
 
         else:
-            shipping_method = Repository().get_current_shipping_method(
-                user=user, basket=basket)
+            shipping_method = Repository().get_current_shipping_method()
+
             if shipping_method:
                 params['shipping_methods'] = [shipping_method]
 
@@ -440,9 +440,7 @@ class SuccessResponseView(PaymentDetailsView):
             return NoShippingRequired()
 
         code = self.checkout_session.shipping_method_code(basket)
-        shipping_method = Repository().get_current_shipping_method(
-            user=self.request.user, basket=basket,
-            shipping_addr=shipping_address, request=self.request)
+        shipping_method = Repository().get_current_shipping_method()
 
         allowed_countries = [country.pk for country in \
                                         shipping_method.countries.all()]
