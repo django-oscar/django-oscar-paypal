@@ -204,7 +204,7 @@ class CancelResponseView(RedirectView):
 # Upgrading notes: when we drop support for Oscar 0.6, this class can be
 # refactored to pass variables around more explicitly (instead of assigning
 # things to self so they are accessible in a later method).
-class SuccessResponseView(PaymentDetailsView):
+class SuccessResponseView(ShippingMethodMixin, PaymentDetailsView):
     template_name_preview = 'paypal/express/preview.html'
     preview = True
 
