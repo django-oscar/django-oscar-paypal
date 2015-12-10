@@ -19,6 +19,7 @@ import oscar
 from oscar.apps.payment.exceptions import UnableToTakePayment
 from oscar.core.loading import get_class
 from oscar.apps.shipping.methods import FixedPrice, NoShippingRequired
+from oscar.apps.checkout import utils as checkout_utils
 
 from paypal.express.facade import (
     get_paypal_url, fetch_transaction_details, confirm_transaction)
@@ -43,7 +44,32 @@ SourceType = get_model('payment', 'SourceType')
 logger = logging.getLogger('paypal.express')
 
 
-class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
+class ShippingMethodMixin(object):
+    def get_current_shipping_method(self):
+        session_data = checkout_utils.CheckoutSessionData(self.request)
+        shipping_method_code = session_data._get('shipping', 'method_code')
+
+        shipping_method = Repository().find_by_code(
+            shipping_method_code,
+            self.request.basket,
+        )
+
+        if not shipping_method:
+            shipping_method = self.get_default_shipping_method(
+                self.request.basket,
+            )
+
+        return shipping_method
+
+    def get_default_shipping_method(self, basket):
+        return Repository().get_default_shipping_method(
+            request=self.request,
+            user=self.request.user,
+            basket=self.request.basket,
+        )
+
+
+class RedirectView(ShippingMethodMixin, CheckoutSessionMixin, DjangoRedirectView):
     """
     Initiate the transaction with Paypal and redirect the user
     to PayPal's Express Checkout to perform the transaction.
@@ -59,32 +85,44 @@ class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
         try:
             basket = self.request.basket
             url = self._get_redirect_url(basket, **kwargs)
-        except PayPalError,e:
+
+        except PayPalError, e:
             messages.error(
                 self.request, _("An error occurred communicating with PayPal"))
+
             logger.exception("An error occurred communicating with PayPal")
+
             if self.as_payment_method:
                 url = reverse('checkout:payment-details')
             else:
                 url = reverse('basket:summary')
+
             return url
+
         except InvalidBasket as e:
             messages.warning(self.request, six.text_type(e))
             logger.exception("Invalid Basket")
             return reverse('basket:summary')
+
         except EmptyBasketException, e:
             messages.error(self.request, _("Your basket is empty"))
             logger.exception("Empty basket")
             return reverse('basket:summary')
+
         except MissingShippingAddressException, e:
             messages.error(
                 self.request, _("A shipping address must be specified"))
             logger.exception("A shipping address must be specified")
             return reverse('checkout:shipping-address')
+
         except MissingShippingMethodException:
             messages.error(
-                self.request, _("A shipping method must be specified"))
+                self.request,
+                _("A shipping method must be specified"),
+            )
+
             return reverse('checkout:shipping-method')
+
         else:
             # Transaction successfully registered with PayPal.  Now freeze the
             # basket so it can't be edited while the customer is on the PayPal
@@ -114,7 +152,7 @@ class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
 
                 shipping_method = self.get_shipping_method(
                     basket, shipping_addr)
-                
+
                 if not shipping_method:
                     raise MissingShippingMethodException()
 
@@ -123,8 +161,8 @@ class RedirectView(CheckoutSessionMixin, DjangoRedirectView):
                 params['shipping_methods'] = []
 
         else:
-            shipping_method = Repository().get_default_shipping_method(
-                user=user, basket=basket)
+            shipping_method = self.get_current_shipping_method()
+
             if shipping_method:
                 params['shipping_methods'] = [shipping_method]
 
@@ -166,7 +204,7 @@ class CancelResponseView(RedirectView):
 # Upgrading notes: when we drop support for Oscar 0.6, this class can be
 # refactored to pass variables around more explicitly (instead of assigning
 # things to self so they are accessible in a later method).
-class SuccessResponseView(PaymentDetailsView):
+class SuccessResponseView(ShippingMethodMixin, PaymentDetailsView):
     template_name_preview = 'paypal/express/preview.html'
     preview = True
 
@@ -403,9 +441,7 @@ class SuccessResponseView(PaymentDetailsView):
             return NoShippingRequired()
 
         code = self.checkout_session.shipping_method_code(basket)
-        shipping_method = Repository().get_default_shipping_method(
-            user=self.request.user, basket=basket,
-            shipping_addr=shipping_address, request=self.request)
+        shipping_method = self.get_current_shipping_method()
 
         allowed_countries = [country.pk for country in \
                                         shipping_method.countries.all()]
