@@ -198,7 +198,11 @@ def _transaction(extra_params):
 
     logger.info("Performing %s transaction (trxtype=%s)",
                 codes.trxtype_map[trxtype], trxtype)
-    pairs = gateway.post(url, params)
+    pairs = gateway.post(
+        url,
+        '&'.join(['{}={}'.format(n,v) for n,v in params.items()]), 
+        encode=False
+    )
 
     # Beware - this log information will contain the Payflow credentials
     # only use it in development, not production.
