@@ -10,7 +10,7 @@ from django.utils.six.moves.urllib.parse import parse_qsl
 from paypal import exceptions
 
 
-def post(url, params):
+def post(url, params, encode=True):
     """
     Make a POST request to the URL using the key-value pairs.  Return
     a set of key-value pairs.
@@ -18,7 +18,11 @@ def post(url, params):
     :url: URL to post to
     :params: Dict of parameters to include in post payload
     """
-    payload = urlencode(params)
+    if encode:
+        payload = urlencode(params)
+    else:
+        payload = params
+
     start_time = time.time()
     response = requests.post(
         url, payload,
