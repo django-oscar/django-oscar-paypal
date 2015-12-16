@@ -292,6 +292,7 @@ class SuccessResponseView(ShippingMethodMixin, PaymentDetailsView):
             'token': self.token,
             'paypal_user_email': self.txn.value('EMAIL'),
             'paypal_amount': D(self.txn.value('AMT')),
+            'show_tax_separately': True,
         })
 
         return ctx
