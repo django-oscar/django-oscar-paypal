@@ -339,7 +339,6 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
             cost = shipping_method.calculate(basket)
             charge = cost.incl_tax
         params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(charge)
-        params['PAYMENTREQUEST_0_AMT'] += charge
 
     # Both the old version (MAXAMT) and the new version (PAYMENT...) are needed
     # here - think it's a problem with the API.

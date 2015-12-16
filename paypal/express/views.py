@@ -297,6 +297,13 @@ class SuccessResponseView(PaymentDetailsView):
 
         # Adding the tax to the total transaction amount to be sent to Paypal 
         self.txn.amount = self.txn.amount + basket.total_tax
+        
+        submission['shipping_method'].set_basket(basket)
+        shipping_method = submission['shipping_method']
+        
+        total = self.get_order_totals(
+            basket, shipping_method=shipping_method)
+        submission['order_total'] = total
 
         # Pass the user email so it can be stored with the order
         submission['order_kwargs']['guest_email'] = self.txn.value('EMAIL')
