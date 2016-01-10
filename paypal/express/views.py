@@ -61,7 +61,7 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
 
     def get_redirect_url(self, **kwargs):
         try:
-            basket = self.request.basket
+            basket = self.build_submission()['basket']
             url = self._get_redirect_url(basket, **kwargs)
         except PayPalError as ppe:
             messages.error(

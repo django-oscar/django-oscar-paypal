@@ -58,6 +58,13 @@ Tests
 Changelog
 ---------
 
+0.9.7 (unreleased)
+------------------
+* Fix breakage when using Oscar's ``DeferredTaxMixin``. `#98`_ `#121`_
+
+.. _`#98`: https://github.com/django-oscar/django-oscar-paypal/issues/98
+.. _`#121`: https://github.com/django-oscar/django-oscar-paypal/pull/121
+
 0.9.6 (released November 13th, 2015)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
