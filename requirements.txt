@@ -1,3 +1,8 @@
+# django-compressor 2.0 dropped support for Django 1.7.  Since Django
+# 1.7 is still considered supported by django-oscar-paypal, ensure
+# using django-compressor 1.6 (which still supported Django 1.7).
+django-compressor==1.6
+
 # Testing
 mock==1.0.1
 coverage==3.7.1
