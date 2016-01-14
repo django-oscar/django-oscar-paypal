@@ -14,7 +14,7 @@ class TestErrorResponse(TestCase):
         with mock.patch('requests.post') as mock_post:
             response = mock.Mock()
             response.status_code = 200
-            response.content = ERROR_RESPONSE
+            response.text = ERROR_RESPONSE
             mock_post.return_value = response
             self.pairs = post('http://example.com', {})
 
