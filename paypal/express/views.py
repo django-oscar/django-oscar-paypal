@@ -332,7 +332,7 @@ class SuccessResponseView(PaymentDetailsView):
         ship_to_name = self.txn.value('PAYMENTREQUEST_0_SHIPTONAME')
         if ship_to_name is None:
             return None
-        first_name = last_name = None
+        first_name = last_name = ''
         parts = ship_to_name.split()
         if len(parts) == 1:
             last_name = ship_to_name
