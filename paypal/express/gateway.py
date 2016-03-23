@@ -206,6 +206,8 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
             line.unit_price_incl_tax)
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = line.quantity
+        params['L_PAYMENTREQUEST_0_ITEMCATEGORY%d' % index] = (
+            'Physical' if product.is_shipping_required() else 'Digital')
 
     # If the order has discounts associated with it, the way PayPal suggests
     # using the API is to add a separate item for the discount with the value
