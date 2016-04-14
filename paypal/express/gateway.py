@@ -176,11 +176,6 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         logger.error(msg)
         raise express_exceptions.InvalidBasket(_(msg))
 
-    if amount <= 0:
-        msg = 'The basket total is zero so no payment is required'
-        logger.error(msg)
-        raise express_exceptions.InvalidBasket(_(msg))
-
     # PAYMENTREQUEST_0_AMT should include tax, shipping and handling
     params.update({
         'PAYMENTREQUEST_0_AMT': amount,
@@ -310,19 +305,21 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['L_SHIPPINGOPTIONISDEFAULT%d' % index] = 'true' if is_default else 'false'
         charge = method.calculate(basket).incl_tax
 
-        if charge > max_charge:
-            max_charge = charge
-        if is_default:
-            params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(charge)
-            params['PAYMENTREQUEST_0_AMT'] += charge
-        params['L_SHIPPINGOPTIONNAME%d' % index] = six.text_type(method.name)
-        params['L_SHIPPINGOPTIONAMOUNT%d' % index] = _format_currency(charge)
+        if charge:
+            if charge > max_charge:
+                max_charge = charge
+            if is_default:
+                params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(charge)
+                params['PAYMENTREQUEST_0_AMT'] += charge
+            params['L_SHIPPINGOPTIONNAME%d' % index] = six.text_type(method.name)
+            params['L_SHIPPINGOPTIONAMOUNT%d' % index] = _format_currency(charge)
 
     # Set shipping charge explicitly if it has been passed
     if shipping_method:
         charge = shipping_method.calculate(basket).incl_tax
-        params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(charge)
-        params['PAYMENTREQUEST_0_AMT'] += charge
+        if charge:
+            params['PAYMENTREQUEST_0_SHIPPINGAMT'] = _format_currency(charge)
+            params['PAYMENTREQUEST_0_AMT'] += charge
 
     # Both the old version (MAXAMT) and the new version (PAYMENT...) are needed
     # here - think it's a problem with the API.
@@ -336,6 +333,11 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     # Ensure that the total is formatted correctly.
     params['PAYMENTREQUEST_0_AMT'] = _format_currency(
         params['PAYMENTREQUEST_0_AMT'])
+
+    if params['PAYMENTREQUEST_0_AMT'] <= 0:
+        msg = 'The basket total is zero so no payment is required'
+        logger.error(msg)
+        raise express_exceptions.InvalidBasket(_(msg))
 
     txn = _fetch_response(SET_EXPRESS_CHECKOUT, params)
 
@@ -400,6 +402,8 @@ def do_void(txn_id, note=None):
 
 FULL_REFUND = 'Full'
 PARTIAL_REFUND = 'Partial'
+
+
 def refund_txn(txn_id, is_partial=False, amount=None, currency=None):
     params = {
         'TRANSACTIONID': txn_id,
