@@ -7,7 +7,7 @@ merchant account.  Unlike Express Checkout, it doesn't require redirecting the
 user to PayPal's site and allows a customer to use a normal bankcard instead of
 their PayPal account.  `Read more details on the PayPal site`_.
 
-.. _`Read more details on the PayPal site`: https://merchant.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=merchant/payment_gateway
+.. _`Read more details on the PayPal site`: https://www.paypal.com/webapps/mpp/payflow-payment-gateway
 
 .. note::
 
@@ -15,6 +15,9 @@ their PayPal account.  `Read more details on the PayPal site`_.
     guide found in the docs/guides folder.  It is recommended that developers at
     least skim-read this guide so that they are familiar with the overall
     processes.  It also has magic bankcard numbers that can be used for testing.
+    `Find the latest developer docs on the PayPal site`_.
+
+.. _`Find the latest developer docs on the PayPal site`: https://developer.paypal.com/docs/classic/products/payflow/
 
 ---------------
 Getting started
