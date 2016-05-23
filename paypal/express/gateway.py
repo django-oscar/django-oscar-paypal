@@ -171,12 +171,16 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     # fiddly to work with.  Lazy solution - only check when dollars are used as
     # the PayPal currency.
     amount = basket.total_incl_tax
+
+    if shipping_method:
+        amount_shipping = shipping_method.calculate(basket).incl_tax
+
     if currency == 'USD' and amount > 10000:
         msg = 'PayPal can only be used for orders up to 10000 USD'
         logger.error(msg)
         raise express_exceptions.InvalidBasket(_(msg))
 
-    if amount <= 0:
+    if amount <= 0 and amount_shipping <= 0:
         msg = 'The basket total is zero so no payment is required'
         logger.error(msg)
         raise express_exceptions.InvalidBasket(_(msg))
