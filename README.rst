@@ -14,7 +14,7 @@ package is structured so that it can be used without Oscar if you so wish.
 
 * `Full documentation`_
 
-.. _`Full documentation`: http://django-oscar-paypal.readthedocs.org/en/latest/
+.. _`Full documentation`: https://django-oscar-paypal.readthedocs.io/en/latest/
 .. _`Continuous integration status`: http://travis-ci.org/#!/django-oscar/django-oscar-paypal?branch=master
 
 License
@@ -40,7 +40,7 @@ Having problems or got a question?
 * Use Github_ for submitting issues and pull requests.
 
 .. _`@django_oscar`: https://twitter.com/django_oscar
-.. _`contributing guide`: http://django-oscar-paypal.readthedocs.org/en/latest/contributing.html
+.. _`contributing guide`: https://django-oscar-paypal.readthedocs.io/en/latest/contributing.html
 .. _`django-oscar@googlegroups.com`: https://groups.google.com/forum/?fromgroups#!forum/django-oscar
 .. _`Github`: http://github.com/django-oscar/django-oscar-paypal
 
