@@ -1,7 +1,6 @@
 {% extends 'dashboard/layout.html' %}
 {% load currency_filters %}
 {% load i18n %}
-{% load url from future %}
 
 {% block title %}
     {% trans "PayPal Express transaction" %} {{ txn.pnref }} | {{ block.super }}
