@@ -36,22 +36,22 @@ Next, you need to add the PayPal URLs to your URL config.  This can be done as
 follows::
 
     from django.contrib import admin
-    from oscar.app import shop
+    from oscar.app import application
 
-    from paypal.express.dashboard.app import application
+    from paypal.express.dashboard.app import application as paypal
 
     urlpatterns = patterns('',
-        (r'^admin/', include(admin.site.urls)),
-        (r'^checkout/paypal/', include('paypal.express.urls')),
-        # Optional
-        (r'^dashboard/paypal/express/', include(application.urls)),
-        (r'', include(shop.urls)),
+        url(r'^admin/', include(admin.site.urls)),
+        url(r'^checkout/paypal/', include('paypal.express.urls')), # Optional
+        url(r'^dashboard/paypal/express/', include(paypal.urls)),
+        url(r'', include(application.urls)),
+
 
 If you are using the dashboard views, extend the dashboard navigation to include
 the appropriate links::
 
     from django.utils.translation import ugettext_lazy as _
-    OSCAR_DASHBOARD_NAVIGATION.append(
+    OSCAR_DASHBOARD_NAVIGATION += [
         {
             'label': _('PayPal'),
             'icon': 'icon-globe',
@@ -61,7 +61,7 @@ the appropriate links::
                     'url_name': 'paypal-express-list',
                 },
             ]
-        })
+        }]
 
 Finally, you need to modify oscar's basket template to include the button that
 links to PayPal.  This can be done by creating a new template
