@@ -1,10 +1,11 @@
-from django.conf.urls import *
+import django
+from django.conf.urls import url
 from django.views.decorators.csrf import csrf_exempt
 
 from paypal.express import views
 
 
-urlpatterns = patterns('',
+urlpatterns = [
     # Views for normal flow that starts on the basket page
     url(r'^redirect/', views.RedirectView.as_view(), name='paypal-redirect'),
     url(r'^preview/(?P<basket_id>\d+)/$',
@@ -21,4 +22,10 @@ urlpatterns = patterns('',
     # View for using PayPal as a payment method
     url(r'^payment/', views.RedirectView.as_view(as_payment_method=True),
         name='paypal-direct-payment'),
-)
+]
+
+if django.VERSION[:2] < (1, 8):
+    from django.conf.urls import patterns
+
+    urlpatterns = patterns('', *urlpatterns)
+
