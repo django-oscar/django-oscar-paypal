@@ -10,14 +10,12 @@
     <ul class="breadcrumb">
         <li>
             <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
-            <span class="divider">/</span>
         </li>
         <li>
-            PayPal <span class="divider">/</span>
+            PayPal
         </li>
         <li>
             <a href="{% url 'paypal-express-list' %}">{% trans "Express transactions" %}</a>
-            <span class="divider">/</span>
         </li>
         <li class="active">{{ txn.correlation_id }}</li>
     </ul>

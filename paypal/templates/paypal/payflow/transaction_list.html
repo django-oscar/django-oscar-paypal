@@ -10,13 +10,11 @@
     <ul class="breadcrumb">
         <li>
             <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
-            <span class="divider">/</span>
         </li>
         <li>
-            <a href="{% url 'paypal-payflow-list' %}">{% trans "PayPal Payflow Pro" %}</a>
-            <span class="divider">/</span>
+            {% trans "PayPal Payflow Pro" %}
         </li>
-        <li class="active">{% trans "Transactions" %}</li>
+        <li class="active"><a href="{% url 'paypal-payflow-list' %}">{% trans "Transactions" %}</a></li>
     </ul>
 {% endblock %}
 
