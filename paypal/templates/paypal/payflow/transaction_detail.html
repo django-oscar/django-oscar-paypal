@@ -12,11 +12,9 @@
     <ul class="breadcrumb">
         <li>
             <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
-            <span class="divider">/</span>
         </li>
         <li>
             <a href="{% url 'paypal-payflow-list' %}">{% trans "PayPal Payflow" %}</a>
-            <span class="divider">/</span>
         </li>
         <li class="active">
             {% blocktrans with pnref=txn.pnref %}
