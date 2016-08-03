@@ -191,6 +191,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         'RETURNURL': return_url,
         'CANCELURL': cancel_url,
         'PAYMENTREQUEST_0_PAYMENTACTION': action,
+        'PAYMENTREQUEST_0_ALLOWEDPAYMENTMETHOD': 'InstantPaymentOnly',
     })
 
     # Add item details
@@ -382,6 +383,7 @@ def do_txn(payer_id, token, amount, currency, action=SALE):
         'PAYMENTREQUEST_0_AMT': amount,
         'PAYMENTREQUEST_0_CURRENCYCODE': currency,
         'PAYMENTREQUEST_0_PAYMENTACTION': action,
+        'PAYMENTREQUEST_0_ALLOWEDPAYMENTMETHOD': 'InstantPaymentOnly',
     }
     return _fetch_response(DO_EXPRESS_CHECKOUT, params)
 
