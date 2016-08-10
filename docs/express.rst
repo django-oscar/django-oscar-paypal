@@ -40,11 +40,11 @@ follows::
 
     from paypal.express.dashboard.app import application as paypal
 
-    urlpatterns = patterns('',
+    urlpatterns = [
         url(r'^admin/', include(admin.site.urls)),
         url(r'^checkout/paypal/', include('paypal.express.urls')), # Optional
         url(r'^dashboard/paypal/express/', include(paypal.urls)),
-        url(r'', include(application.urls)),
+        url(r'', include(application.urls)),]
 
 
 If you are using the dashboard views, extend the dashboard navigation to include
