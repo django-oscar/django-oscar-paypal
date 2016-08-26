@@ -2,11 +2,17 @@ from oscar import get_core_apps, OSCAR_MAIN_TEMPLATE_DIR
 from oscar.defaults import *
 
 
-PAYPAL_API_USERNAME = ''
-PAYPAL_API_PASSWORD = ''
-PAYPAL_API_SIGNATURE = ''
-PAYPAL_PAYFLOW_VENDOR_ID = ''
-PAYPAL_PAYFLOW_PASSWORD = ''
+# To specify integration settings (which include passwords, hence why they
+# are not committed), create an integration.py module.
+try:
+    from integration import *
+except ImportError:
+    PAYPAL_API_USERNAME = ''
+    PAYPAL_API_PASSWORD = ''
+    PAYPAL_API_SIGNATURE = ''
+    PAYPAL_PAYFLOW_VENDOR_ID = ''
+    PAYPAL_PAYFLOW_PASSWORD = ''
+
 SECRET_KEY = '9%d9&5!^+hcq!pin#0lfz(qj8j2h7y$p*rr-o#cy+)9%dyvwkn'
 DATABASES = {
     'default': {
