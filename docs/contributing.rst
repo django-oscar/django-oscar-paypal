@@ -11,7 +11,7 @@ Do this::
 
 then you should be able to run the tests using::
 
-    ./runtests.py
+    py.test
 
 There is also a sandbox site for exploring a sample oscar site.  Set it up::
 
