@@ -74,7 +74,7 @@ links to PayPal.  This can be done by creating a new template
     {% block formactions %}
     <div class="form-actions">
         {% if anon_checkout_allowed or request.user.is_authenticated %}
-            <a href="{% url 'paypal-redirect' %}"><img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"></a>
+            <a href="{% url 'paypal-redirect' %}"><img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" style="margin-right:7px;"></a>
         {% endif %}
         <a href="{% url 'checkout:index' %}" class="pull-right btn btn-large btn-primary">{% trans "Proceed to checkout" %}</a>
     </div>
