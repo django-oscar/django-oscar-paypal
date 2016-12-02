@@ -333,6 +333,7 @@ class SuccessResponseView(PaymentDetailsView):
         parts = ship_to_name.split()
         if len(parts) == 1:
             last_name = ship_to_name
+            first_name = ''
         elif len(parts) > 1:
             first_name = parts[0]
             last_name = " ".join(parts[1:])
