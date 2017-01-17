@@ -23,6 +23,7 @@ urlpatterns += i18n_patterns('',
     (r'^dashboard/paypal/payflow/', include(payflow.urls)),
     # Dashboard views for Express
     (r'^dashboard/paypal/express/', include(express_dashboard.urls)),
+    (r'^i18n/', include('django.conf.urls.i18n')),
     (r'', include(application.urls)),
 )
 if settings.DEBUG:
