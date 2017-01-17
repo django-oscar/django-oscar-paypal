@@ -27,7 +27,10 @@ def post(url, params):
 
     # Convert response into a simple key-value format
     pairs = {}
-    for key, value in parse_qsl(response.content):
+    content = response.content
+    if isinstance(content, six.binary_type):
+        content = content.decode('utf8')
+    for key, value in parse_qsl(content):
         if isinstance(key, six.binary_type):
             key = key.decode('utf8')
         if isinstance(value, six.binary_type):
@@ -36,7 +39,7 @@ def post(url, params):
 
     # Add audit information
     pairs['_raw_request'] = payload
-    pairs['_raw_response'] = response.content
+    pairs['_raw_response'] = content
     pairs['_response_time'] = (time.time() - start_time) * 1000.0
 
     return pairs
