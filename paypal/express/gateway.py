@@ -171,12 +171,16 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     # fiddly to work with.  Lazy solution - only check when dollars are used as
     # the PayPal currency.
     amount = basket.total_incl_tax
+
+    if shipping_method:
+        amount_shipping = shipping_method.calculate(basket).incl_tax
+
     if currency == 'USD' and amount > 10000:
         msg = 'PayPal can only be used for orders up to 10000 USD'
         logger.error(msg)
         raise express_exceptions.InvalidBasket(_(msg))
 
-    if amount <= 0:
+    if amount <= 0 and amount_shipping <= 0:
         msg = 'The basket total is zero so no payment is required'
         logger.error(msg)
         raise express_exceptions.InvalidBasket(_(msg))
@@ -206,6 +210,8 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['L_PAYMENTREQUEST_0_AMT%d' % index] = _format_currency(
             line.unit_price_incl_tax)
         params['L_PAYMENTREQUEST_0_QTY%d' % index] = line.quantity
+        params['L_PAYMENTREQUEST_0_ITEMCATEGORY%d' % index] = (
+            'Physical' if product.is_shipping_required else 'Digital')
 
     # If the order has discounts associated with it, the way PayPal suggests
     # using the API is to add a separate item for the discount with the value
@@ -275,6 +281,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['SHIPTOSTATE'] = user_address.state
         params['SHIPTOZIP'] = user_address.postcode
         params['SHIPTOCOUNTRYCODE'] = user_address.country.iso_3166_1_a2
+        params['SHIPTOPHONENUM'] = user_address.phone_number
 
     # Shipping details (if already set) - we override the SHIPTO* fields and
     # set a flag to indicate that these can't be altered on the PayPal side.
@@ -290,6 +297,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['SHIPTOSTATE'] = shipping_address.state
         params['SHIPTOZIP'] = shipping_address.postcode
         params['SHIPTOCOUNTRYCODE'] = shipping_address.country.iso_3166_1_a2
+        params['SHIPTOPHONENUM'] = shipping_address.phone_number
 
         # For US addresses, we need to try and convert the state into 2 letter
         # code - otherwise we can get a 10736 error as the shipping address and

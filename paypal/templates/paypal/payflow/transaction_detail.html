@@ -1,7 +1,6 @@
 {% extends 'dashboard/layout.html' %}
 {% load currency_filters %}
 {% load i18n %}
-{% load url from future %}
 
 {% block title %}
     {% blocktrans with pnref=txn.pnref %}
@@ -13,11 +12,9 @@
     <ul class="breadcrumb">
         <li>
             <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
-            <span class="divider">/</span>
         </li>
         <li>
             <a href="{% url 'paypal-payflow-list' %}">{% trans "PayPal Payflow" %}</a>
-            <span class="divider">/</span>
         </li>
         <li class="active">
             {% blocktrans with pnref=txn.pnref %}

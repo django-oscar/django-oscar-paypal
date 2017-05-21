@@ -19,7 +19,7 @@ class MockedResponseTests(TestCase):
 
     def setUp(self):
         response = Mock()
-        response.content = self.response_body
+        response.text = self.response_body
         response.status_code = 200
         with patch('requests.post') as post:
             post.return_value = response

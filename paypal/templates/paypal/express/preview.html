@@ -1,7 +1,6 @@
 {% extends "checkout/preview.html" %}
 {% load currency_filters %}
 {% load i18n %}
-{% load url from future %}
 {% load thumbnail %}
 
 {# Null out the actions as they can't be used here #}
@@ -10,7 +9,7 @@
 {% block order_contents_actions %}{% endblock %}
 
 {% block payment_method %}
-    <div class="span6">
+    <div class="col-sm-6">
         <div class="sub-header">
             <h2>{% trans "Payment" %}</h2>
         </div>
@@ -18,7 +17,7 @@
             <h4>{% trans "PayPal" %}</h4>
             <p>
                 {% blocktrans with amt=paypal_amount|currency email=paypal_user_email %}
-                    {{ amt }} will be deducted from your PayPal account, registered 
+                    {{ amt }} will be deducted from your PayPal account, registered
                     to email: {{ email }}.
                 {% endblocktrans %}
             </p>

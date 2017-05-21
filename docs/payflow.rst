@@ -7,7 +7,7 @@ merchant account.  Unlike Express Checkout, it doesn't require redirecting the
 user to PayPal's site and allows a customer to use a normal bankcard instead of
 their PayPal account.  `Read more details on the PayPal site`_.
 
-.. _`Read more details on the PayPal site`: https://merchant.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=merchant/payment_gateway
+.. _`Read more details on the PayPal site`: https://www.paypal.com/webapps/mpp/payflow-payment-gateway
 
 .. note::
 
@@ -15,6 +15,10 @@ their PayPal account.  `Read more details on the PayPal site`_.
     guide found in the docs/guides folder.  It is recommended that developers at
     least skim-read this guide so that they are familiar with the overall
     processes.  It also has magic bankcard numbers that can be used for testing.
+
+    `Find the latest developer docs on the PayPal site`_.
+
+.. _`Find the latest developer docs on the PayPal site`: https://developer.paypal.com/docs/classic/products/payflow/
 
 ---------------
 Getting started
@@ -41,7 +45,7 @@ Next steps
 
 The next steps are to plumb the payment gateway into your checkout and order
 processing.  There is no one-size-fits-all solution here - your implementation
-will depend on your business model.  
+will depend on your business model.
 
 A good way to start is to browse the sandbox project within the repo - this is a
 fully integrated Oscar site.
@@ -118,7 +122,7 @@ Using without Oscar
 
 To use Payflow Pro without an Oscar install, you need to use the
 ``paypal.payflow.gateway`` module directly.  This module is agnostic of Oscar
-and can be used independently.  
+and can be used independently.
 
 The ``paypal.payflow.facade`` module is a bridging module that provides a
 simpler API designed to link Oscar to the gateway module.
@@ -138,5 +142,3 @@ Gateway
 
 .. automodule:: paypal.payflow.gateway
     :members:
-
-
