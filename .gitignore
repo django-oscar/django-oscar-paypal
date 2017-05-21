@@ -1,6 +1,7 @@
 *.sw[po]
 *.py[oc]
 .DS_Store
+.cache/
 
 # Packaging
 dist

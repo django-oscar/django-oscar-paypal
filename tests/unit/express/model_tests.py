@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
 from unittest import TestCase
 
+import pytest
 from paypal.express.models import ExpressTransaction as Transaction
 
 
+@pytest.mark.django_db
 class TransactionTests(TestCase):
 
     def test_password_is_not_saved(self):
