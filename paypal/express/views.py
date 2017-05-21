@@ -232,7 +232,7 @@ class SuccessResponseView(PaymentDetailsView):
             basket.strategy = Selector().strategy(self.request)
 
         # Re-apply any offers
-        Applicator().apply(request=self.request, basket=basket)
+        Applicator().apply(basket, self.request.user, request=self.request)
 
         return basket
 
@@ -332,10 +332,11 @@ class SuccessResponseView(PaymentDetailsView):
         ship_to_name = self.txn.value('PAYMENTREQUEST_0_SHIPTONAME')
         if ship_to_name is None:
             return None
-        first_name = last_name = None
+        first_name = last_name = ''
         parts = ship_to_name.split()
         if len(parts) == 1:
             last_name = ship_to_name
+            first_name = ''
         elif len(parts) > 1:
             first_name = parts[0]
             last_name = " ".join(parts[1:])
@@ -347,7 +348,8 @@ class SuccessResponseView(PaymentDetailsView):
             line4=self.txn.value('PAYMENTREQUEST_0_SHIPTOCITY', default=""),
             state=self.txn.value('PAYMENTREQUEST_0_SHIPTOSTATE', default=""),
             postcode=self.txn.value('PAYMENTREQUEST_0_SHIPTOZIP', default=""),
-            country=Country.objects.get(iso_3166_1_a2=self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'))
+            country=Country.objects.get(iso_3166_1_a2=self.txn.value('PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE')),
+            phone_number=self.txn.value('PAYMENTREQUEST_0_SHIPTOPHONENUM', default="")
         )
 
     def _get_shipping_method_by_name(self, name, basket, shipping_address=None):
@@ -408,18 +410,18 @@ class ShippingOptionsView(View):
 
         # Create a shipping address instance using the data passed back
         country_code = self.request.POST.get(
-            'PAYMENTREQUEST_0_SHIPTOCOUNTRY', None)
+            'SHIPTOCOUNTRY', None)
         try:
             country = Country.objects.get(iso_3166_1_a2=country_code)
         except Country.DoesNotExist:
             country = Country()
 
         shipping_address = ShippingAddress(
-            line1=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTREET', ''),
-            line2=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTREET2', ''),
-            line4=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOCITY', ''),
-            state=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOSTATE', ''),
-            postcode=self.request.POST.get('PAYMENTREQUEST_0_SHIPTOZIP', ''),
+            line1=self.request.POST.get('SHIPTOSTREET', ''),
+            line2=self.request.POST.get('SHIPTOSTREET2', ''),
+            line4=self.request.POST.get('SHIPTOCITY', ''),
+            state=self.request.POST.get('SHIPTOSTATE', ''),
+            postcode=self.request.POST.get('SHIPTOZIP', ''),
             country=country
         )
         methods = Repository().get_shipping_methods(

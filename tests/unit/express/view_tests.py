@@ -41,7 +41,7 @@ class MockedPayPalTests(TestCase):
 
     def get_mock_response(self, content=None):
         response = Mock()
-        response.content = self.response_body if content is None else content
+        response.text = self.response_body if content is None else content
         response.status_code = 200
         return response
 

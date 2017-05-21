@@ -69,7 +69,6 @@ links to PayPal.  This can be done by creating a new template
 
     {% extends 'oscar/basket/partials/basket_content.html' %}
     {% load i18n %}
-    {% load url from future %}
 
     {% block formactions %}
     <div class="form-actions">
