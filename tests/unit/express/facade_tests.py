@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from decimal import Decimal as D
 from unittest import TestCase
 
+import pytest
 from mock import patch, Mock
 from purl import URL
 from django.utils.six.moves.urllib.parse import parse_qs
@@ -11,6 +12,7 @@ from paypal.models import ExpressTransaction as Transaction
 from paypal.express.facade import get_paypal_url, fetch_transaction_details
 
 
+@pytest.mark.django_db
 class MockedResponseTests(TestCase):
     token = ''
     response_body = ''

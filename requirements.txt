@@ -13,6 +13,9 @@ tox==2.1.0
 detox==0.10.0
 WebTest==2.0.16
 pinocchio==0.4.1
+pytest==3.0.1
+pytest-django==3.0.0
+pytest-cov==2.3.1
 
 # Development
 # 1.5.7 still ships with South migrations in the wrong folder,
