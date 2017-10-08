@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
+
 from decimal import Decimal as D
 
-from django.test import TestCase
 import mock
+from django.test import TestCase
 
 from paypal.payflow import gateway
 
@@ -37,7 +38,10 @@ class TestAuthorizeFunction(TestCase):
                 'RESPMSG': 'Under review by Fraud Service',
                 'AUTHCODE': '525PNI',
                 'POSTFPSMSG': 'Review',
-                '_raw_request': 'VENDOR=oscarpaypal&TRXTYPE=A&ZIP=n12+9et&LASTNAME=&COMMENT1=100010&EXPDATE=0113&COMMENT2=&STATE=&STREET=Flat+1+Caxton+Court&USER=oscarpaypal&CVV2=123&TENDER=C&ACCT=5555555555554444&CITY=&FIRSTNAME=&PWD=secret&AMT=6.99',
+                '_raw_request': (
+                    'VENDOR=oscarpaypal&TRXTYPE=A&ZIP=n12+9et&LASTNAME=&COMMENT1=100010&EXPDATE=0113'
+                    '&COMMENT2=&STATE=&STREET=Flat+1+Caxton+Court&USER=oscarpaypal&CVV2=123&TENDER=C'
+                    '&ACCT=5555555555554444&CITY=&FIRSTNAME=&PWD=secret&AMT=6.99'),
                 '_raw_response': '',
                 '_response_time': 1000
             }
@@ -60,7 +64,7 @@ class TestAuthorizeFunction(TestCase):
                 '_raw_response': 'RESULT=4&RESPMSG=Invalid amount',
                 '_response_time': 1000
             }
-            txn = gateway.authorize(
+            gateway.authorize(
                 order_number='1234',
                 card_number='5555555555554444',
                 cvv='123',

@@ -1,11 +1,12 @@
 from __future__ import unicode_literals
-from django.test import TestCase
+
 import mock
+from django.test import TestCase
 
 from paypal.gateway import post
 
 # Fixtures
-ERROR_RESPONSE = 'RESULT=126&PNREF=V25A2BB645A7&RESPMSG=Under review by Fraud Service&AUTHCODE=525PNI&PREFPSMSG=Review: More than one rule was triggered for Review&POSTFPSMSG=Review'
+ERROR_RESPONSE = 'RESULT=126&PNREF=V25A2BB645A7&RESPMSG=Under review by Fraud Service&AUTHCODE=525PNI&PREFPSMSG=Review: More than one rule was triggered for Review&POSTFPSMSG=Review'  # noqa E501
 
 
 class TestErrorResponse(TestCase):

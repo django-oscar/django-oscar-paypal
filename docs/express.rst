@@ -40,12 +40,13 @@ follows::
 
     from paypal.express.dashboard.app import application
 
-    urlpatterns = patterns('',
-        (r'^admin/', include(admin.site.urls)),
-        (r'^checkout/paypal/', include('paypal.express.urls')),
+    urlpatterns = [
+        url(r'^admin/', include(admin.site.urls)),
+        url(r'^checkout/paypal/', include('paypal.express.urls')),
         # Optional
-        (r'^dashboard/paypal/express/', include(application.urls)),
-        (r'', include(shop.urls)),
+        url(r'^dashboard/paypal/express/', include(application.urls)),
+        url(r'', include(shop.urls)),
+    ]
 
 If you are using the dashboard views, extend the dashboard navigation to include
 the appropriate links::
@@ -69,7 +70,6 @@ links to PayPal.  This can be done by creating a new template
 
     {% extends 'oscar/basket/partials/basket_content.html' %}
     {% load i18n %}
-    {% load url from future %}
 
     {% block formactions %}
     <div class="form-actions">

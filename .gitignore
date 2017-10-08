@@ -13,7 +13,6 @@ docs/_build
 htmlcov
 .tox
 .coverage
-.coveralls.yml
 
 # Database
 sandbox/db.sqlite

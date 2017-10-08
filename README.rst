@@ -3,7 +3,7 @@ PayPal package for django-oscar
 ===============================
 
 This package provides integration between django-oscar_ and both `PayPal
-Express`_ and `PayPal Payflow Pro`_. 
+Express`_ and `PayPal Payflow Pro`_.
 
 .. _django-oscar: https://github.com/django-oscar/django-oscar
 .. _`PayPal Express`: https://www.paypal.com/uk/cgi-bin/webscr?cmd=_additional-payment-ref-impl1
@@ -51,9 +51,9 @@ Tests
     :alt: Continuous integration status
     :target: http://travis-ci.org/#!/django-oscar/django-oscar-paypal
 
-.. image:: https://coveralls.io/repos/django-oscar/django-oscar-paypal/badge.png?branch=master
+.. image:: http://codecov.io/github/django-oscar/django-oscar-paypal/coverage.svg?branch=master
     :alt: Coverage
-    :target: https://coveralls.io/r/django-oscar/django-oscar-paypal
+    :target: http://codecov.io/github/django-oscar/django-oscar-paypal?branch=master
 
 Changelog
 ---------
@@ -97,7 +97,7 @@ Changelog
 ~~~~~
 
 * Use the correct key to look up a previous transaction ID (for
-  refund/capture/void operations). `#81`_ 
+  refund/capture/void operations). `#81`_
 
 .. _`#81`: https://github.com/django-oscar/django-oscar-paypal/pull/81
 
@@ -140,7 +140,7 @@ Changelog
 0.6.1
 ~~~~~
 * Persist shipping method name when using PayPal Express as a payment method
-  only. 
+  only.
 
 0.6
 ~~~

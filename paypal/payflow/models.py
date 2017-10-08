@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+
 import re
 
 from django.db import models
@@ -6,8 +7,8 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
-from paypal.payflow import codes
 from paypal import base
+from paypal.payflow import codes
 
 
 @python_2_unicode_compatible
@@ -37,8 +38,7 @@ class PayflowTransaction(base.ResponseModel):
                                  max_length=12)
     avsaddr = models.CharField(_("House number check"), null=True, blank=True,
                                max_length=1)
-    avszip = models.CharField(_("Zip/Postcode check"), null=True, blank=True,
-                               max_length=1)
+    avszip = models.CharField(_("Zip/Postcode check"), null=True, blank=True, max_length=1)
 
     class Meta:
         ordering = ('-date_created',)
