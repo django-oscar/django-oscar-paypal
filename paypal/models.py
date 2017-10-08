@@ -1,2 +1,2 @@
-from paypal.express.models import *
-from paypal.payflow.models import *
+from paypal.express.models import *  # noqa F403
+from paypal.payflow.models import *  # noqa F403

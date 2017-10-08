@@ -1,2 +1,2 @@
-from paypal.express.admin import *
-from paypal.payflow.admin import *
+from paypal.express.admin import *  # noqa F403
+from paypal.payflow.admin import *  # noqa F403

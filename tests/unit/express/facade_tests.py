@@ -1,15 +1,16 @@
 from __future__ import unicode_literals
+
 from decimal import Decimal as D
 from unittest import TestCase
 
 import pytest
-from mock import patch, Mock
-from purl import URL
 from django.utils.six.moves.urllib.parse import parse_qs
+from mock import Mock, patch
 from oscar.apps.shipping.methods import Free
+from purl import URL
 
+from paypal.express.facade import fetch_transaction_details, get_paypal_url
 from paypal.models import ExpressTransaction as Transaction
-from paypal.express.facade import get_paypal_url, fetch_transaction_details
 
 
 @pytest.mark.django_db
@@ -51,6 +52,7 @@ class SuccessfulSetExpressCheckoutTests(BaseSetExpressCheckoutTests):
     def perform_action(self):
         basket = Mock()
         basket.id = 1
+        basket.currency = 'GBP'
         basket.total_incl_tax = D('200')
         basket.all_lines = Mock(return_value=[])
         basket.offer_discounts = []
@@ -68,8 +70,7 @@ class SuccessfulSetExpressCheckoutTests(BaseSetExpressCheckoutTests):
         for param in [
                 'LOCALECODE', 'HDRIMG', 'LANDINGPAGE', 'PAYFLOWCOLOR',
                 'REQCONFIRMSHIPPING', 'PAGESTYLE', 'SOLUTIONTYPE',
-                'BRANDNAME', 'CUSTOMERSERVICENUMBER'
-            ]:
+                'BRANDNAME', 'CUSTOMERSERVICENUMBER']:
             self.assertPaypalParamDoesNotExist(param)
 
         # defaults
@@ -82,22 +83,23 @@ class ExtraPaypalSuccessfulSetExpressCheckoutTests(BaseSetExpressCheckoutTests):
     response_body = 'TOKEN=EC%2d6469953681606921P&TIMESTAMP=2012%2d03%2d26T17%3a19%3a38Z&CORRELATIONID=50a8d895e928f&ACK=Success&VERSION=60%2e0&BUILD=2649250'
 
     paypal_params = {
-            'CUSTOMERSERVICENUMBER': '999999999',
-            'SOLUTIONTYPE': 'Mark',
-            'LANDINGPAGE': 'Login',
-            'BRANDNAME': 'My Brand Name',
-            'PAGESTYLE': 'eee',
-            'HDRIMG': 'http://image.jpg',
-            'PAYFLOWCOLOR': '00FF00',
-            'LOCALECODE': 'GB',
-            'REQCONFIRMSHIPPING': True,
-            'ALLOWNOTE': False,
-            'CALLBACKTIMEOUT': 2
-        }
+        'CUSTOMERSERVICENUMBER': '999999999',
+        'SOLUTIONTYPE': 'Mark',
+        'LANDINGPAGE': 'Login',
+        'BRANDNAME': 'My Brand Name',
+        'PAGESTYLE': 'eee',
+        'HDRIMG': 'http://image.jpg',
+        'PAYFLOWCOLOR': '00FF00',
+        'LOCALECODE': 'GB',
+        'REQCONFIRMSHIPPING': True,
+        'ALLOWNOTE': False,
+        'CALLBACKTIMEOUT': 2
+    }
 
     def perform_action(self):
         basket = Mock()
         basket.id = 1
+        basket.currency = 'GBP'
         basket.total_incl_tax = D('200')
         basket.all_lines = Mock(return_value=[])
         basket.offer_discounts = []
@@ -118,7 +120,7 @@ class ExtraPaypalSuccessfulSetExpressCheckoutTests(BaseSetExpressCheckoutTests):
 
 class SuccessfulGetExpressCheckoutTests(MockedResponseTests):
     token = 'EC-9LW34435GU332960W'
-    response_body = 'TOKEN=EC%2d6WY34243AN3588740&CHECKOUTSTATUS=PaymentActionCompleted&TIMESTAMP=2012%2d04%2d19T10%3a07%3a46Z&CORRELATIONID=7e9c5efbda3c0&ACK=Success&VERSION=88%2e0&BUILD=2808426&EMAIL=david%2e_1332854868_per%40gmail%2ecom&PAYERID=7ZTRBDFYYA47W&PAYERSTATUS=verified&FIRSTNAME=David&LASTNAME=Winterbottom&COUNTRYCODE=GB&SHIPTONAME=David%20Winterbottom&SHIPTOSTREET=1%20Main%20Terrace&SHIPTOCITY=Wolverhampton&SHIPTOSTATE=West%20Midlands&SHIPTOZIP=W12%204LQ&SHIPTOCOUNTRYCODE=GB&SHIPTOCOUNTRYNAME=United%20Kingdom&ADDRESSSTATUS=Confirmed&CURRENCYCODE=GBP&AMT=33%2e98&SHIPPINGAMT=0%2e00&HANDLINGAMT=0%2e00&TAXAMT=0%2e00&INSURANCEAMT=0%2e00&SHIPDISCAMT=0%2e00&PAYMENTREQUEST_0_CURRENCYCODE=GBP&PAYMENTREQUEST_0_AMT=33%2e98&PAYMENTREQUEST_0_SHIPPINGAMT=0%2e00&PAYMENTREQUEST_0_HANDLINGAMT=0%2e00&PAYMENTREQUEST_0_TAXAMT=0%2e00&PAYMENTREQUEST_0_INSURANCEAMT=0%2e00&PAYMENTREQUEST_0_SHIPDISCAMT=0%2e00&PAYMENTREQUEST_0_TRANSACTIONID=51963679RW630412N&PAYMENTREQUEST_0_INSURANCEOPTIONOFFERED=false&PAYMENTREQUEST_0_SHIPTONAME=David%20Winterbottom&PAYMENTREQUEST_0_SHIPTOSTREET=1%20Main%20Terrace&PAYMENTREQUEST_0_SHIPTOCITY=Wolverhampton&PAYMENTREQUEST_0_SHIPTOSTATE=West%20Midlands&PAYMENTREQUEST_0_SHIPTOZIP=W12%204LQ&PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE=GB&PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME=United%20Kingdom&PAYMENTREQUESTINFO_0_TRANSACTIONID=51963679RW630412N&PAYMENTREQUESTINFO_0_ERRORCODE=0'
+    response_body = 'TOKEN=EC%2d6WY34243AN3588740&CHECKOUTSTATUS=PaymentActionCompleted&TIMESTAMP=2012%2d04%2d19T10%3a07%3a46Z&CORRELATIONID=7e9c5efbda3c0&ACK=Success&VERSION=88%2e0&BUILD=2808426&EMAIL=david%2e_1332854868_per%40gmail%2ecom&PAYERID=7ZTRBDFYYA47W&PAYERSTATUS=verified&FIRSTNAME=David&LASTNAME=Winterbottom&COUNTRYCODE=GB&SHIPTONAME=David%20Winterbottom&SHIPTOSTREET=1%20Main%20Terrace&SHIPTOCITY=Wolverhampton&SHIPTOSTATE=West%20Midlands&SHIPTOZIP=W12%204LQ&SHIPTOCOUNTRYCODE=GB&SHIPTOCOUNTRYNAME=United%20Kingdom&ADDRESSSTATUS=Confirmed&CURRENCYCODE=GBP&AMT=33%2e98&SHIPPINGAMT=0%2e00&HANDLINGAMT=0%2e00&TAXAMT=0%2e00&INSURANCEAMT=0%2e00&SHIPDISCAMT=0%2e00&PAYMENTREQUEST_0_CURRENCYCODE=GBP&PAYMENTREQUEST_0_AMT=33%2e98&PAYMENTREQUEST_0_SHIPPINGAMT=0%2e00&PAYMENTREQUEST_0_HANDLINGAMT=0%2e00&PAYMENTREQUEST_0_TAXAMT=0%2e00&PAYMENTREQUEST_0_INSURANCEAMT=0%2e00&PAYMENTREQUEST_0_SHIPDISCAMT=0%2e00&PAYMENTREQUEST_0_TRANSACTIONID=51963679RW630412N&PAYMENTREQUEST_0_INSURANCEOPTIONOFFERED=false&PAYMENTREQUEST_0_SHIPTONAME=David%20Winterbottom&PAYMENTREQUEST_0_SHIPTOSTREET=1%20Main%20Terrace&PAYMENTREQUEST_0_SHIPTOCITY=Wolverhampton&PAYMENTREQUEST_0_SHIPTOSTATE=West%20Midlands&PAYMENTREQUEST_0_SHIPTOZIP=W12%204LQ&PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE=GB&PAYMENTREQUEST_0_SHIPTOCOUNTRYNAME=United%20Kingdom&PAYMENTREQUESTINFO_0_TRANSACTIONID=51963679RW630412N&PAYMENTREQUESTINFO_0_ERRORCODE=0'   # noqa E501
 
     def perform_action(self):
         self.txn = fetch_transaction_details(self.token)

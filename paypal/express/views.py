@@ -1,31 +1,29 @@
 from __future__ import unicode_literals
-from decimal import Decimal as D
-import logging
 
-from django.views.generic import RedirectView, View
+import logging
+from decimal import Decimal as D
+
 from django.conf import settings
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
-from django.utils.http import urlencode
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.utils import six
+from django.utils.http import urlencode
 from django.utils.translation import ugettext_lazy as _
-
-import oscar
+from django.views.generic import RedirectView, View
 from oscar.apps.payment.exceptions import UnableToTakePayment
+from oscar.apps.shipping.methods import FixedPrice, NoShippingRequired
 from oscar.core.exceptions import ModuleNotFoundError
 from oscar.core.loading import get_class, get_model
-from oscar.apps.shipping.methods import FixedPrice, NoShippingRequired
 
-from paypal.express.facade import (
-    get_paypal_url, fetch_transaction_details, confirm_transaction)
-from paypal.express.exceptions import (
-    EmptyBasketException, MissingShippingAddressException,
-    MissingShippingMethodException, InvalidBasket)
 from paypal.exceptions import PayPalError
+from paypal.express.exceptions import (EmptyBasketException, InvalidBasket,
+                                       MissingShippingAddressException,
+                                       MissingShippingMethodException)
+from paypal.express.facade import (confirm_transaction,
+                                   fetch_transaction_details, get_paypal_url)
 
 # Load views dynamically
 PaymentDetailsView = get_class('checkout.views', 'PaymentDetailsView')
@@ -232,7 +230,7 @@ class SuccessResponseView(PaymentDetailsView):
             basket.strategy = Selector().strategy(self.request)
 
         # Re-apply any offers
-        Applicator().apply(request=self.request, basket=basket)
+        Applicator().apply(basket, self.request.user, request=self.request)
 
         return basket
 

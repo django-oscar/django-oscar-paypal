@@ -2,16 +2,16 @@
 Responsible for briding between Oscar and the PayPal gateway
 """
 from __future__ import unicode_literals
-from django.core.urlresolvers import reverse
-from django.contrib.sites.models import Site
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 
+from django.conf import settings
+from django.contrib.sites.models import Site
+from django.core.exceptions import ImproperlyConfigured
+from django.core.urlresolvers import reverse
+
+from paypal.express.gateway import (AUTHORIZATION, DO_EXPRESS_CHECKOUT, ORDER,
+                                    SALE, do_capture, do_txn, do_void, get_txn,
+                                    refund_txn, set_txn)
 from paypal.express.models import ExpressTransaction as Transaction
-from paypal.express.gateway import (
-    set_txn, get_txn, do_txn, SALE, AUTHORIZATION, ORDER,
-    do_capture, DO_EXPRESS_CHECKOUT, do_void, refund_txn
-)
 
 
 def _get_payment_action():

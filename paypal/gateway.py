@@ -1,9 +1,10 @@
 from __future__ import unicode_literals
-import requests
+
 import time
 
-from django.utils.http import urlencode
+import requests
 from django.utils import six
+from django.utils.http import urlencode
 from django.utils.six.moves.urllib.parse import parse_qsl
 
 from paypal import exceptions

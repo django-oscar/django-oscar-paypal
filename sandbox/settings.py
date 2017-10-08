@@ -94,28 +94,6 @@ STATIC_ROOT = location('public')
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '$)a7n&o80u!6y5t-+jrd3)3!%vh&shg$wqpjpxc!ar&p#!)n1a'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.request",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
-    "django.contrib.messages.context_processors.messages",
-    # Oscar specific
-    'oscar.apps.search.context_processors.search_form',
-    'oscar.apps.promotions.context_processors.promotions',
-    'oscar.apps.checkout.context_processors.checkout',
-    'oscar.core.context_processors.metadata',
-)
-
 MIDDLEWARE_CLASSES = (
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -133,11 +111,37 @@ INTERNAL_IPS = ('127.0.0.1',)
 ROOT_URLCONF = 'urls'
 
 from oscar import OSCAR_MAIN_TEMPLATE_DIR
-TEMPLATE_DIRS = (
-    location('templates'),
-    os.path.join(OSCAR_MAIN_TEMPLATE_DIR, 'templates'),
-    OSCAR_MAIN_TEMPLATE_DIR,
-)
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            location('templates'),
+            os.path.join(OSCAR_MAIN_TEMPLATE_DIR, 'templates'),
+            OSCAR_MAIN_TEMPLATE_DIR,
+        ],
+        'OPTIONS': {
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ],
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.request',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.contrib.messages.context_processors.messages',
+
+                'oscar.apps.search.context_processors.search_form',
+                'oscar.apps.promotions.context_processors.promotions',
+                'oscar.apps.checkout.context_processors.checkout',
+                'oscar.core.context_processors.metadata',
+            ],
+        }
+    }
+]
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -158,7 +162,7 @@ LOGGING = {
     'handlers': {
         'null': {
             'level': 'DEBUG',
-            'class': 'django.utils.log.NullHandler',
+            'class': 'logging.NullHandler',
         },
         'console': {
             'level': 'DEBUG',
@@ -215,13 +219,10 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
     'django.contrib.staticfiles',
     # External apps
-    # 1.5.7 still ships with South migrations in the wrong folder,
-    # 1.5.8 contains a fix. Upgrade when released.
-    # 'django_extensions',
+    'django_extensions',
     'debug_toolbar',
     # Apps from oscar
     'paypal',
-    'compressor',
     'widget_tweaks',
 ]
 
@@ -291,4 +292,3 @@ try:
     from integration import *  # noqa
 except ImportError:
     pass
-
