@@ -62,8 +62,7 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
             basket = self.build_submission()['basket']
             url = self._get_redirect_url(basket, **kwargs)
         except PayPalError as ppe:
-            messages.error(
-                self.request, ppe.message)
+            messages.error(self.request, six.text_type(ppe))
             if self.as_payment_method:
                 url = reverse('checkout:payment-details')
             else:
