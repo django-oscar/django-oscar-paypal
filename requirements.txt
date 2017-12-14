@@ -1,6 +1,6 @@
 # Testing
 mock==2.0.0
-coverage==4.4.1
+coverage==4.4.2
 django-webtest==1.9.2
 tox==2.9.1
 detox==0.11
@@ -8,6 +8,6 @@ pytest-django==3.1.2
 pytest-cov==2.5.1
 
 # Development
-django-extensions==1.9.1
-django-debug-toolbar==1.8
-flake8==3.4.1
+django-extensions==1.9.8
+django-debug-toolbar==1.9.1
+flake8==3.5.0

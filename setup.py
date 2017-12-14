@@ -17,11 +17,12 @@ setup(
     packages=find_packages(exclude=['sandbox*', 'tests*']),
     include_package_data=True,
     install_requires=[
+        'django>=1.11,<2',
         'requests>=1.0',
         'django-localflavor'
     ],
     extras_require={
-        'oscar': ['django-oscar>=1.2,<1.6']
+        'oscar': ['django-oscar>=1.5,<1.6']
     },
     tests_require=[
         'django-webtest==1.9.2',
@@ -42,5 +43,6 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Other/Nonlisted Topic'],
 )
