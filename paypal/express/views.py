@@ -6,9 +6,9 @@ from decimal import Decimal as D
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import AnonymousUser
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils import six
 from django.utils.http import urlencode
 from django.utils.translation import ugettext_lazy as _
@@ -131,7 +131,7 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
             # in testing mode
             params['host'] = self.request.META['HTTP_HOST']
 
-        if user.is_authenticated():
+        if user.is_authenticated:
             params['user'] = user
 
         params['paypal_params'] = self._get_paypal_params()

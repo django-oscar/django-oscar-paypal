@@ -7,5 +7,5 @@ urlpatterns = [
 ]
 urlpatterns += i18n_patterns(
     url(r'^checkout/paypal/', include('paypal.express.urls')),
-    url(r'', include(application.urls)),
+    url(r'', application.urls),
 )

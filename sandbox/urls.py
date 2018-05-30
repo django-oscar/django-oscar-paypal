@@ -12,19 +12,25 @@ from paypal.express.dashboard.app import application as express_dashboard
 admin.autodiscover()
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
     url(r'^i18n/', include('django.conf.urls.i18n')),
 ]
 urlpatterns += i18n_patterns(
     # PayPal Express integration...
     url(r'^checkout/paypal/', include('paypal.express.urls')),
     # Dashboard views for Payflow Pro
-    url(r'^dashboard/paypal/payflow/', include(payflow.urls)),
+    url(r'^dashboard/paypal/payflow/', payflow.urls),
     # Dashboard views for Express
-    url(r'^dashboard/paypal/express/', include(express_dashboard.urls)),
-    url(r'', include(application.urls)),
+    url(r'^dashboard/paypal/express/', express_dashboard.urls),
+    url(r'', application.urls),
 )
+
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
     urlpatterns += static(
         settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+    import debug_toolbar
+    urlpatterns = [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

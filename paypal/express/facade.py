@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from paypal.express.gateway import (AUTHORIZATION, DO_EXPRESS_CHECKOUT, ORDER,
                                     SALE, do_capture, do_txn, do_void, get_txn,

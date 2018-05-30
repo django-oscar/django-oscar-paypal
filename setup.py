@@ -17,12 +17,12 @@ setup(
     packages=find_packages(exclude=['sandbox*', 'tests*']),
     include_package_data=True,
     install_requires=[
-        'django>=1.11,<2',
+        'django>=1.11,<2.1',
         'requests>=1.0',
         'django-localflavor'
     ],
     extras_require={
-        'oscar': ['django-oscar>=1.5,<1.6']
+        'oscar': ['django-oscar>=1.5,<1.7']
     },
     tests_require=[
         'django-webtest==1.9.2',
