@@ -58,6 +58,11 @@ Tests
 Changelog
 ---------
 
+1.0.0 (released May 30th, 2018)
+-----------------------------------
+* Add support for Oscar 1.6 and Django 2.
+* Drop support for Oscar 1.4 and lower and Django 1.10 and lower.
+
 0.9.7 (released January 12th, 2016)
 -----------------------------------
 * Fix breakage when using Oscar's ``DeferredTaxMixin``. `#98`_ `#121`_
