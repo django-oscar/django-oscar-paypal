@@ -37,7 +37,11 @@ By default, this won't install Oscar as well. To install Oscar, run::
 
 Finally, add ``paypal`` to your ``INSTALLED_APPS``, and run::
 
-    python manage.py syncdb
+    python manage.py migrate
+
+For versions of Django prior to 1.7 use
+   
+   python manage.py syncdb
 
 Table of contents
 -----------------
