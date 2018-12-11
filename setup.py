@@ -17,7 +17,7 @@ setup(
     packages=find_packages(exclude=['sandbox*', 'tests*']),
     include_package_data=True,
     install_requires=[
-        'django>=1.11,<2.1',
+        'django>=1.11,<2.2',
         'requests>=1.0',
         'django-localflavor'
     ],
@@ -25,9 +25,9 @@ setup(
         'oscar': ['django-oscar>=1.5,<1.7']
     },
     tests_require=[
-        'django-webtest==1.9.2',
-        'pytest-cov==2.5.1',
-        'pytest-django==3.1.2',
+        'django-webtest==1.9.4',
+        'pytest-cov==2.6.0',
+        'pytest-django==3.4.4',
     ],
     # See http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[

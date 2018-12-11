@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
     'django.contrib.staticfiles',
     'paypal',
+    'widget_tweaks',
 ] + get_core_apps([
     'tests.shipping',
 ])

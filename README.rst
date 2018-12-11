@@ -58,6 +58,11 @@ Tests
 Changelog
 ---------
 
+1.0.1
+-----------------------------------
+* Bump requirements to Django 2.1
+* upgrade dependencies to fix tests
+
 1.0.0 (released May 30th, 2018)
 -----------------------------------
 * Add support for Oscar 1.6 and Django 2.
