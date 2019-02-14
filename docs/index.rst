@@ -35,9 +35,10 @@ By default, this won't install Oscar as well. To install Oscar, run::
 
     pip install "django-oscar-paypal[oscar]"
 
-Finally, add ``paypal`` to your ``INSTALLED_APPS``, and run::
+Finally, add ``paypal`` to your ``INSTALLED_APPS``, and run migration::
 
-    python manage.py syncdb
+    python manage.py makemigrations
+    python manage.py migrate
 
 Table of contents
 -----------------
