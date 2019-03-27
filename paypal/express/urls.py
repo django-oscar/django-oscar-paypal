@@ -14,7 +14,7 @@ urlpatterns = [
     url(r'^place-order/(?P<basket_id>\d+)/$', views.SuccessResponseView.as_view(),
         name='paypal-place-order'),
     # Callback for getting shipping options for a specific basket
-    url(r'^shipping-options/(?P<basket_id>\d+)/',
+    url(r'^shipping-options/(?P<basket_id>\d+)/(?P<country_code>\w+)?',
         csrf_exempt(views.ShippingOptionsView.as_view()),
         name='paypal-shipping-options'),
     # View for using PayPal as a payment method

@@ -333,7 +333,6 @@ class SuccessResponseView(PaymentDetailsView):
         parts = ship_to_name.split()
         if len(parts) == 1:
             last_name = ship_to_name
-            first_name = ''
         elif len(parts) > 1:
             first_name = parts[0]
             last_name = " ".join(parts[1:])
@@ -390,6 +389,46 @@ class SuccessResponseView(PaymentDetailsView):
 
 class ShippingOptionsView(View):
 
+    def get(self, request, *args, **kwargs):
+        """
+        We use the shipping address given to use by PayPal to
+        determine the available shipping method
+        """
+        # Basket ID is passed within the URL path.  We need to do this as some
+        # shipping options depend on the user and basket contents.  PayPal do
+        # pass back details of the basket contents but it would be royal pain to
+        # reconstitute the basket based on those - easier to just to piggy-back
+        # the basket ID in the callback URL.
+        basket = get_object_or_404(Basket, id=kwargs['basket_id'])
+        user = basket.owner
+        if not user:
+            user = AnonymousUser()
+
+        logger.info(kwargs['country_code'])
+
+        # Create a shipping address instance using the data passed back
+        country_code = self.request.POST.get(
+            'SHIPTOCOUNTRY', None)
+        try:
+            country = Country.objects.get(iso_3166_1_a2=kwargs['country_code'])
+        except Country.DoesNotExist:
+            country = Country()
+
+        shipping_address = ShippingAddress(
+            line1=self.request.POST.get('SHIPTOSTREET', ''),
+            line2=self.request.POST.get('SHIPTOSTREET2', ''),
+            line4=self.request.POST.get('SHIPTOCITY', ''),
+            state=self.request.POST.get('SHIPTOSTATE', ''),
+            postcode=self.request.POST.get('SHIPTOZIP', ''),
+            country=country
+        )
+        methods = Repository().get_shipping_methods(
+            basket=basket, shipping_addr=shipping_address,
+            request=self.request, user=user)
+        return self.render_to_response(methods, basket)
+
+
+
     def post(self, request, *args, **kwargs):
         """
         We use the shipping address given to use by PayPal to
@@ -429,6 +468,7 @@ class ShippingOptionsView(View):
     def render_to_response(self, methods, basket):
         pairs = [
             ('METHOD', 'CallbackResponse'),
+            ('CALLBACKVERSION', '61.0'),
             ('CURRENCYCODE', self.request.POST.get('CURRENCYCODE', 'GBP')),
         ]
         for index, method in enumerate(methods):
@@ -447,6 +487,8 @@ class ShippingOptionsView(View):
         else:
             # No shipping methods available - we flag this up to PayPal indicating that we
             # do not ship to the shipping address.
+            pass
             pairs.append(('NO_SHIPPING_OPTION_DETAILS', 1))
         payload = urlencode(pairs)
+        logger.info(payload)
         return HttpResponse(payload)
