@@ -1,31 +1,29 @@
 from __future__ import unicode_literals
-from decimal import Decimal as D
-import logging
 
-from django.views.generic import RedirectView, View
+import logging
+from decimal import Decimal as D
+
 from django.conf import settings
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.models import AnonymousUser
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
-from django.utils.http import urlencode
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils import six
+from django.utils.http import urlencode
 from django.utils.translation import ugettext_lazy as _
-
-import oscar
+from django.views.generic import RedirectView, View
 from oscar.apps.payment.exceptions import UnableToTakePayment
+from oscar.apps.shipping.methods import FixedPrice, NoShippingRequired
 from oscar.core.exceptions import ModuleNotFoundError
 from oscar.core.loading import get_class, get_model
-from oscar.apps.shipping.methods import FixedPrice, NoShippingRequired
 
-from paypal.express.facade import (
-    get_paypal_url, fetch_transaction_details, confirm_transaction)
-from paypal.express.exceptions import (
-    EmptyBasketException, MissingShippingAddressException,
-    MissingShippingMethodException, InvalidBasket)
 from paypal.exceptions import PayPalError
+from paypal.express.exceptions import (EmptyBasketException, InvalidBasket,
+                                       MissingShippingAddressException,
+                                       MissingShippingMethodException)
+from paypal.express.facade import (confirm_transaction,
+                                   fetch_transaction_details, get_paypal_url)
 
 # Load views dynamically
 PaymentDetailsView = get_class('checkout.views', 'PaymentDetailsView')
@@ -64,8 +62,7 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
             basket = self.build_submission()['basket']
             url = self._get_redirect_url(basket, **kwargs)
         except PayPalError as ppe:
-            messages.error(
-                self.request, ppe.message)
+            messages.error(self.request, six.text_type(ppe))
             if self.as_payment_method:
                 url = reverse('checkout:payment-details')
             else:
@@ -134,7 +131,7 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
             # in testing mode
             params['host'] = self.request.META['HTTP_HOST']
 
-        if user.is_authenticated():
+        if user.is_authenticated:
             params['user'] = user
 
         params['paypal_params'] = self._get_paypal_params()
@@ -232,7 +229,7 @@ class SuccessResponseView(PaymentDetailsView):
             basket.strategy = Selector().strategy(self.request)
 
         # Re-apply any offers
-        Applicator().apply(request=self.request, basket=basket)
+        Applicator().apply(basket, self.request.user, request=self.request)
 
         return basket
 
@@ -332,11 +329,10 @@ class SuccessResponseView(PaymentDetailsView):
         ship_to_name = self.txn.value('PAYMENTREQUEST_0_SHIPTONAME')
         if ship_to_name is None:
             return None
-        first_name = last_name = None
+        first_name = last_name = ''
         parts = ship_to_name.split()
         if len(parts) == 1:
             last_name = ship_to_name
-            first_name = ''
         elif len(parts) > 1:
             first_name = parts[0]
             last_name = " ".join(parts[1:])
@@ -392,6 +388,46 @@ class SuccessResponseView(PaymentDetailsView):
 
 class ShippingOptionsView(View):
 
+    def get(self, request, *args, **kwargs):
+        """
+        We use the shipping address given to use by PayPal to
+        determine the available shipping method
+        """
+        # Basket ID is passed within the URL path.  We need to do this as some
+        # shipping options depend on the user and basket contents.  PayPal do
+        # pass back details of the basket contents but it would be royal pain to
+        # reconstitute the basket based on those - easier to just to piggy-back
+        # the basket ID in the callback URL.
+        basket = get_object_or_404(Basket, id=kwargs['basket_id'])
+        user = basket.owner
+        if not user:
+            user = AnonymousUser()
+
+        logger.info(kwargs['country_code'])
+
+        # Create a shipping address instance using the data passed back
+        country_code = self.request.POST.get(
+            'SHIPTOCOUNTRY', None)
+        try:
+            country = Country.objects.get(iso_3166_1_a2=kwargs['country_code'])
+        except Country.DoesNotExist:
+            country = Country()
+
+        shipping_address = ShippingAddress(
+            line1=self.request.POST.get('SHIPTOSTREET', ''),
+            line2=self.request.POST.get('SHIPTOSTREET2', ''),
+            line4=self.request.POST.get('SHIPTOCITY', ''),
+            state=self.request.POST.get('SHIPTOSTATE', ''),
+            postcode=self.request.POST.get('SHIPTOZIP', ''),
+            country=country
+        )
+        methods = Repository().get_shipping_methods(
+            basket=basket, shipping_addr=shipping_address,
+            request=self.request, user=user)
+        return self.render_to_response(methods, basket)
+
+
+
     def post(self, request, *args, **kwargs):
         """
         We use the shipping address given to use by PayPal to
@@ -431,6 +467,7 @@ class ShippingOptionsView(View):
     def render_to_response(self, methods, basket):
         pairs = [
             ('METHOD', 'CallbackResponse'),
+            ('CALLBACKVERSION', '61.0'),
             ('CURRENCYCODE', self.request.POST.get('CURRENCYCODE', 'GBP')),
         ]
         for index, method in enumerate(methods):
@@ -449,6 +486,8 @@ class ShippingOptionsView(View):
         else:
             # No shipping methods available - we flag this up to PayPal indicating that we
             # do not ship to the shipping address.
+            pass
             pairs.append(('NO_SHIPPING_OPTION_DETAILS', 1))
         payload = urlencode(pairs)
+        logger.info(payload)
         return HttpResponse(payload)
