@@ -1,15 +1,15 @@
 from __future__ import unicode_literals
-from decimal import Decimal as D
 
-from django.test import TestCase
-from django.utils import unittest
+from decimal import Decimal as D
+from unittest import skipUnless
+
 from django.conf import settings
+from django.test import TestCase
 
 from paypal.payflow import gateway
 
 
-@unittest.skipUnless(getattr(settings, 'PAYPAL_RUN_EXTERNAL_TESTS', False),
-                    "External tests are not enabled")
+@skipUnless(getattr(settings, 'PAYPAL_RUN_EXTERNAL_TESTS', False), "External tests are not enabled")
 class TestGateway(TestCase):
 
     def test_authorisation_without_address_returns_successful_txn(self):

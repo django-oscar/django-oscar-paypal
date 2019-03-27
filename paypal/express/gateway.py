@@ -1,19 +1,20 @@
 from __future__ import unicode_literals
+
 import logging
 from decimal import Decimal as D
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.http import urlencode
+from django.template.defaultfilters import striptags, truncatewords
 from django.utils import six
+from django.utils.http import urlencode
 from django.utils.translation import ugettext as _
-from django.template.defaultfilters import truncatewords, striptags
 from localflavor.us import us_states
 
-from . import models, exceptions as express_exceptions
-from paypal import gateway
-from paypal import exceptions
+from paypal import exceptions, gateway
 
+from . import exceptions as express_exceptions
+from . import models
 
 # PayPal methods
 SET_EXPRESS_CHECKOUT = 'SetExpressCheckout'
@@ -400,6 +401,8 @@ def do_void(txn_id, note=None):
 
 FULL_REFUND = 'Full'
 PARTIAL_REFUND = 'Partial'
+
+
 def refund_txn(txn_id, is_partial=False, amount=None, currency=None):
     params = {
         'TRANSACTIONID': txn_id,

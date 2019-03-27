@@ -1,29 +1,32 @@
-# Use Travis new infrastructure
+language: python
 sudo: false
 
-language: python
+matrix:
+  include:
+    - python: 2.7
+      env: TOXENV=py27-django111
+    - python: 3.4
+      env: TOXENV=py34-django111
+    - python: 3.5
+      env: TOXENV=py35-django111
+    - python: 3.6
+      env: TOXENV=py36-django111
+    - python: 3.4
+      env: TOXENV=py34-django2
+    - python: 3.5
+      env: TOXENV=py35-django2
+    - python: 3.6
+      env: TOXENV=py36-django2
 
-env:
-  # Generated with https://www.dominicrodger.com/tox-and-travis.html
-  - TOX_ENV=py27-django17-oscar10
-  - TOX_ENV=py27-django17-oscar11
-  - TOX_ENV=py27-django18-oscar10
-  - TOX_ENV=py27-django18-oscar11
-  - TOX_ENV=py33-django17-oscar10
-  - TOX_ENV=py33-django17-oscar11
-  - TOX_ENV=py33-django18-oscar10
-  - TOX_ENV=py33-django18-oscar11
-  - TOX_ENV=py34-django17-oscar10
-  - TOX_ENV=py34-django17-oscar11
-  - TOX_ENV=py34-django18-oscar10
-  - TOX_ENV=py34-django18-oscar11
-
+    - python: 3.6
+      env: TOXENV=lint
 
 install:
-    - pip install tox
+    - pip install tox codecov
 
 script:
-    - tox -e $TOX_ENV
+    - tox
 
-notifications:
-  email: false
+after_success:
+  - tox -e coverage-report
+  - codecov

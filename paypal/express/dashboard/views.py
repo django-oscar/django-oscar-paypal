@@ -1,5 +1,5 @@
-from django.views import generic
 from django.conf import settings
+from django.views import generic
 
 from paypal.express import models
 

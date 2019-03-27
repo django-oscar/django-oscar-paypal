@@ -1,11 +1,12 @@
 from __future__ import unicode_literals
-from django.test import TestCase
+
 import mock
+from django.test import TestCase
 
 from paypal.gateway import post
 
 # Fixtures
-ERROR_RESPONSE = 'RESULT=126&PNREF=V25A2BB645A7&RESPMSG=Under review by Fraud Service&AUTHCODE=525PNI&PREFPSMSG=Review: More than one rule was triggered for Review&POSTFPSMSG=Review'
+ERROR_RESPONSE = 'RESULT=126&PNREF=V25A2BB645A7&RESPMSG=Under review by Fraud Service&AUTHCODE=525PNI&PREFPSMSG=Review: More than one rule was triggered for Review&POSTFPSMSG=Review'  # noqa E501
 
 
 class TestErrorResponse(TestCase):
@@ -14,7 +15,7 @@ class TestErrorResponse(TestCase):
         with mock.patch('requests.post') as mock_post:
             response = mock.Mock()
             response.status_code = 200
-            response.content = ERROR_RESPONSE
+            response.text = ERROR_RESPONSE
             mock_post.return_value = response
             self.pairs = post('http://example.com', {})
 

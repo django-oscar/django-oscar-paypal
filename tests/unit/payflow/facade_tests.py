@@ -1,14 +1,16 @@
 from __future__ import unicode_literals
-from decimal import Decimal as D
-import datetime
 
+import datetime
+from decimal import Decimal as D
+
+import mock
 from django.test import TestCase
 from django.utils import six
-from oscar.apps.payment.models import Bankcard
 from oscar.apps.payment import exceptions
-import mock
+from oscar.apps.payment.models import Bankcard
 
-from paypal.payflow import facade, models, codes
+from paypal.payflow import codes, facade, models
+
 
 """
 See page 49 of the PDF for information on PayPal's testing set-up

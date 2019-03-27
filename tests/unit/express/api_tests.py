@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
+
 from decimal import Decimal as D
+
 from django.test import TestCase
-from mock import patch, Mock
+from mock import Mock, patch
+from oscar.apps.shipping.methods import FixedPrice, Free
 
-from oscar.apps.shipping.methods import Free, FixedPrice
-
-from paypal.express import gateway
 from paypal import exceptions
+from paypal.express import gateway
 from paypal.express.exceptions import InvalidBasket
 from paypal.express.models import ExpressTransaction as Transaction
 
@@ -32,7 +33,7 @@ class MockedResponseTestCase(TestCase):
 
     def create_mock_response(self, body, status_code=200):
         response = Mock()
-        response.content = body
+        response.text = body
         response.status_code = status_code
         return response
 
@@ -40,7 +41,10 @@ class MockedResponseTestCase(TestCase):
 class ErrorResponseTests(MockedResponseTestCase):
 
     def test_error_response_raises_exception(self):
-        response_body = 'TIMESTAMP=2012%2d03%2d26T16%3a33%3a09Z&CORRELATIONID=3bea2076bb9c3&ACK=Failure&VERSION=0%2e000000&BUILD=2649250&L_ERRORCODE0=10002&L_SHORTMESSAGE0=Security%20error&L_LONGMESSAGE0=Security%20header%20is%20not%20valid&L_SEVERITYCODE0=Error'
+        response_body = (
+            'TIMESTAMP=2012%2d03%2d26T16%3a33%3a09Z&CORRELATIONID=3bea2076bb9c3&ACK=Failure&VERSION=0%2e000000'
+            '&BUILD=2649250&L_ERRORCODE0=10002&L_SHORTMESSAGE0=Security%20error'
+            '&L_LONGMESSAGE0=Security%20header%20is%20not%20valid&L_SEVERITYCODE0=Error')
         response = self.create_mock_response(response_body)
 
         with patch('requests.post') as post:
@@ -63,7 +67,9 @@ class SuccessResponseTests(MockedResponseTestCase):
 
     def setUp(self):
         super(SuccessResponseTests, self).setUp()
-        response_body = 'TOKEN=EC%2d6469953681606921P&TIMESTAMP=2012%2d03%2d26T17%3a19%3a38Z&CORRELATIONID=50a8d895e928f&ACK=Success&VERSION=60%2e0&BUILD=2649250'
+        response_body = (
+            'TOKEN=EC%2d6469953681606921P&TIMESTAMP=2012%2d03%2d26T17%3a19%3a38Z&CORRELATIONID=50a8d895e928f'
+            '&ACK=Success&VERSION=60%2e0&BUILD=2649250')
         response = self.create_mock_response(response_body)
 
         with patch('requests.post') as post:
@@ -102,7 +108,7 @@ class TestOrderTotal(TestCase):
         basket = create_mock_basket(D('0.00'))
         shipping_methods = [FixedPrice(D('2.50'))]
 
-        with patch('paypal.express.gateway._fetch_response') as mock_fetch:
+        with patch('paypal.express.gateway._fetch_response') as mock_fetch: # noqa F841
             with self.assertRaises(InvalidBasket):
                 gateway.set_txn(basket, shipping_methods, 'GBP',
                                 'http://example.com', 'http://example.com')

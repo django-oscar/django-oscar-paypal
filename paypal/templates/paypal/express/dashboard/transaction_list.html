@@ -1,7 +1,6 @@
 {% extends 'dashboard/layout.html' %}
 {% load currency_filters %}
 {% load i18n %}
-{% load url from future %}
 
 {% block title %}
     {% trans "PayPal Express transactions" %} | {{ block.super }}
@@ -11,11 +10,8 @@
     <ul class="breadcrumb">
         <li>
             <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
-            <span class="divider">/</span>
         </li>
-        <li>
-            PayPal <span class="divider">/</span>
-        </li>
+        <li>PayPal</li>
         <li class="active">{% trans "Express transactions" %}</li>
     </ul>
 {% endblock %}

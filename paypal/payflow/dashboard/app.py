@@ -1,6 +1,5 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.contrib.admin.views.decorators import staff_member_required
-
 from oscar.core.application import Application
 
 from . import views
@@ -12,12 +11,12 @@ class PayFlowDashboardApplication(Application):
     detail_view = views.TransactionDetailView
 
     def get_urls(self):
-        urlpatterns = patterns('',
+        urlpatterns = [
             url(r'^transactions/$', self.list_view.as_view(),
                 name='paypal-payflow-list'),
             url(r'^transactions/(?P<pk>\d+)/$', self.detail_view.as_view(),
                 name='paypal-payflow-detail'),
-        )
+        ]
         return self.post_process_urls(urlpatterns)
 
     def get_url_decorator(self, url_name):
