@@ -488,7 +488,7 @@ class ShippingOptionsView(View):
             # No shipping methods available - we flag this up to PayPal indicating that we
             # do not ship to the shipping address.
             pass
-            pairs.append(('NO_SHIPPING_OPTION_DETAILS', 1))
+            # pairs.append(('NO_SHIPPING_OPTION_DETAILS', 1))
         payload = urlencode(pairs)
         logger.info(payload)
         return HttpResponse(payload)
