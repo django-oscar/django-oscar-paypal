@@ -405,7 +405,7 @@ class ShippingOptionsView(View):
             user = AnonymousUser()
 
         # Create a shipping address instance using the data passed back
-        country_code = self.request.POST.get(
+        country_code = self.request.GET.get(
             'SHIPTOCOUNTRY', None)
         try:
             country = Country.objects.get(iso_3166_1_a2=kwargs['country_code'])
@@ -413,11 +413,11 @@ class ShippingOptionsView(View):
             country = Country()
 
         shipping_address = ShippingAddress(
-            line1=self.request.POST.get('SHIPTOSTREET', ''),
-            line2=self.request.POST.get('SHIPTOSTREET2', ''),
-            line4=self.request.POST.get('SHIPTOCITY', ''),
-            state=self.request.POST.get('SHIPTOSTATE', ''),
-            postcode=self.request.POST.get('SHIPTOZIP', ''),
+            line1=self.request.GET.get('SHIPTOSTREET', ''),
+            line2=self.request.GET.get('SHIPTOSTREET2', ''),
+            line4=self.request.GET.get('SHIPTOCITY', ''),
+            state=self.request.GET.get('SHIPTOSTATE', ''),
+            postcode=self.request.GET.get('SHIPTOZIP', ''),
             country=country
         )
         methods = Repository().get_shipping_methods(
