@@ -404,8 +404,6 @@ class ShippingOptionsView(View):
         if not user:
             user = AnonymousUser()
 
-        logger.info(kwargs['country_code'])
-
         # Create a shipping address instance using the data passed back
         country_code = self.request.POST.get(
             'SHIPTOCOUNTRY', None)
@@ -490,5 +488,5 @@ class ShippingOptionsView(View):
             pass
             # pairs.append(('NO_SHIPPING_OPTION_DETAILS', 1))
         payload = urlencode(pairs)
-        logger.info(payload)
+        logger.debug(payload)
         return HttpResponse(payload)
