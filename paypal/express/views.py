@@ -469,24 +469,25 @@ class ShippingOptionsView(View):
             ('CALLBACKVERSION', '61.0'),
             ('CURRENCYCODE', self.request.POST.get('CURRENCYCODE', 'GBP')),
         ]
-        for index, method in enumerate(methods):
-            charge = method.calculate(basket).incl_tax
+        if methods:
+            for index, method in enumerate(methods):
+                charge = method.calculate(basket).incl_tax
 
-            pairs.append(('L_SHIPPINGOPTIONNAME%d' % index,
-                          six.text_type(method.name)))
-            pairs.append(('L_SHIPPINGOPTIONLABEL%d' % index,
-                          six.text_type(method.name)))
-            pairs.append(('L_SHIPPINGOPTIONAMOUNT%d' % index, charge))
-            # For now, we assume tax and insurance to be zero
-            pairs.append(('L_TAXAMT%d' % index, D('0.00')))
-            pairs.append(('L_INSURANCEAMT%d' % index, D('0.00')))
-            # We assume that the first returned method is the default one
-            pairs.append(('L_SHIPPINGOPTIONISDEFAULT%d' % index, 1 if index == 0 else 0))
+                pairs.append(('L_SHIPPINGOPTIONNAME%d' % index,
+                              six.text_type(method.name)))
+                pairs.append(('L_SHIPPINGOPTIONLABEL%d' % index,
+                              six.text_type(method.name)))
+                pairs.append(('L_SHIPPINGOPTIONAMOUNT%d' % index, charge))
+                # For now, we assume tax and insurance to be zero
+                pairs.append(('L_TAXAMT%d' % index, D('0.00')))
+                pairs.append(('L_INSURANCEAMT%d' % index, D('0.00')))
+                # We assume that the first returned method is the default one
+                pairs.append(('L_SHIPPINGOPTIONISDEFAULT%d' % index, 1 if index == 0 else 0))
         else:
             # No shipping methods available - we flag this up to PayPal indicating that we
             # do not ship to the shipping address.
-            pass
-            # pairs.append(('NO_SHIPPING_OPTION_DETAILS', 1))
+            pairs.append(('NO_SHIPPING_OPTION_DETAILS', 1))
+
         payload = urlencode(pairs)
         logger.debug(payload)
         return HttpResponse(payload)
