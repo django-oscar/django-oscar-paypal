@@ -475,8 +475,9 @@ class ShippingOptionsView(View):
 
                 pairs.append(('L_SHIPPINGOPTIONNAME%d' % index,
                               six.text_type(method.name)))
+                # this looks horrible in paypal, as the name and label are repeated next to each other
                 pairs.append(('L_SHIPPINGOPTIONLABEL%d' % index,
-                              six.text_type(method.name)))
+                              six.text_type(method.description)))
                 pairs.append(('L_SHIPPINGOPTIONAMOUNT%d' % index, charge))
                 # For now, we assume tax and insurance to be zero
                 pairs.append(('L_TAXAMT%d' % index, D('0.00')))
