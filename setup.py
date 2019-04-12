@@ -22,7 +22,7 @@ setup(
         'django-localflavor'
     ],
     extras_require={
-        'oscar': ['django-oscar>=1.5,<1.7']
+        'oscar': ['django-oscar>=1.6,<1.7']
     },
     tests_require=[
         'django-webtest==1.9.4',
