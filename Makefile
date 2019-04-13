@@ -13,3 +13,7 @@ sandbox: install
 	sandbox/manage.py migrate --noinput
 	sandbox/manage.py loaddata sandbox/fixtures/auth.json countries.json
 	sandbox/manage.py oscar_import_catalogue sandbox/fixtures/catalogue.csv
+
+lint:
+	flake8 paypal tests setup.py
+	isort -q --recursive --diff paypal tests setup.py
