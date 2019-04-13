@@ -9,8 +9,8 @@ from django.template.defaultfilters import striptags, truncatewords
 from django.utils import six
 from django.utils.http import urlencode
 from django.utils.translation import ugettext as _
-from localflavor.us import us_states
 
+from localflavor.us import us_states
 from paypal import exceptions, gateway
 
 from . import exceptions as express_exceptions
