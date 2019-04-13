@@ -114,7 +114,7 @@ def _fetch_response(method, extra_params):
     return txn
 
 
-def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_url=None,
+def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_url=None,  # noqa: C901 too complex
             action=SALE, user=None, user_address=None, shipping_method=None,
             shipping_address=None, no_shipping=False, paypal_params=None):
     """
