@@ -488,5 +488,5 @@ class ShippingOptionsView(View):
             pairs.append(('NO_SHIPPING_OPTION_DETAILS', 1))
 
         payload = urlencode(pairs)
-        logger.debug(payload)
+        logger.debug("Basket #%s - returning postage costs payload = '%s'", basket.id, payload)
         return HttpResponse(payload)
