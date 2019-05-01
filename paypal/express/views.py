@@ -482,7 +482,8 @@ class ShippingOptionsView(View):
                 pairs.append(('L_TAXAMT%d' % index, D('0.00')))
                 pairs.append(('L_INSURANCEAMT%d' % index, D('0.00')))
                 # We assume that the first returned method is the default one
-                pairs.append(('L_SHIPPINGOPTIONISDEFAULT%d' % index, 1 if index == 0 else 0))
+                pairs.append(('L_SHIPPINGOPTIONISDEFAULT%d' % index, 
+                              1 if index == 0 else 0))
         else:
             # No shipping methods available - we flag this up to PayPal indicating that we
             # do not ship to the shipping address.
