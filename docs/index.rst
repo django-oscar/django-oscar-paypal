@@ -37,7 +37,8 @@ By default, this won't install Oscar as well. To install Oscar, run::
 
 Finally, add ``paypal`` to your ``INSTALLED_APPS``, and run::
 
-    python manage.py syncdb
+    python manage.py migrate
+
 
 Table of contents
 -----------------

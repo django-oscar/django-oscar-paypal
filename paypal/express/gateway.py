@@ -9,8 +9,8 @@ from django.template.defaultfilters import striptags, truncatewords
 from django.utils import six
 from django.utils.http import urlencode
 from django.utils.translation import ugettext as _
-from localflavor.us import us_states
 
+from localflavor.us import us_states
 from paypal import exceptions, gateway
 
 from . import exceptions as express_exceptions
@@ -114,7 +114,7 @@ def _fetch_response(method, extra_params):
     return txn
 
 
-def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_url=None,
+def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_url=None,  # noqa: C901 too complex
             action=SALE, user=None, user_address=None, shipping_method=None,
             shipping_address=None, no_shipping=False, paypal_params=None):
     """
@@ -276,6 +276,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['SHIPTOSTATE'] = user_address.state
         params['SHIPTOZIP'] = user_address.postcode
         params['SHIPTOCOUNTRYCODE'] = user_address.country.iso_3166_1_a2
+        params['SHIPTOPHONENUM'] = user_address.phone_number
 
     # Shipping details (if already set) - we override the SHIPTO* fields and
     # set a flag to indicate that these can't be altered on the PayPal side.
@@ -291,6 +292,7 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         params['SHIPTOSTATE'] = shipping_address.state
         params['SHIPTOZIP'] = shipping_address.postcode
         params['SHIPTOCOUNTRYCODE'] = shipping_address.country.iso_3166_1_a2
+        params['SHIPTOPHONENUM'] = shipping_address.phone_number
 
         # For US addresses, we need to try and convert the state into 2 letter
         # code - otherwise we can get a 10736 error as the shipping address and
