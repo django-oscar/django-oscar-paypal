@@ -408,7 +408,7 @@ class ShippingOptionsView(View):
         country_code = self.request.GET.get(
             'SHIPTOCOUNTRY', None)
         try:
-            country = Country.objects.get(iso_3166_1_a2=kwargs['country_code'])
+            country = Country.objects.get(iso_3166_1_a2=country_code)
         except Country.DoesNotExist:
             country = Country()
 
@@ -424,8 +424,6 @@ class ShippingOptionsView(View):
             basket=basket, shipping_addr=shipping_address,
             request=self.request, user=user)
         return self.render_to_response(methods, basket)
-
-
 
     def post(self, request, *args, **kwargs):
         """
@@ -482,7 +480,7 @@ class ShippingOptionsView(View):
                 pairs.append(('L_TAXAMT%d' % index, D('0.00')))
                 pairs.append(('L_INSURANCEAMT%d' % index, D('0.00')))
                 # We assume that the first returned method is the default one
-                pairs.append(('L_SHIPPINGOPTIONISDEFAULT%d' % index, 
+                pairs.append(('L_SHIPPINGOPTIONISDEFAULT%d' % index,
                               1 if index == 0 else 0))
         else:
             # No shipping methods available - we flag this up to PayPal indicating that we
