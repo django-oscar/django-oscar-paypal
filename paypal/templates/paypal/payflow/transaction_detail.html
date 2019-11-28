@@ -1,4 +1,4 @@
-{% extends 'dashboard/layout.html' %}
+{% extends 'oscar/dashboard/layout.html' %}
 {% load currency_filters %}
 {% load i18n %}
 
@@ -15,7 +15,7 @@
         </li>
         <li>PayPal</li>
         <li>
-            <a href="{% url 'paypal-payflow-list' %}">{% trans "PayPal Payflow" %}</a>
+            <a href="{% url 'payflow_dashboard:paypal-payflow-list' %}">{% trans "PayPal Payflow" %}</a>
         </li>
         <li class="active">
             {% blocktrans with pnref=txn.pnref %}

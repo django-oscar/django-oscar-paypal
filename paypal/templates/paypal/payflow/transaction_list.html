@@ -1,4 +1,4 @@
-{% extends 'dashboard/layout.html' %}
+{% extends 'oscar/dashboard/layout.html' %}
 {% load currency_filters %}
 {% load i18n %}
 
@@ -13,7 +13,7 @@
         </li>
         <li>PayPal</li>
         <li>
-            <a href="{% url 'paypal-payflow-list' %}">{% trans "PayPal Payflow Pro" %}</a>
+            <a href="{% url 'payflow_dashboard:paypal-payflow-list' %}">{% trans "PayPal Payflow Pro" %}</a>
         </li>
         <li class="active">{% trans "Transactions" %}</li>
     </ul>
@@ -54,13 +54,13 @@
                         <td>{{ txn.response_time|floatformat:0 }}</td>
                         <td>{{ txn.date_created }}</td>
                         <td>
-                            <a href="{% url 'paypal-payflow-detail' txn.id %}" class="btn btn-info">{% trans "View" %}</a>
+                            <a href="{% url 'payflow_dashboard:paypal-payflow-detail' txn.id %}" class="btn btn-info">{% trans "View" %}</a>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
-        {% include "partials/pagination.html" %}
+        {% include "oscar/partials/pagination.html" %}
     {% else %}
         <p>{% trans "No transactions have been made yet." %}</p>
     {% endif %}

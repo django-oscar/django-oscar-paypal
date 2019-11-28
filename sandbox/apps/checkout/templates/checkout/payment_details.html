@@ -17,9 +17,9 @@
         <form method="post" action="{% url 'checkout:preview' %}" class="form-stacked">
             {% csrf_token %}
             <h4>{% trans "Bankcard" %}</h4>
-            {% include "partials/form_fields.html" with form=bankcard_form %}
+            {% include "oscar/partials/form_fields.html" with form=bankcard_form %}
             <h4>{% trans "Billing address" %}</h4>
-            {% include "partials/form_fields.html" with form=billing_address_form %}
+            {% include "oscar/partials/form_fields.html" with form=billing_address_form %}
             <div class="form-actions">
                 <button type="submit" class="btn btn-large btn-primary">{% trans "Continue" %}</button>
             </div>

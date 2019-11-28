@@ -1,4 +1,3 @@
-from oscar import OSCAR_MAIN_TEMPLATE_DIR, get_core_apps
 from oscar.defaults import *  # noqa
 
 # To specify integration settings (which include passwords, hence why they
@@ -27,10 +26,48 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
     'django.contrib.staticfiles',
     'paypal',
+
+    # Forked Oscar Apps
+    'tests.shipping.apps.ShippingConfig',
+
+    # Oscar
+    'oscar',
+    'oscar.apps.analytics',
+    'oscar.apps.address',
+    'oscar.apps.catalogue',
+    'oscar.apps.checkout',
+    'oscar.apps.catalogue.reviews',
+    'oscar.apps.partner',
+    'oscar.apps.basket',
+    'oscar.apps.payment',
+    'oscar.apps.offer',
+    'oscar.apps.order',
+    'oscar.apps.customer',
+    'oscar.apps.search',
+    'oscar.apps.voucher',
+    'oscar.apps.wishlists',
+    'oscar.apps.dashboard',
+    'oscar.apps.dashboard.reports',
+    'oscar.apps.dashboard.users',
+    'oscar.apps.dashboard.orders',
+    'oscar.apps.dashboard.catalogue',
+    'oscar.apps.dashboard.offers',
+    'oscar.apps.dashboard.partners',
+    'oscar.apps.dashboard.pages',
+    'oscar.apps.dashboard.ranges',
+    'oscar.apps.dashboard.reviews',
+    'oscar.apps.dashboard.vouchers',
+    'oscar.apps.dashboard.communications',
+    'oscar.apps.dashboard.shipping',
+
+    # 3rd-party apps that oscar depends on
     'widget_tweaks',
-] + get_core_apps([
-    'tests.shipping',
-])
+    'haystack',
+    'treebeard',
+    'sorl.thumbnail',
+    'easy_thumbnails',
+    'django_tables2',
+]
 
 MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
@@ -52,7 +89,6 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            OSCAR_MAIN_TEMPLATE_DIR,
         ],
         'OPTIONS': {
             'loaders': [
@@ -69,7 +105,6 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
 
                 'oscar.apps.search.context_processors.search_form',
-                'oscar.apps.promotions.context_processors.promotions',
                 'oscar.apps.checkout.context_processors.checkout',
                 'oscar.core.context_processors.metadata',
             ],

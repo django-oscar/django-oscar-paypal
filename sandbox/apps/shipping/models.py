@@ -1,1 +1,1 @@
-from oscar.apps.shipping.models import *
+from oscar.apps.shipping.models import *  # noqa isort:skip
