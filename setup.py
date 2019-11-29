@@ -17,7 +17,7 @@ setup(
     packages=find_packages(exclude=['sandbox*', 'tests*']),
     include_package_data=True,
     install_requires=[
-        'django>=1.11,<2.8',
+        'django>=1.11,<2.2.8',
         'requests>=1.0',
         'django-localflavor'
     ],
