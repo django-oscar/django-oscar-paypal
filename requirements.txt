@@ -2,7 +2,7 @@
 mock==2.0.0
 coverage==4.4.2
 django-webtest==1.9.4
-tox==2.9.1
+tox==3.14.2
 detox==0.11
 pytest-django==3.7.0
 pytest-cov==2.6.0
