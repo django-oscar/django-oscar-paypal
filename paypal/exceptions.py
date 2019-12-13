@@ -1,8 +1,4 @@
-try:
-    from oscar.apps.payment.exceptions import PaymentError
-except ImportError:
-    class PaymentError(Exception):
-        pass
+from oscar.apps.payment.exceptions import PaymentError
 
 
 class PayPalError(PaymentError):

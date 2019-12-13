@@ -14,4 +14,4 @@ sandbox: install
 
 lint:
 	flake8 paypal tests setup.py
-	isort -q --recursive --diff paypal tests setup.py
+	isort -q -c --recursive --diff paypal tests setup.py

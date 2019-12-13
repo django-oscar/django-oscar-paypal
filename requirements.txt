@@ -11,5 +11,5 @@ sorl-thumbnail==12.5.0
 # Development
 django-extensions==1.9.8
 django-debug-toolbar==1.9.1
-flake8==3.7.7
-isort==4.3.17
+flake8
+isort
