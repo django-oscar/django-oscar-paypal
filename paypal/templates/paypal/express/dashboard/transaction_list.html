@@ -1,4 +1,4 @@
-{% extends 'dashboard/layout.html' %}
+{% extends 'oscar/dashboard/layout.html' %}
 {% load currency_filters %}
 {% load i18n %}
 
@@ -39,7 +39,7 @@
             <tbody>
                 {% for txn in transactions %}
                     <tr>
-                        <td><a href="{% url 'paypal-express-detail' txn.id %}">{{ txn.correlation_id|default:"-" }}</a></td>
+                        <td><a href="{% url 'express_dashboard:paypal-express-detail' txn.id %}">{{ txn.correlation_id|default:"-" }}</a></td>
                         <td>{{ txn.method }}</td>
                         <td>{{ txn.ack }}</td>
                         <td>{{ txn.amount|currency:txn.currency }}</td>
@@ -51,7 +51,7 @@
                 {% endfor %}
             </tbody>
         </table>
-        {% include "partials/pagination.html" %}
+        {% include "oscar/partials/pagination.html" %}
     {% else %}
         <p>{% trans "No transactions have been made yet." %}</p>
     {% endif %}

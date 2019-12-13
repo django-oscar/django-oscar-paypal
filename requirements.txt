@@ -4,9 +4,11 @@ coverage==4.4.2
 django-webtest==1.9.4
 tox==2.9.1
 detox==0.11
-pytest-django==3.4.4
+pytest-django==3.7.0
 pytest-cov==2.6.0
 django-widget-tweaks==1.4.3
+sorl-thumbnail==12.5.0
+easy-thumbnails==2.6
 
 # Development
 django-extensions==1.9.8
