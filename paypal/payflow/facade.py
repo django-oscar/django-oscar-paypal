@@ -1,8 +1,6 @@
 """
 Bridging module between Oscar and the gateway module (which is Oscar agnostic)
 """
-from __future__ import unicode_literals
-
 from oscar.apps.payment import exceptions
 
 from paypal.payflow import codes, gateway, models

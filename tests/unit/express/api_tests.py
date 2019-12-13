@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from decimal import Decimal as D
 
 from django.test import TestCase

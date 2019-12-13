@@ -53,8 +53,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'django-oscar-paypal'
-copyright = u'2012, David Winterbottom'
+project = 'django-oscar-paypal'
+copyright = '2012, David Winterbottom'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -197,8 +197,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'django-oscar-paypal.tex', u'django-oscar-paypal Documentation',
-   u'David Winterbottom', 'manual'),
+  ('index', 'django-oscar-paypal.tex', 'django-oscar-paypal Documentation',
+   'David Winterbottom', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -227,8 +227,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'django-oscar-paypal', u'django-oscar-paypal Documentation',
-     [u'David Winterbottom'], 1)
+    ('index', 'django-oscar-paypal', 'django-oscar-paypal Documentation',
+     ['David Winterbottom'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -241,8 +241,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'django-oscar-paypal', u'django-oscar-paypal Documentation',
-   u'David Winterbottom', 'django-oscar-paypal', 'One line description of project.',
+  ('index', 'django-oscar-paypal', 'django-oscar-paypal Documentation',
+   'David Winterbottom', 'django-oscar-paypal', 'One line description of project.',
    'Miscellaneous'),
 ]
 

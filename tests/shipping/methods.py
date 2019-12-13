@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from decimal import Decimal as D
 
 from oscar.apps.shipping.methods import Free
