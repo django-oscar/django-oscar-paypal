@@ -51,7 +51,7 @@ follows::
 If you are using the dashboard views, extend the dashboard navigation to include
 the appropriate links::
 
-    from django.utils.translation import ugettext_lazy as _
+    from django.utils.translation import gettext_lazy as _
     OSCAR_DASHBOARD_NAVIGATION.append(
         {
             'label': _('PayPal'),

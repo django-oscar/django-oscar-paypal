@@ -277,7 +277,7 @@ OSCAR_ALLOW_ANON_CHECKOUT = True
 OSCAR_SHOP_TAGLINE = 'PayPal'
 
 # Add Payflow dashboard stuff to settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 OSCAR_DASHBOARD_NAVIGATION.append(
     {
         'label': _('PayPal'),

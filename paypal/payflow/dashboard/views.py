@@ -2,7 +2,7 @@ from django import http
 from django.conf import settings
 from django.contrib import messages
 from django.urls import reverse
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.views import generic
 
 from paypal.payflow import facade, models

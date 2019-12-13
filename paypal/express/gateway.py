@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.template.defaultfilters import striptags, truncatewords
 from django.utils.http import urlencode
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from localflavor.us import us_states
 
 from paypal import exceptions, gateway

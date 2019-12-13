@@ -2,8 +2,8 @@ import re
 
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
-from django.utils.translation import ugettext
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 
 from paypal import base
 from paypal.payflow import codes
@@ -49,11 +49,11 @@ class PayflowTransaction(base.ResponseModel):
         return super(PayflowTransaction, self).save(*args, **kwargs)
 
     def get_trxtype_display(self):
-        return ugettext(codes.trxtype_map.get(self.trxtype, self.trxtype))
+        return gettext(codes.trxtype_map.get(self.trxtype, self.trxtype))
     get_trxtype_display.short_description = _("Transaction type")
 
     def get_tender_display(self):
-        return ugettext(codes.tender_map.get(self.tender, ''))
+        return gettext(codes.tender_map.get(self.tender, ''))
     get_tender_display.short_description = _("Tender")
 
     @property
