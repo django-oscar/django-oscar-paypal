@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from decimal import Decimal as D
+from unittest.mock import Mock, patch
 
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
 from django.utils.encoding import force_text
-from mock import Mock, patch
 from oscar.apps.basket.models import Basket
 from oscar.apps.order.models import Order
 from oscar.core.loading import get_classes

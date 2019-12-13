@@ -1,7 +1,7 @@
 import datetime
 from decimal import Decimal as D
+from unittest import mock
 
-import mock
 from django.test import TestCase
 from django.utils import six
 from oscar.apps.payment import exceptions
