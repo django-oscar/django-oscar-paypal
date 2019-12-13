@@ -1,6 +1,6 @@
 # Testing
 mock==2.0.0
-coverage==4.4.2
+coverage==4.5.4
 django-webtest==1.9.4
 tox==2.9.1
 detox==0.11
