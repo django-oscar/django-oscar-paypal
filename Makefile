@@ -1,10 +1,8 @@
 install:
-	pip install django-oscar
 	pip install -r requirements.txt
 	python setup.py develop
 
 upgrade:
-	pip install -U django-oscar
 	pip install -U -r requirements.txt
 	python setup.py develop --upgrade
 
@@ -16,4 +14,4 @@ sandbox: install
 
 lint:
 	flake8 paypal tests setup.py
-	isort -q --recursive --diff paypal tests setup.py
+	isort -q -c --recursive --diff paypal tests setup.py

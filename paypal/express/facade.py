@@ -6,9 +6,8 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse
 
-from paypal.express.gateway import (AUTHORIZATION, DO_EXPRESS_CHECKOUT, ORDER,
-                                    SALE, do_capture, do_txn, do_void, get_txn,
-                                    refund_txn, set_txn)
+from paypal.express.gateway import (
+    AUTHORIZATION, DO_EXPRESS_CHECKOUT, ORDER, SALE, do_capture, do_txn, do_void, get_txn, refund_txn, set_txn)
 from paypal.express.models import ExpressTransaction as Transaction
 
 

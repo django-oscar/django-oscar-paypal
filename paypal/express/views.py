@@ -17,11 +17,9 @@ from oscar.core.exceptions import ModuleNotFoundError
 from oscar.core.loading import get_class, get_model
 
 from paypal.exceptions import PayPalError
-from paypal.express.exceptions import (EmptyBasketException, InvalidBasket,
-                                       MissingShippingAddressException,
-                                       MissingShippingMethodException)
-from paypal.express.facade import (confirm_transaction,
-                                   fetch_transaction_details, get_paypal_url)
+from paypal.express.exceptions import (
+    EmptyBasketException, InvalidBasket, MissingShippingAddressException, MissingShippingMethodException)
+from paypal.express.facade import confirm_transaction, fetch_transaction_details, get_paypal_url
 
 # Load views dynamically
 PaymentDetailsView = get_class('checkout.views', 'PaymentDetailsView')

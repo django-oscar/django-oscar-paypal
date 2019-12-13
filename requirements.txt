@@ -1,17 +1,15 @@
 # Testing
-mock==2.0.0
-coverage==4.4.2
-django-webtest==1.9.4
-tox==2.9.1
-detox==0.11
+django-oscar>=2.0,<2.1
+coverage==4.5.4
+django-webtest==1.9.7
+tox==3.14.2
 pytest-django==3.7.0
-pytest-cov==2.6.0
+pytest-cov==2.8.1
 django-widget-tweaks==1.4.3
 sorl-thumbnail==12.5.0
-easy-thumbnails==2.6
 
 # Development
 django-extensions==1.9.8
 django-debug-toolbar==1.9.1
-flake8==3.7.7
-isort==4.3.17
+flake8
+isort

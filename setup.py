@@ -24,11 +24,6 @@ setup(
     extras_require={
         'oscar': ['django-oscar>=2.0,<2.1']
     },
-    tests_require=[
-        'django-webtest==1.9.4',
-        'pytest-cov==2.6.0',
-        'pytest-django==3.7.0',
-    ],
     # See http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 4 - Beta',
