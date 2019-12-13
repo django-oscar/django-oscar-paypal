@@ -1,9 +1,8 @@
 import time
+from urllib.parse import parse_qsl
 
 import requests
-from django.utils import six
 from django.utils.http import urlencode
-from django.utils.six.moves.urllib.parse import parse_qsl
 
 from paypal import exceptions
 
@@ -31,10 +30,6 @@ def post(url, params, encode=True):
     # Convert response into a simple key-value format
     pairs = {}
     for key, value in parse_qsl(response.text):
-        if isinstance(key, six.binary_type):
-            key = key.decode('utf8')
-        if isinstance(value, six.binary_type):
-            value = value.decode('utf8')
         pairs[key] = value
 
     # Add audit information

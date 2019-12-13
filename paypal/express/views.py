@@ -7,7 +7,6 @@ from django.contrib.auth.models import AnonymousUser
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.utils import six
 from django.utils.http import urlencode
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import RedirectView, View
@@ -58,14 +57,14 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
             basket = self.build_submission()['basket']
             url = self._get_redirect_url(basket, **kwargs)
         except PayPalError as ppe:
-            messages.error(self.request, six.text_type(ppe))
+            messages.error(self.request, str(ppe))
             if self.as_payment_method:
                 url = reverse('checkout:payment-details')
             else:
                 url = reverse('basket:summary')
             return url
         except InvalidBasket as e:
-            messages.warning(self.request, six.text_type(e))
+            messages.warning(self.request, str(e))
             return reverse('basket:summary')
         except EmptyBasketException:
             messages.error(self.request, _("Your basket is empty"))
@@ -468,9 +467,9 @@ class ShippingOptionsView(View):
                 charge = method.calculate(basket).incl_tax
 
                 pairs.append(('L_SHIPPINGOPTIONNAME%d' % index,
-                              six.text_type(method.name)))
+                              str(method.name)))
                 pairs.append(('L_SHIPPINGOPTIONLABEL%d' % index,
-                              six.text_type(method.description)))
+                              str(method.description)))
                 pairs.append(('L_SHIPPINGOPTIONAMOUNT%d' % index, charge))
                 # For now, we assume tax and insurance to be zero
                 pairs.append(('L_TAXAMT%d' % index, D('0.00')))

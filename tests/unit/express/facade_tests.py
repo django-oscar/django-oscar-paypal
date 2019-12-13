@@ -1,9 +1,9 @@
 from decimal import Decimal as D
 from unittest import TestCase
 from unittest.mock import Mock, patch
+from urllib.parse import parse_qs
 
 import pytest
-from django.utils.six.moves.urllib.parse import parse_qs
 from oscar.apps.shipping.methods import Free
 from purl import URL
 
