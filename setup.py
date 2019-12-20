@@ -12,7 +12,7 @@ setup(
         "Payments for django-oscar"),
     long_description=open('README.rst').read(),
     keywords="Payment, PayPal, Oscar",
-    license=open('LICENSE').read(),
+    license='BSD',
     platforms=['linux'],
     packages=find_packages(exclude=['sandbox*', 'tests*']),
     include_package_data=True,

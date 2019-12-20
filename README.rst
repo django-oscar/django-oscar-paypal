@@ -59,7 +59,7 @@ Changelog
 ---------
 
 2.0.0 (released December 20th, 2019)
------------------------------------
+------------------------------------
 * Add support for Oscar 2.0 and Django 2.2.
 * Drop support for Oscar 1.6 and lower and Django 2.0 and lower.
 * Drop support for Python 2.
