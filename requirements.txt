@@ -1,6 +1,6 @@
 # Testing
 django-oscar>=2.0,<2.1
-coverage==5.0
+coverage==5.0.1
 django-webtest==1.9.7
 tox==3.14.2
 pytest-django==3.7.0
