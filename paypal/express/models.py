@@ -43,3 +43,26 @@ class ExpressTransaction(base.ResponseModel):
     def __str__(self):
         return 'method: %s: token: %s' % (
             self.method, self.token)
+
+
+class ExpressCheckoutTransaction(models.Model):
+    token = models.CharField(max_length=255)
+
+    amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    currency = models.CharField(max_length=8, null=True, blank=True)
+
+    CREATED, SAVED, APPROVED, VOIDED, COMPLETED = 'CREATED', 'SAVED', 'APPROVED', 'VOIDED', 'COMPLETED'
+    status = models.CharField(max_length=8)
+
+    AUTHORIZE, CAPTURE = 'AUTHORIZE', 'CAPTURE'
+    intent = models.CharField(max_length=9)
+
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-date_created',)
+        app_label = 'paypal'
+
+    def __str__(self):
+        if self.intent:
+            return 'intent: {}, status: {}'

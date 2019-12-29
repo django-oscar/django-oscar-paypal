@@ -302,10 +302,11 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
+# TODO: remove useless settings
+
 # Taken from PayPal's documentation - these should always work in the sandbox
 PAYPAL_SANDBOX_MODE = True
-PAYPAL_CALLBACK_HTTPS = False
-PAYPAL_API_VERSION = '119'
+PAYPAL_CALLBACK_SCHEME = 'http'
 
 # These are the standard PayPal sandbox details from the docs - but I don't
 # think you can get access to the merchant dashboard.
@@ -317,8 +318,11 @@ PAYPAL_API_SIGNATURE = 'A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU
 PAYPAL_CURRENCY = PAYPAL_PAYFLOW_CURRENCY = 'GBP'
 PAYPAL_PAYFLOW_DASHBOARD_FORMS = True
 
-# Put your own sandbox settings into an integration.py modulde (that is ignored
-# by git).
+PAYPAL_SANDBOX_CLIENT_ID = ''
+PAYPAL_SANDBOX_CLIENT_SECRET = ''
+
+# Put your own sandbox settings into an integration.py module
+# (that is ignored by git).
 try:
     from integration import *  # noqa
 except ImportError:

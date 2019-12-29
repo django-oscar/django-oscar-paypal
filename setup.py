@@ -18,8 +18,9 @@ setup(
     include_package_data=True,
     install_requires=[
         'django>=2.2,<2.3',
-        'requests>=1.0',
-        'django-localflavor'
+        'paypal-checkout-serversdk>=1.0.1',
+        'requests>=1.0',  # TODO: do we need this lib?
+        'django-localflavor'  # TODO: do we need this lib?
     ],
     extras_require={
         'oscar': ['django-oscar>=2.0,<2.1']

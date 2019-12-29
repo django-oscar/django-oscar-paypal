@@ -1,5 +1,5 @@
 """
-Responsible for briding between Oscar and the PayPal gateway
+Responsible for bridging between Oscar and the PayPal gateway
 """
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -7,7 +7,8 @@ from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse
 
 from paypal.express.gateway import (
-    AUTHORIZATION, DO_EXPRESS_CHECKOUT, ORDER, SALE, do_capture, do_txn, do_void, get_txn, refund_txn, set_txn)
+    AUTHORIZATION, DO_EXPRESS_CHECKOUT, ORDER, SALE, do_capture, do_txn, do_void, get_txn, refund_txn)
+from paypal.express.gateway_new import PaymentProcessor
 from paypal.express.models import ExpressTransaction as Transaction
 
 
@@ -19,7 +20,7 @@ def _get_payment_action():
     return action
 
 
-def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
+def get_paypal_url(basket, user=None, shipping_address=None,
                    shipping_method=None, host=None, scheme=None,
                    paypal_params=None):
     """
@@ -36,24 +37,12 @@ def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
         currency = getattr(settings, 'PAYPAL_CURRENCY', 'GBP')
     if host is None:
         host = Site.objects.get_current().domain
-    if scheme is None:
-        use_https = getattr(settings, 'PAYPAL_CALLBACK_HTTPS', True)
-        scheme = 'https' if use_https else 'http'
-    return_url = '%s://%s%s' % (
-        scheme, host, reverse('paypal-success-response', kwargs={
-            'basket_id': basket.id}))
-    cancel_url = '%s://%s%s' % (
-        scheme, host, reverse('paypal-cancel-response', kwargs={
-            'basket_id': basket.id}))
+    scheme = getattr(settings, 'PAYPAL_CALLBACK_SCHEME', 'https')
+    return_url_path = reverse('paypal-success-response', kwargs={'basket_id': basket.id})
+    return_url = '{0}://{1}{2}'.format(scheme, host, return_url_path)
 
-    # URL for updating shipping methods - we only use this if we have a set of
-    # shipping methods to choose between.
-    update_url = None
-    if shipping_methods:
-        update_url = '%s://%s%s' % (
-            scheme, host,
-            reverse('paypal-shipping-options',
-                    kwargs={'basket_id': basket.id}))
+    cancel_url_path = reverse('paypal-cancel-response', kwargs={'basket_id': basket.id})
+    cancel_url = '{0}://{1}{2}'.format(scheme, host, cancel_url_path)
 
     # Determine whether a shipping address is required
     no_shipping = False
@@ -68,19 +57,17 @@ def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
         if len(addresses):
             address = addresses[0]
 
-    return set_txn(basket=basket,
-                   shipping_methods=shipping_methods,
-                   currency=currency,
-                   return_url=return_url,
-                   cancel_url=cancel_url,
-                   update_url=update_url,
-                   action=_get_payment_action(),
-                   shipping_method=shipping_method,
-                   shipping_address=shipping_address,
-                   user=user,
-                   user_address=address,
-                   no_shipping=no_shipping,
-                   paypal_params=paypal_params)
+    return PaymentProcessor().create_order(
+        basket=basket,
+        currency=currency,
+        return_url=return_url,
+        cancel_url=cancel_url,
+        user=user,
+        user_address=address,
+        shipping_address=shipping_address,
+        shipping_method=shipping_method,
+        no_shipping=no_shipping,
+    )
 
 
 def fetch_transaction_details(token):
