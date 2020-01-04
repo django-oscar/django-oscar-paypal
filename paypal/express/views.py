@@ -163,6 +163,8 @@ class SuccessResponseView(PaymentDetailsView):
     template_name_preview = 'paypal/express/preview.html'
     preview = True
 
+    error_message = _("A problem occurred communicating with PayPal - please try again later")
+
     @property
     def pre_conditions(self):
         return []
@@ -190,9 +192,7 @@ class SuccessResponseView(PaymentDetailsView):
             logger.warning(
                 "Unable to fetch transaction details for token %s: %s",
                 self.token, e)
-            messages.error(
-                self.request,
-                _("A problem occurred communicating with PayPal - please try again later"))
+            messages.error(self.request, self.error_message)
             return HttpResponseRedirect(reverse('basket:summary'))
 
         # Reload frozen basket which is specified in the URL
@@ -251,29 +251,25 @@ class SuccessResponseView(PaymentDetailsView):
         We fetch the txn details again and then proceed with oscar's standard
         payment details view for placing the order.
         """
-        error_msg = _(
-            "A problem occurred communicating with PayPal "
-            "- please try again later"
-        )
         try:
             self.payer_id = request.POST['payer_id']
             self.token = request.POST['token']
         except KeyError:
             # Probably suspicious manipulation if we get here
-            messages.error(self.request, error_msg)
+            messages.error(self.request, self.error_message)
             return HttpResponseRedirect(reverse('basket:summary'))
 
         try:
             self.txn = fetch_transaction_details(self.token)
         except PayPalError:
             # Unable to fetch txn details from PayPal - we have to bail out
-            messages.error(self.request, error_msg)
+            messages.error(self.request, self.error_message)
             return HttpResponseRedirect(reverse('basket:summary'))
 
         # Reload frozen basket which is specified in the URL
         basket = self.load_frozen_basket(kwargs['basket_id'])
         if not basket:
-            messages.error(self.request, error_msg)
+            messages.error(self.request, self.error_message)
             return HttpResponseRedirect(reverse('basket:summary'))
 
         submission = self.build_submission(basket=basket)
