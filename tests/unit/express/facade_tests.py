@@ -65,7 +65,7 @@ class SuccessfulSetExpressCheckoutTests(BaseSetExpressCheckoutTests):
         self.assertTrue(self.url.has_query_param('token'))
         self.assertTrue('_express-checkout', self.url.query_param('cmd'))
 
-    def test_corrent_paypal_params(self):
+    def test_correct_paypal_params(self):
         for param in [
                 'LOCALECODE', 'HDRIMG', 'LANDINGPAGE', 'PAYFLOWCOLOR',
                 'REQCONFIRMSHIPPING', 'PAGESTYLE', 'SOLUTIONTYPE',
