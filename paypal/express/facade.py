@@ -7,7 +7,8 @@ from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse
 
 from paypal.express.gateway import (
-    AUTHORIZATION, DO_EXPRESS_CHECKOUT, ORDER, SALE, do_capture, do_txn, do_void, get_txn, refund_txn, set_txn)
+    AUTHORIZATION, DO_EXPRESS_CHECKOUT, ORDER, SALE, buyer_pays_on_paypal, do_capture, do_txn, do_void,
+    get_txn, refund_txn, set_txn)
 from paypal.express.models import ExpressTransaction as Transaction
 
 
@@ -39,21 +40,16 @@ def get_paypal_url(basket, shipping_methods, user=None, shipping_address=None,
     if scheme is None:
         use_https = getattr(settings, 'PAYPAL_CALLBACK_HTTPS', True)
         scheme = 'https' if use_https else 'http'
-    return_url = '%s://%s%s' % (
-        scheme, host, reverse('paypal-success-response', kwargs={
-            'basket_id': basket.id}))
-    cancel_url = '%s://%s%s' % (
-        scheme, host, reverse('paypal-cancel-response', kwargs={
-            'basket_id': basket.id}))
+
+    response_view_name = 'paypal-handle-order' if buyer_pays_on_paypal() else 'paypal-success-response'
+    return_url = '%s://%s%s' % (scheme, host, reverse(response_view_name, kwargs={'basket_id': basket.id}))
+    cancel_url = '%s://%s%s' % (scheme, host, reverse('paypal-cancel-response', kwargs={'basket_id': basket.id}))
 
     # URL for updating shipping methods - we only use this if we have a set of
     # shipping methods to choose between.
     update_url = None
     if shipping_methods:
-        update_url = '%s://%s%s' % (
-            scheme, host,
-            reverse('paypal-shipping-options',
-                    kwargs={'basket_id': basket.id}))
+        update_url = '%s://%s%s' % (scheme, host, reverse('paypal-shipping-options', kwargs={'basket_id': basket.id}))
 
     # Determine whether a shipping address is required
     no_shipping = False
