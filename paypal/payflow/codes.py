@@ -1,4 +1,4 @@
-# Make strings collectable with gettext tools, but don't trnslate them here:
+# Make strings collectable with gettext tools, but don't translate them here:
 _ = lambda x: x
 
 # Transaction types (TRXTYPE)...
