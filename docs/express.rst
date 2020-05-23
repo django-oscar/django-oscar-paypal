@@ -26,7 +26,7 @@ seller.  Once the seller is created, you will have access to a
 username, password and 'signature' which are used to authenticate API
 requests.
 
-Add the following settings using the details from your sandbox buyer account::
+Add the following settings using the details from your sandbox seller account::
 
     PAYPAL_API_USERNAME = 'test_xxxx.gmail.com'
     PAYPAL_API_PASSWORD = '123456789'
