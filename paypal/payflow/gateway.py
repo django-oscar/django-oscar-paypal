@@ -147,7 +147,7 @@ def _transaction(extra_params):
     the user credentials.
     """
     if 'TRXTYPE' not in extra_params:
-        raise RuntimeError("All transactions must specify a 'TRXTYPE' paramter")
+        raise RuntimeError("All transactions must specify a 'TRXTYPE' parameter")
 
     # Validate constraints on parameters
     constraints = {
