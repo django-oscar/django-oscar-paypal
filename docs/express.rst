@@ -35,22 +35,26 @@ Add the following settings using the details from your sandbox buyer account::
 Next, you need to add the PayPal URLs to your URL config.  This can be done as
 follows::
 
+    from django.urls import include
+    from django.conf.urls import url
     from django.contrib import admin
+    
     from oscar.app import shop
-
-    from paypal.express.dashboard.app import application
-
+    
     urlpatterns = [
         url(r'^admin/', admin.site.urls),
         url(r'^checkout/paypal/', include('paypal.express.urls')),
         # Optional
-        url(r'^dashboard/paypal/express/', application.urls),
+        url(r^'dashboard/paypal/express/', apps.get_app_config("express_dashboard").urls),
         url(r'', shop.urls),
     ]
 
 If you are using the dashboard views, extend the dashboard navigation to include
-the appropriate links::
-
+the appropriate links and add the dashboard app to INSTALLED_APPS in settings.py:: 
+    
+    INSTALLED_APPS += ['paypal.express.dashboard.apps.ExpressDashboardApplication']
+    
+    # Add Payflow dashboard stuff to settings
     from django.utils.translation import gettext_lazy as _
     OSCAR_DASHBOARD_NAVIGATION.append(
         {
@@ -59,7 +63,7 @@ the appropriate links::
             'children': [
                 {
                     'label': _('Express transactions'),
-                    'url_name': 'paypal-express-list',
+                    'url_name': 'express_dashboard:paypal-express-list',
                 },
             ]
         })
