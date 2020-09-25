@@ -8,7 +8,6 @@ from oscar.apps.payment.models import Bankcard
 
 from paypal.payflow import codes, facade, models
 
-
 """
 See page 49 of the PDF for information on PayPal's testing set-up
 """

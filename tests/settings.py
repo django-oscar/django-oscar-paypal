@@ -3,7 +3,7 @@ from oscar.defaults import *  # noqa
 # To specify integration settings (which include passwords, hence why they
 # are not committed), create an integration.py module.
 try:
-    from integration import *   # noqa
+    from integration import *  # noqa
 except ImportError:
     PAYPAL_API_USERNAME = ''
     PAYPAL_API_PASSWORD = ''
