@@ -10,6 +10,6 @@ sorl-thumbnail==12.6.3
 
 # Development
 django-extensions==3.0.9
-django-debug-toolbar==2.2
+django-debug-toolbar==3.1.1
 flake8
 isort
