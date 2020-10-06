@@ -1,5 +1,6 @@
-from django.conf.urls import url
+from django.urls import path
 from django.utils.translation import gettext_lazy as _
+
 from oscar.core.application import OscarDashboardConfig
 
 
@@ -18,9 +19,9 @@ class PayFlowDashboardApplication(OscarDashboardConfig):
 
     def get_urls(self):
         urlpatterns = [
-            url(r'^transactions/$', self.list_view.as_view(),
-                name='paypal-payflow-list'),
-            url(r'^transactions/(?P<pk>\d+)/$', self.detail_view.as_view(),
-                name='paypal-payflow-detail'),
+            path('transactions/', self.list_view.as_view(),
+                 name='paypal-payflow-list'),
+            path('transactions/<int:pk>/', self.detail_view.as_view(),
+                 name='paypal-payflow-detail'),
         ]
         return self.post_process_urls(urlpatterns)
