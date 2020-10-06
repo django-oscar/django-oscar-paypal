@@ -1,0 +1,59 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load currency_filters %}
+{% load i18n %}
+
+{% block title %}
+    {% trans "PayPal Express Checkout transactions" %} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+        </li>
+        <li>PayPal</li>
+        <li class="active">{% trans "Express Checkout transactions" %}</li>
+    </ul>
+{% endblock %}
+
+{% block headertext %}
+    {% trans "PayPal Express Checkout transactions" %}
+{% endblock %}
+
+{% block dashboard_content %}
+
+    {% if transactions %}
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>{% trans "Order ID" %}</th>
+                    <th>{% trans "Capture ID" %}</th>
+                    <th>{% trans "Refund ID" %}</th>
+                    <th>{% trans "Authorization ID" %}</th>
+                    <th>{% trans "Amount" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Intent" %}</th>
+                    <th>{% trans "Date" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for txn in transactions %}
+                    <tr>
+                        <td><a href="{% url 'express_checkout_dashboard:paypal-transaction-detail' txn.id %}">{{ txn.order_id }}</a></td>
+                        <td>{{ txn.capture_id }}</td>
+                        <td>{{ txn.refund_id }}</td>
+                        <td>{{ txn.authorization_id }}</td>
+                        <td>{{ txn.amount|currency:txn.currency }}</td>
+                        <td>{{ txn.status }}</td>
+                        <td>{{ txn.intent }}</td>
+                        <td>{{ txn.date_created }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% include "oscar/partials/pagination.html" %}
+    {% else %}
+        <p>{% trans "No transactions have been made yet." %}</p>
+    {% endif %}
+
+{% endblock dashboard_content %}
