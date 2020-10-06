@@ -222,6 +222,7 @@ INSTALLED_APPS = [
     'apps.shipping.apps.ShippingConfig',
     'apps.checkout.apps.CheckoutConfig',
     'paypal.express.dashboard.apps.ExpressDashboardApplication',
+    'paypal.express_checkout.dashboard.apps.ExpressCheckoutDashboardApplication',
     'paypal.payflow.dashboard.apps.PayFlowDashboardApplication',
 
     # oscar
@@ -291,6 +292,10 @@ OSCAR_DASHBOARD_NAVIGATION.append(
             {
                 'label': _('Express transactions'),
                 'url_name': 'express_dashboard:paypal-express-list',
+            },
+            {
+                'label': _('Express Checkout transactions'),
+                'url_name': 'express_checkout_dashboard:paypal-transaction-list',
             },
         ]
     })

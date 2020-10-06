@@ -1,0 +1,45 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load currency_filters %}
+{% load i18n %}
+
+{% block title %}
+    {% trans "PayPal Express Checkout transaction" %} {{ txn.order_id }} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+        </li>
+        <li>PayPal</li>
+        <li>
+            <a href="{% url 'express_checkout_dashboard:paypal-transaction-list' %}">{% trans "Express Checkout transactions" %}</a>
+        </li>
+        <li class="active">{{ txn.order_id }}</li>
+    </ul>
+{% endblock %}
+
+{% block headertext %}
+    {% blocktrans with id=txn.order_id %}
+        Transaction {{ id }}
+    {% endblocktrans %}
+{% endblock %}
+
+{% block dashboard_content %}
+    <table class="table table-striped table-bordered">
+        <tbody>
+            <tr><th>{% trans "Order ID" %}</th><td>{{ txn.order_id }}</td></tr>
+            <tr><th>{% trans "Captre ID" %}</th><td>{{ txn.capture_id|default:'-' }}</td></tr>
+            <tr><th>{% trans "Refund ID" %}</th><td>{{ txn.refund_idde|default:'-' }}</td></tr>
+            <tr><th>{% trans "Authorization ID" %}</th><td>{{ txn.authorization_id|default:'-' }}</td></tr>
+            <tr><th>{% trans "Amount" %}</th><td>{{ txn.amount|currency:txn.currency }}</td></tr>
+            <tr><th>{% trans "Status" %}</th><td>{{ txn.status }}</td></tr>
+            <tr><th>{% trans "Intent" %}</th><td>{{ txn.intent }}</td></tr>
+            <tr><th>{% trans "Payer ID" %}</th><td>{{ txn.payer_id|default:'-' }}</td></tr>
+            <tr><th>{% trans "Email" %}</th><td>{{ txn.email|default:'-' }}</td></tr>
+            <tr><th>{% trans "Address full name" %}</th><td>{{ txn.address_full_name }}</td></tr>
+            <tr><th>{% trans "Address" %}</th><td>{{ txn.address|safe }}</td></tr>
+            <tr><th>{% trans "Date" %}</th><td>{{ txn.date_created }}</td></tr>
+        </tbody>
+    </table>
+{% endblock dashboard_content %}
