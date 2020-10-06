@@ -35,18 +35,17 @@ Add the following settings using the details from your sandbox seller account::
 Next, you need to add the PayPal URLs to your URL config.  This can be done as
 follows::
 
-    from django.urls import include
-    from django.conf.urls import url
     from django.contrib import admin
-    
+    from django.urls import include, path
+
     from oscar.app import shop
     
     urlpatterns = [
-        url(r'^admin/', admin.site.urls),
-        url(r'^checkout/paypal/', include('paypal.express.urls')),
+        path('admin/', admin.site.urls),
+        path('checkout/paypal/', include('paypal.express.urls')),
         # Optional
-        url(r^'dashboard/paypal/express/', apps.get_app_config("express_dashboard").urls),
-        url(r'', shop.urls),
+        path('dashboard/paypal/express/', apps.get_app_config("express_dashboard").urls),
+        path('', shop.urls),
     ]
 
 If you are using the dashboard views, extend the dashboard navigation to include

@@ -1,5 +1,6 @@
-from django.conf.urls import url
 from django.utils.translation import gettext_lazy as _
+from django.urls import path
+
 from oscar.core.application import OscarDashboardConfig
 
 
@@ -18,9 +19,9 @@ class ExpressDashboardApplication(OscarDashboardConfig):
 
     def get_urls(self):
         urlpatterns = [
-            url(r'^transactions/$', self.list_view.as_view(),
-                name='paypal-express-list'),
-            url(r'^transactions/(?P<pk>\d+)/$', self.detail_view.as_view(),
-                name='paypal-express-detail'),
+            path('transactions/', self.list_view.as_view(),
+                 name='paypal-express-list'),
+            path('transactions/<int:pk>/', self.detail_view.as_view(),
+                 name='paypal-express-detail'),
         ]
         return self.post_process_urls(urlpatterns)
