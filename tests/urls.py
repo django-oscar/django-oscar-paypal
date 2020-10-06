@@ -2,7 +2,7 @@ from django.apps import apps
 from django.conf.urls.i18n import i18n_patterns
 from django.urls import include, path
 
-from paypal.express.urls import base_patterns, buyer_pays_on_paypal_patterns, buyer_pays_on_website_patterns
+from paypal.express_checkout.urls import base_patterns, buyer_pays_on_paypal_patterns, buyer_pays_on_website_patterns
 
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
