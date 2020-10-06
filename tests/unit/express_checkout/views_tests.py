@@ -201,3 +201,20 @@ class SubmitOrderTests(BasketMixin, TestCase):
                 response = self.client.post(self.url, self.payload)
                 expected_message = 'A problem occurred during payment capturing - please try again later'
                 assert expected_message in response.content.decode()
+
+
+class CancelOrderTests(BasketMixin, TestCase):
+
+    def test_cancel_order(self):
+        """
+        In case of order cancellation on PayPay side, a user will be redirected
+        to the URL like ".../en-gb/checkout/paypal/cancel/<basket_id>/?token=43V282428E5567001"
+        """
+
+        self.add_product_to_basket(price=D('9.99'))
+        basket = Basket.objects.all().first()
+        basket.freeze()
+
+        url = reverse('paypal-cancel-response', kwargs={'basket_id': basket.id})
+        response = self.client.get(url, follow=True)
+        assert 'PayPal transaction cancelled' in response.content.decode()
