@@ -2,7 +2,7 @@ from decimal import Decimal as D
 from unittest.mock import Mock, patch
 from urllib.parse import urlencode
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from oscar.apps.basket.models import Basket
@@ -148,10 +148,10 @@ class SubmitOrderTests(BasketMixin, TestCase):
         super().setUp()
 
         self.add_product_to_basket(price=D('9.99'))
-        basket = Basket.objects.all().first()
-        basket.freeze()
+        self.basket = Basket.objects.all().first()
+        self.basket.freeze()
 
-        self.url = reverse('paypal-place-order', kwargs={'basket_id': basket.id})
+        self.url = reverse('paypal-place-order', kwargs={'basket_id': self.basket.id})
         self.payload = {
             'action': 'place_order',
             'payer_id': '0000000000001',
@@ -167,7 +167,7 @@ class SubmitOrderTests(BasketMixin, TestCase):
         ExpressCheckoutTransaction.objects.create(
             order_id='4MW805572N795704B',
             amount=D('19.99'),
-            currency=basket.currency,
+            currency=self.basket.currency,
             status=ExpressCheckoutTransaction.CREATED,
             intent=ExpressCheckoutTransaction.CAPTURE,
         )
@@ -201,6 +201,30 @@ class SubmitOrderTests(BasketMixin, TestCase):
                 response = self.client.post(self.url, self.payload)
                 expected_message = 'A problem occurred during payment capturing - please try again later'
                 assert expected_message in response.content.decode()
+
+    @override_settings(PAYPAL_BUYER_PAYS_ON_PAYPAL=True)
+    def test_create_order_when_bayer_pays_on_paypal(self):
+        url = reverse('paypal-handle-order', kwargs={'basket_id': self.basket.id})
+        query_string = urlencode({'PayerID': '0000000000001', 'token': '4MW805572N795704B'})
+        url_with_query_string = f'{url}?{query_string}'
+
+        with patch('paypal.express_checkout.gateway.PaymentProcessor.get_order') as get_order:
+            with patch('paypal.express_checkout.gateway.PaymentProcessor.capture_order') as capture_order:
+
+                get_order.return_value = construct_object('Result', GET_ORDER_RESULT_DATA)
+                capture_order.return_value = construct_object('Result', CAPTURE_ORDER_RESULT_DATA_MINIMAL)
+
+                self.client.get(url_with_query_string)
+
+                order = Order.objects.all().first()
+                assert order.total_incl_tax == D('9.99')
+                assert order.guest_email == 'sherlock.holmes@example.com'
+
+                address = order.shipping_address
+                assert address.line1 == '221B Baker Street'
+                assert address.line4 == 'London'
+                assert address.country.iso_3166_1_a2 == 'GB'
+                assert address.postcode == 'WC2N 5DU'
 
 
 class CancelOrderTests(BasketMixin, TestCase):
