@@ -4,8 +4,8 @@ from decimal import Decimal as D
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import AnonymousUser
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
@@ -183,21 +183,21 @@ class SuccessResponseView(PaymentDetailsView):
             # Manipulation - redirect to basket page with warning message
             logger.warning("Missing GET params on success response page")
             messages.error(self.request, _("Unable to determine PayPal transaction details"))
-            return HttpResponseRedirect(reverse('basket:summary'))
+            return redirect('basket:summary')
 
         try:
             self.txn = fetch_transaction_details(self.token)
         except PayPalError as e:
             logger.warning("Unable to fetch transaction details for token %s: %s", self.token, e)
             messages.error(self.request, self.error_message)
-            return HttpResponseRedirect(reverse('basket:summary'))
+            return redirect('basket:summary')
 
         # Reload frozen basket which is specified in the URL
         kwargs['basket'] = self.load_frozen_basket(kwargs['basket_id'])
         if not kwargs['basket']:
             logger.warning("Unable to load frozen basket with ID %s", kwargs['basket_id'])
             messages.error(self.request, _("No basket was found that corresponds to your PayPal transaction"))
-            return HttpResponseRedirect(reverse('basket:summary'))
+            return redirect('basket:summary')
 
         if buyer_pays_on_paypal():
             return self.submit(**self.build_submission(basket=kwargs['basket']))
@@ -256,20 +256,20 @@ class SuccessResponseView(PaymentDetailsView):
         except KeyError:
             # Probably suspicious manipulation if we get here
             messages.error(self.request, self.error_message)
-            return HttpResponseRedirect(reverse('basket:summary'))
+            return redirect('basket:summary')
 
         try:
             self.txn = fetch_transaction_details(self.token)
         except PayPalError:
             # Unable to fetch txn details from PayPal - we have to bail out
             messages.error(self.request, self.error_message)
-            return HttpResponseRedirect(reverse('basket:summary'))
+            return redirect('basket:summary')
 
         # Reload frozen basket which is specified in the URL
         basket = self.load_frozen_basket(kwargs['basket_id'])
         if not basket:
             messages.error(self.request, self.error_message)
-            return HttpResponseRedirect(reverse('basket:summary'))
+            return redirect('basket:summary')
 
         submission = self.build_submission(basket=basket)
         return self.submit(**submission)
