@@ -38,11 +38,11 @@ def get_paypal_url(basket, user=None, shipping_address=None, shipping_method=Non
     use_https = getattr(settings, 'PAYPAL_CALLBACK_HTTPS', True)
     scheme = 'https' if use_https else 'http'
 
-    response_view_name = 'paypal-handle-order' if buyer_pays_on_paypal() else 'paypal-success-response'
+    response_view_name = 'express-checkout-handle-order' if buyer_pays_on_paypal() else 'express-checkout-success-response'
     return_url_path = reverse(response_view_name, kwargs={'basket_id': basket.id})
     return_url = f'{scheme}://{host}{return_url_path}'
 
-    cancel_url_path = reverse('paypal-cancel-response', kwargs={'basket_id': basket.id})
+    cancel_url_path = reverse('express-checkout-cancel-response', kwargs={'basket_id': basket.id})
     cancel_url = f'{scheme}://{host}{cancel_url_path}'
 
     address = None

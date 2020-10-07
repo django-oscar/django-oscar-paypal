@@ -30,7 +30,7 @@ class EdgeCaseTests(BasketMixin, TestCase):
 
     def setUp(self):
         super().setUp()
-        self.url = reverse('paypal-redirect')
+        self.url = reverse('express-checkout-redirect')
 
     def test_empty_basket_shows_error(self):
         response = self.client.get(self.url)
@@ -65,7 +65,7 @@ class RedirectToPayPalTests(BasketMixin, TestCase):
 
     def setUp(self):
         super().setUp()
-        self.url = reverse('paypal-redirect')
+        self.url = reverse('express-checkout-redirect')
 
     def test_nonempty_basket_redirects_to_paypal(self):
         order_approve_url = 'https://www.sandbox.paypal.com/checkoutnow?token=4MW805572N795704B'
@@ -96,7 +96,7 @@ class PreviewOrderTests(BasketMixin, TestCase):
         basket = Basket.objects.all().first()
         basket.freeze()
 
-        url = reverse('paypal-success-response', kwargs={'basket_id': basket.id})
+        url = reverse('express-checkout-success-response', kwargs={'basket_id': basket.id})
         query_string = urlencode({'PayerID': '0000000000001', 'token': '4MW805572N795704B'})
         self.url_with_query_string = f'{url}?{query_string}'
 
@@ -151,7 +151,7 @@ class SubmitOrderTests(BasketMixin, TestCase):
         self.basket = Basket.objects.all().first()
         self.basket.freeze()
 
-        self.url = reverse('paypal-place-order', kwargs={'basket_id': self.basket.id})
+        self.url = reverse('express-checkout-place-order', kwargs={'basket_id': self.basket.id})
         self.payload = {
             'action': 'place_order',
             'payer_id': '0000000000001',
@@ -204,7 +204,7 @@ class SubmitOrderTests(BasketMixin, TestCase):
 
     @override_settings(PAYPAL_BUYER_PAYS_ON_PAYPAL=True)
     def test_create_order_when_bayer_pays_on_paypal(self):
-        url = reverse('paypal-handle-order', kwargs={'basket_id': self.basket.id})
+        url = reverse('express-checkout-handle-order', kwargs={'basket_id': self.basket.id})
         query_string = urlencode({'PayerID': '0000000000001', 'token': '4MW805572N795704B'})
         url_with_query_string = f'{url}?{query_string}'
 
@@ -239,6 +239,6 @@ class CancelOrderTests(BasketMixin, TestCase):
         basket = Basket.objects.all().first()
         basket.freeze()
 
-        url = reverse('paypal-cancel-response', kwargs={'basket_id': basket.id})
+        url = reverse('express-checkout-cancel-response', kwargs={'basket_id': basket.id})
         response = self.client.get(url, follow=True)
         assert 'PayPal transaction cancelled' in response.content.decode()
