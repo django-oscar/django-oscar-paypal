@@ -20,17 +20,13 @@ base_patterns = [
 
 
 buyer_pays_on_paypal_patterns = [
-    path('handle-order/(<int:basket_id>/',
-        views.SuccessResponseView.as_view(preview=True),
-        name='paypal-handle-order'),
+    path('handle-order/(<int:basket_id>/', views.SuccessResponseView.as_view(preview=True),
+         name='paypal-handle-order'),
 ]
 
 buyer_pays_on_website_patterns = [
-    path('place-order/<int:basket_id>/', views.SuccessResponseView.as_view(),
-         name='paypal-place-order'),
-    path('preview/<int:basket_id>/',
-         views.SuccessResponseView.as_view(preview=True),
-         name='paypal-success-response'),
+    path('place-order/<int:basket_id>/', views.SuccessResponseView.as_view(), name='paypal-place-order'),
+    path('preview/<int:basket_id>/', views.SuccessResponseView.as_view(preview=True), name='paypal-success-response'),
 ]
 
 
