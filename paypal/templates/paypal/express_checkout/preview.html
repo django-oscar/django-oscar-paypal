@@ -27,7 +27,7 @@
 
 {# Note, we submit to a different URL for placing an Express order #}
 {% block place_order %}
-    <form method="post" action="{% url 'paypal-place-order' basket.id %}">
+    <form method="post" action="{% url 'express-checkout-place-order' basket.id %}">
         {% csrf_token %}
         <input type="hidden" name="payer_id" value="{{ payer_id }}" />
         <input type="hidden" name="token" value="{{ token }}" />
