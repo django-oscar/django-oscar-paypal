@@ -1,6 +1,5 @@
 from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.shortcuts import redirect
 from oscar.apps.checkout import views
 from oscar.apps.payment import forms, models
 
@@ -61,7 +60,7 @@ class PaymentDetailsView(views.PaymentDetailsView):
         if not all([bankcard_form.is_valid(),
                     billing_address_form.is_valid()]):
             messages.error(request, "Invalid submission")
-            return HttpResponseRedirect(reverse('checkout:payment-details'))
+            return redirect('checkout:payment-details')
 
         # Attempt to submit the order, passing the bankcard object so that it
         # gets passed back to the 'handle_payment' method below.
