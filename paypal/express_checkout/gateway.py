@@ -4,20 +4,10 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.template.defaultfilters import striptags, truncatechars
 from django.utils.translation import gettext_lazy as _
-
 from paypalcheckoutsdk.core import LiveEnvironment, PayPalHttpClient, SandboxEnvironment
 from paypalcheckoutsdk.orders import (
-    OrdersAuthorizeRequest,
-    OrdersCaptureRequest,
-    OrdersCreateRequest,
-    OrdersGetRequest,
-)
-from paypalcheckoutsdk.payments import (
-    AuthorizationsCaptureRequest,
-    AuthorizationsVoidRequest,
-    CapturesRefundRequest,
-)
-
+    OrdersAuthorizeRequest, OrdersCaptureRequest, OrdersCreateRequest, OrdersGetRequest)
+from paypalcheckoutsdk.payments import AuthorizationsCaptureRequest, AuthorizationsVoidRequest, CapturesRefundRequest
 
 INTENT_AUTHORIZE = 'AUTHORIZE'
 INTENT_CAPTURE = 'CAPTURE'

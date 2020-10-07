@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.views import generic
 
 from paypal.express_checkout import models

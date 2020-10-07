@@ -11,12 +11,10 @@ from django.views.generic import RedirectView
 from oscar.apps.payment.exceptions import UnableToTakePayment
 from oscar.apps.shipping.methods import NoShippingRequired
 from oscar.core.loading import get_class, get_model
-
 from paypalhttp.http_error import HttpError
 
 from paypal.express.exceptions import (
-    EmptyBasketException, InvalidBasket, MissingShippingAddressException, MissingShippingMethodException,
-)
+    EmptyBasketException, InvalidBasket, MissingShippingAddressException, MissingShippingMethodException)
 from paypal.express_checkout.facade import capture_order, fetch_transaction_details, get_paypal_url
 from paypal.express_checkout.gateway import buyer_pays_on_paypal
 

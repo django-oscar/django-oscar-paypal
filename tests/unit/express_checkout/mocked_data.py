@@ -398,7 +398,7 @@ CAPTURE_ORDER_RESULT_DATA_REPRESENTATION = {
                     'country_code': 'GB',
                     'postal_code': 'WC2N 5DU'},
                 'name': {
-                  'full_name': 'Sherlock Holmes'
+                    'full_name': 'Sherlock Holmes'
                 }
             },
             'soft_descriptor': 'PAYPAL *TESTFACILIT'
@@ -474,20 +474,20 @@ GET_ORDER_AUTHORIZE_RESULT_DATA = {
     'id': '63354340WP116034H',
     'intent': 'AUTHORIZE',
     'links': [
-       {
-           'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/63354340WP116034H',
+        {
+            'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/63354340WP116034H',
             'method': 'GET',
             'rel': 'self'
-       },
-       {
-           'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/63354340WP116034H/authorize',
-           'method': 'POST',
-           'rel': 'authorize'
-       }
+        },
+        {
+            'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/63354340WP116034H/authorize',
+            'method': 'POST',
+            'rel': 'authorize'
+        }
     ],
     'payer': {
         'address': {
-           'country_code': 'GB'
+            'country_code': 'GB'
         },
         'email_address': 'sherlock.holmes@example.com',
         'name': {
@@ -648,16 +648,18 @@ AUTHORIZE_ORDER_RESULT_DATA = {
                             {
                                 'href': 'https://api.sandbox.paypal.com/v2/payments/authorizations/3PW0120338716941H/void',
                                 'method': 'POST',
-                                'rel': 'void'},
+                                'rel': 'void'
+                            },
                             {
                                 'href': 'https://api.sandbox.paypal.com/v2/payments/authorizations/3PW0120338716941H/reauthorize',
                                 'method': 'POST',
-                                'rel': 'reauthorize'},
+                                'rel': 'reauthorize'
+                            },
                             {
                                 'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/63354340WP116034H',
                                 'method': 'GET',
                                 'rel': 'up'
-                            }
+                            },
                         ],
                         'seller_protection': {
                             'dispute_categories': [

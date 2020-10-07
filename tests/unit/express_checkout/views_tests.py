@@ -4,17 +4,16 @@ from urllib.parse import urlencode
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
-
 from oscar.apps.basket.models import Basket
 from oscar.apps.checkout.utils import CheckoutSessionData
 from oscar.apps.order.models import Order
 from oscar.test.factories import create_product
-
 from paypalhttp.http_error import HttpError
 from paypalhttp.http_response import construct_object
 
 from paypal.express_checkout.models import ExpressCheckoutTransaction
 from tests.shipping.methods import SecondClassRecorded
+
 from .mocked_data import CAPTURE_ORDER_RESULT_DATA_MINIMAL, CREATE_ORDER_RESULT_DATA_MINIMAL, GET_ORDER_RESULT_DATA
 
 
