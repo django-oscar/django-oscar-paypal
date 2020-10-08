@@ -270,14 +270,14 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
     if user:
         params['EMAIL'] = user.email
     if user_address:
-        params['SHIPTONAME'] = user_address.name
-        params['SHIPTOSTREET'] = user_address.line1
-        params['SHIPTOSTREET2'] = user_address.line2
-        params['SHIPTOCITY'] = user_address.line4
-        params['SHIPTOSTATE'] = user_address.state
-        params['SHIPTOZIP'] = user_address.postcode
-        params['SHIPTOCOUNTRYCODE'] = user_address.country.iso_3166_1_a2
-        params['SHIPTOPHONENUM'] = user_address.phone_number
+        params['PAYMENTREQUEST_0_SHIPTONAME'] = user_address.name
+        params['PAYMENTREQUEST_0_SHIPTOSTREET'] = user_address.line1
+        params['PAYMENTREQUEST_0_SHIPTOSTREET2'] = user_address.line2
+        params['PAYMENTREQUEST_0_SHIPTOCITY'] = user_address.line4
+        params['PAYMENTREQUEST_0_SHIPTOSTATE'] = user_address.state
+        params['PAYMENTREQUEST_0_SHIPTOZIP'] = user_address.postcode
+        params['PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'] = user_address.country.iso_3166_1_a2
+        params['PAYMENTREQUEST_0_SHIPTOPHONENUM'] = user_address.phone_number
 
     # Shipping details (if already set) - we override the SHIPTO* fields and
     # set a flag to indicate that these can't be altered on the PayPal side.
@@ -286,22 +286,22 @@ def set_txn(basket, shipping_methods, currency, return_url, cancel_url, update_u
         # It's recommend not to set 'confirmed shipping' if supplying the
         # shipping address directly.
         params['REQCONFIRMSHIPPING'] = 0
-        params['SHIPTONAME'] = shipping_address.name
-        params['SHIPTOSTREET'] = shipping_address.line1
-        params['SHIPTOSTREET2'] = shipping_address.line2
-        params['SHIPTOCITY'] = shipping_address.line4
-        params['SHIPTOSTATE'] = shipping_address.state
-        params['SHIPTOZIP'] = shipping_address.postcode
-        params['SHIPTOCOUNTRYCODE'] = shipping_address.country.iso_3166_1_a2
-        params['SHIPTOPHONENUM'] = shipping_address.phone_number
+        params['PAYMENTREQUEST_0_SHIPTONAME'] = shipping_address.name
+        params['PAYMENTREQUEST_0_SHIPTOSTREET'] = shipping_address.line1
+        params['PAYMENTREQUEST_0_SHIPTOSTREET2'] = shipping_address.line2
+        params['PAYMENTREQUEST_0_SHIPTOCITY'] = shipping_address.line4
+        params['PAYMENTREQUEST_0_SHIPTOSTATE'] = shipping_address.state
+        params['PAYMENTREQUEST_0_SHIPTOZIP'] = shipping_address.postcode
+        params['PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'] = shipping_address.country.iso_3166_1_a2
+        params['PAYMENTREQUEST_0_SHIPTOPHONENUM'] = shipping_address.phone_number
 
         # For US addresses, we need to try and convert the state into 2 letter
         # code - otherwise we can get a 10736 error as the shipping address and
         # zipcode don't match the state. Very silly really.
-        if params['SHIPTOCOUNTRYCODE'] == 'US':
-            key = params['SHIPTOSTATE'].lower().strip()
+        if params['PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'] == 'US':
+            key = params['PAYMENTREQUEST_0_SHIPTOSTATE'].lower().strip()
             if key in us_states.STATES_NORMALIZED:
-                params['SHIPTOSTATE'] = us_states.STATES_NORMALIZED[key]
+                params['PAYMENTREQUEST_0_SHIPTOSTATE'] = us_states.STATES_NORMALIZED[key]
 
     elif no_shipping:
         params['NOSHIPPING'] = 1
