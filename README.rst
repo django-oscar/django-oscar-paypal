@@ -6,7 +6,7 @@ This package provides integration between django-oscar_ and both `PayPal REST AP
 Express (NVP)`_ and `PayPal Payflow Pro`_.
 
 .. _django-oscar: https://github.com/django-oscar/django-oscar
-.. _`PayPal REST API`:: https://developer.paypal.com/docs/api-basics/
+.. _`PayPal REST API`: https://developer.paypal.com/docs/api-basics/
 .. _`PayPal Express (NVP)`: https://developer.paypal.com/docs/nvp-soap-api/
 .. _`PayPal Payflow Pro`: https://merchant.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=merchant/payment_gateway
 
