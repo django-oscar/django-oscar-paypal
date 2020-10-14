@@ -14,7 +14,9 @@ from paypalhttp.http_response import construct_object
 from paypal.express_checkout.models import ExpressCheckoutTransaction
 from tests.shipping.methods import SecondClassRecorded
 
-from .mocked_data import CAPTURE_ORDER_RESULT_DATA_MINIMAL, CREATE_ORDER_RESULT_DATA_MINIMAL, GET_ORDER_RESULT_DATA
+from .mocked_data import (
+    AUTHORIZE_ORDER_RESULT_DATA_MINIMAL, CAPTURE_AUTHORIZATION_RESULT_DATA_MINIMAL, CAPTURE_ORDER_RESULT_DATA_MINIMAL,
+    CREATE_ORDER_RESULT_DATA_MINIMAL, GET_ORDER_AUTHORIZE_RESULT_DATA, GET_ORDER_RESULT_DATA)
 
 
 class BasketMixin:
@@ -136,8 +138,9 @@ class PreviewOrderTests(BasketMixin, TestCase):
             assert reverse('basket:summary') == response.url
 
 
-class SubmitOrderTests(BasketMixin, TestCase):
+class SubmitOrderMixin(BasketMixin):
     fixtures = ['countries.json']
+    intent = ExpressCheckoutTransaction.CAPTURE
 
     def setUp(self):
         super().setUp()
@@ -159,13 +162,16 @@ class SubmitOrderTests(BasketMixin, TestCase):
         session.save()
 
         # Before getting order must be created
-        ExpressCheckoutTransaction.objects.create(
+        self.txn = ExpressCheckoutTransaction.objects.create(
             order_id='4MW805572N795704B',
             amount=D('19.99'),
             currency=self.basket.currency,
             status=ExpressCheckoutTransaction.CREATED,
-            intent=ExpressCheckoutTransaction.CAPTURE,
+            intent=self.intent,
         )
+
+
+class SubmitOrderTests(SubmitOrderMixin, TestCase):
 
     def test_created_order(self):
         with patch('paypal.express_checkout.gateway.PaymentProcessor.get_order') as get_order:
@@ -185,6 +191,15 @@ class SubmitOrderTests(BasketMixin, TestCase):
                 assert address.line4 == 'London'
                 assert address.country.iso_3166_1_a2 == 'GB'
                 assert address.postcode == 'WC2N 5DU'
+
+                self.txn.refresh_from_db()
+                assert self.txn.capture_id == '2D6171889X1782919'
+                assert self.txn.authorization_id is None
+                assert self.txn.refund_id is None
+                assert self.txn.payer_id == '0000000000001'
+                assert self.txn.email == 'sherlock.holmes@example.com'
+                assert self.txn.address_full_name == 'Sherlock Holmes'
+                assert self.txn.address is not None
 
     def test_paypal_error(self):
         with patch('paypal.express_checkout.gateway.PaymentProcessor.get_order') as get_order:
@@ -220,6 +235,50 @@ class SubmitOrderTests(BasketMixin, TestCase):
                 assert address.line4 == 'London'
                 assert address.country.iso_3166_1_a2 == 'GB'
                 assert address.postcode == 'WC2N 5DU'
+
+                self.txn.refresh_from_db()
+                assert self.txn.capture_id == '2D6171889X1782919'
+                assert self.txn.authorization_id is None
+                assert self.txn.refund_id is None
+                assert self.txn.payer_id == '0000000000001'
+                assert self.txn.email == 'sherlock.holmes@example.com'
+                assert self.txn.address_full_name == 'Sherlock Holmes'
+                assert self.txn.address is not None
+
+
+class SubmitOrderWithAuthorizationTests(SubmitOrderMixin, TestCase):
+    intent = ExpressCheckoutTransaction.AUTHORIZE
+
+    @override_settings(PAYPAL_ORDER_INTENT=ExpressCheckoutTransaction.AUTHORIZE)
+    def test_created_order(self):
+        with patch('paypal.express_checkout.gateway.PaymentProcessor.get_order') as get_order:
+            with patch('paypal.express_checkout.gateway.PaymentProcessor.authorize_order') as authorize_order:
+                with patch('paypal.express_checkout.gateway.PaymentProcessor.capture_order') as capture_order:
+
+                    get_order.return_value = construct_object('Result', GET_ORDER_AUTHORIZE_RESULT_DATA)
+                    authorize_order.return_value = construct_object('Result', AUTHORIZE_ORDER_RESULT_DATA_MINIMAL)
+                    capture_order.return_value = construct_object('Result', CAPTURE_AUTHORIZATION_RESULT_DATA_MINIMAL)
+
+                    self.client.post(self.url, self.payload)
+
+                    order = Order.objects.all().first()
+                    assert order.total_incl_tax == D('19.99')
+                    assert order.guest_email == 'sherlock.holmes@example.com'
+
+                    address = order.shipping_address
+                    assert address.line1 == '221B Baker Street'
+                    assert address.line4 == 'London'
+                    assert address.country.iso_3166_1_a2 == 'GB'
+                    assert address.postcode == 'WC2N 5DU'
+
+                    self.txn.refresh_from_db()
+                    assert self.txn.capture_id == '62Y22172G0146141U'
+                    assert self.txn.authorization_id == '3PW0120338716941H'
+                    assert self.txn.refund_id is None
+                    assert self.txn.payer_id == '0000000000001'
+                    assert self.txn.email == 'sherlock.holmes@example.com'
+                    assert self.txn.address_full_name == 'Sherlock Holmes'
+                    assert self.txn.address is not None
 
 
 class CancelOrderTests(BasketMixin, TestCase):
