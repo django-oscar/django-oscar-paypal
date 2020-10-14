@@ -468,18 +468,20 @@ REFUND_ORDER_DATA_REPRESENTATION = {
     'update_time': '2020-10-04T02:51:57-07:00'
 }
 
+
+# Returned by `PaymentProcessor.get_order` for authorized order.
 GET_ORDER_AUTHORIZE_RESULT_DATA = {
     'create_time': '2020-03-04T19:57:30Z',
-    'id': '63354340WP116034H',
+    'id': '4MW805572N795704B',
     'intent': 'AUTHORIZE',
     'links': [
         {
-            'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/63354340WP116034H',
+            'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/4MW805572N795704B',
             'method': 'GET',
             'rel': 'self'
         },
         {
-            'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/63354340WP116034H/authorize',
+            'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/4MW805572N795704B/authorize',
             'method': 'POST',
             'rel': 'authorize'
         }
@@ -549,13 +551,103 @@ GET_ORDER_AUTHORIZE_RESULT_DATA = {
     'status': 'APPROVED'
 }
 
-AUTHORIZE_ORDER_RESULT_DATA = {
+# Returned by `PaymentProcessor.authorize_order` with request.prefer('return=minimal').
+AUTHORIZE_ORDER_RESULT_DATA_MINIMAL = {
+    'id': '4MW805572N795704B',
+    'status': 'COMPLETED',
+    'purchase_units': [
+        {
+            'reference_id': 'default',
+            'shipping': {
+                'address': {
+                    'address_line_1': '221B Baker Street',
+                    'admin_area_2': 'London',
+                    'country_code': 'GB',
+                    'postal_code': 'WC2N 5DU'
+                },
+                'name': {
+                    'full_name': 'Sherlock Holmes'
+                }
+            },
+            'payments': {
+                'authorizations': [
+                    {'amount': {
+                        'currency_code': 'GBP',
+                        'value': '9.99'
+                    },
+                        'create_time': '2020-03-04T19:57:47Z',
+                        'expiration_time': '2020-04-02T19:57:47Z',
+                        'id': '3PW0120338716941H',
+                        'links': [
+                            {
+                                'href': 'https://api.sandbox.paypal.com/v2/payments/authorizations/3PW0120338716941H',
+                                'method': 'GET',
+                                'rel': 'self'
+                            },
+                            {
+                                'href': 'https://api.sandbox.paypal.com/v2/payments/authorizations/3PW0120338716941H/capture',
+                                'method': 'POST',
+                                'rel': 'capture'
+                            },
+                            {
+                                'href': 'https://api.sandbox.paypal.com/v2/payments/authorizations/3PW0120338716941H/void',
+                                'method': 'POST',
+                                'rel': 'void'
+                            },
+                            {
+                                'href': 'https://api.sandbox.paypal.com/v2/payments/authorizations/3PW0120338716941H/reauthorize',
+                                'method': 'POST',
+                                'rel': 'reauthorize'
+                            },
+                            {
+                                'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/4MW805572N795704B',
+                                'method': 'GET',
+                                'rel': 'up'
+                            },
+                        ],
+                        'seller_protection': {
+                            'dispute_categories': [
+                                'ITEM_NOT_RECEIVED',
+                                'UNAUTHORIZED_TRANSACTION'
+                            ],
+                            'status': 'ELIGIBLE'
+                        },
+                        'status': 'CREATED',
+                        'update_time': '2020-03-04T19:57:47Z'
+                    }
+                ]
+            }
+        }
+    ],
+    'payer': {
+        'address': {
+            'country_code': 'US'
+        },
+        'email_address': 'sherlock.holmes@example.com',
+        'name': {
+            'given_name': 'Sherlock',
+            'surname': 'Holmes'
+        },
+        'payer_id': '0000000000001'
+    },
+    'links': [
+        {
+            'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/4MW805572N795704B',
+            'method': 'GET',
+            'rel': 'self'
+        }
+    ]
+}
+
+# Returned by `PaymentProcessor.authorize_order` with request.prefer('return=representation').
+# Is not used in tests for the moment - shown just as an example.
+AUTHORIZE_ORDER_RESULT_DATA_REPRESENTATION = {
     'create_time': '2020-03-04T19:57:30Z',
-    'id': '63354340WP116034H',
+    'id': '4MW805572N795704B',
     'intent': 'AUTHORIZE',
     'links': [
         {
-            'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/63354340WP116034H',
+            'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/4MW805572N795704B',
             'method': 'GET',
             'rel': 'self'
         }
@@ -655,7 +747,7 @@ AUTHORIZE_ORDER_RESULT_DATA = {
                                 'rel': 'reauthorize'
                             },
                             {
-                                'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/63354340WP116034H',
+                                'href': 'https://api.sandbox.paypal.com/v2/checkout/orders/4MW805572N795704B',
                                 'method': 'GET',
                                 'rel': 'up'
                             },
@@ -692,7 +784,7 @@ AUTHORIZE_ORDER_RESULT_DATA = {
 }
 
 
-# request.prefer('return=minimal')
+# Returned by `PaymentProcessor.capture_order` for authorized order with request.prefer('return=minimal')
 CAPTURE_AUTHORIZATION_RESULT_DATA_MINIMAL = {
     'id': '62Y22172G0146141U',
     'links': [
@@ -715,11 +807,12 @@ CAPTURE_AUTHORIZATION_RESULT_DATA_MINIMAL = {
     'status': 'PENDING'
 }
 
-
-# request.prefer('return=representation')
+# Returned by `PaymentProcessor.capture_order` for authorized order with request.prefer('return=representation')
+# Is not used in tests for the moment - shown just as an example.
 CAPTURE_AUTHORIZATION_RESULT_DATA_REPRESENTATION = {
     'amount': {
-        'currency_code': 'GBP', 'value': '9.99'
+        'currency_code': 'GBP',
+        'value': '9.99'
     },
     'create_time': '2020-03-04T21:14:12Z',
     'final_capture': True,
