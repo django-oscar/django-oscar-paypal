@@ -119,8 +119,9 @@ def capture_order(token):
         capture_token = transaction.order_id
 
     result = PaymentProcessor().capture_order(capture_token, transaction.intent)
-    transaction.capture_id = result.purchase_units[0].payments.captures[0].id
-    transaction.status = result.status
+    capture_id = result.id if transaction.is_authorization else result.purchase_units[0].payments.captures[0].id
+    transaction.capture_id = capture_id
+    transaction.status = Transaction.COMPLETED
     transaction.save()
     return transaction
 
