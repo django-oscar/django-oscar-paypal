@@ -4,7 +4,7 @@ from unittest.mock import patch
 from django.test import TestCase
 from paypalhttp.http_response import construct_object
 
-from paypal.express_checkout.facade import refund_order
+from paypal.express_checkout.facade import refund_order, void_authorization
 from paypal.express_checkout.models import ExpressCheckoutTransaction
 
 from .mocked_data import REFUND_ORDER_DATA_MINIMAL
@@ -35,3 +35,17 @@ class FacadeTests(TestCase):
             assert self.txn.refund_id == '0SM71185A67927728'
 
             mocked_refund_order.assert_called_once_with('45315376249711632', D('0.99'), 'GBP')
+
+    def test_void_authorization(self):
+        self.txn.authorization_id = '3PW0120338716941H'
+        self.txn.save()
+
+        with patch('paypal.express_checkout.facade.PaymentProcessor.void_authorized_order') as mocked_void_order:
+            mocked_void_order.return_value = None
+
+            void_authorization('4MW805572N795704B')
+
+            self.txn.refresh_from_db()
+            assert self.txn.status == ExpressCheckoutTransaction.VOIDED
+
+            mocked_void_order.assert_called_once_with('3PW0120338716941H')
