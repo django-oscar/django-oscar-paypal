@@ -170,9 +170,9 @@ class PaymentProcessor:
     def get_authorize_request_body(self):
         return {}
 
-    def authorize_order(self, order_id):
+    def authorize_order(self, order_id, preferred_response='minimal'):
         request = OrdersAuthorizeRequest(order_id)
-        request.prefer("return=representation")  # TODO: probably here we can use default `prefer`?
+        request.prefer(f'return={preferred_response}')
         request.request_body(self.get_authorize_request_body())
         response = self.client.execute(request)
         return response.result
