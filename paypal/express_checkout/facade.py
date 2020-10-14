@@ -99,11 +99,13 @@ def fetch_transaction_details(token):
         transaction.email = result.payer.email_address
         transaction.address_full_name = result.purchase_units[0].shipping.name.full_name
         transaction.address = json.dumps(result.purchase_units[0].shipping.address.dict())
+        transaction.status = result.status
         transaction.save()
 
-    if transaction.is_authorization:
+    if transaction.is_authorization and not transaction.authorization_id:
         result = PaymentProcessor().authorize_order(transaction.order_id)
         transaction.authorization_id = result.purchase_units[0].payments.authorizations[0].id
+        transaction.status = result.status
         transaction.save()
 
     return transaction
