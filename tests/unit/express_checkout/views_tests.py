@@ -91,7 +91,7 @@ class PreviewOrderTests(BasketMixin, TestCase):
     def setUp(self):
         super().setUp()
 
-        self.add_product_to_basket(price=D('9.99'))
+        self.add_product_to_basket(price=D('19.99'))
         basket = Basket.objects.all().first()
         basket.freeze()
 
@@ -129,10 +129,6 @@ class PreviewOrderTests(BasketMixin, TestCase):
                 assert k in context, f'{k} not in context'
 
     def test_paypal_error_redirects_to_basket(self):
-        self.add_product_to_basket(price=D('9.99'))
-        basket = Basket.objects.all().first()
-        basket.freeze()
-
         with patch('paypal.express_checkout.gateway.PaymentProcessor.get_order') as get_order:
             get_order.side_effect = HttpError(message='Error message', status_code=404, headers=None)
 
@@ -146,7 +142,7 @@ class SubmitOrderTests(BasketMixin, TestCase):
     def setUp(self):
         super().setUp()
 
-        self.add_product_to_basket(price=D('9.99'))
+        self.add_product_to_basket(price=D('19.99'))
         self.basket = Basket.objects.all().first()
         self.basket.freeze()
 
@@ -181,7 +177,7 @@ class SubmitOrderTests(BasketMixin, TestCase):
                 self.client.post(self.url, self.payload)
 
                 order = Order.objects.all().first()
-                assert order.total_incl_tax == D('9.99')
+                assert order.total_incl_tax == D('19.99')
                 assert order.guest_email == 'sherlock.holmes@example.com'
 
                 address = order.shipping_address
@@ -216,7 +212,7 @@ class SubmitOrderTests(BasketMixin, TestCase):
                 self.client.get(url_with_query_string)
 
                 order = Order.objects.all().first()
-                assert order.total_incl_tax == D('9.99')
+                assert order.total_incl_tax == D('19.99')
                 assert order.guest_email == 'sherlock.holmes@example.com'
 
                 address = order.shipping_address
