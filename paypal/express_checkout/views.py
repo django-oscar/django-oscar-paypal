@@ -131,7 +131,7 @@ class CancelResponseView(RedirectView):
 
 class SuccessResponseView(PaymentDetailsView):
 
-    template_name_preview = 'paypal/express/preview.html'
+    template_name_preview = 'paypal/express_checkout/preview.html'
     preview = True
 
     error_msg = _('A problem occurred communicating with PayPal - please try again later')
