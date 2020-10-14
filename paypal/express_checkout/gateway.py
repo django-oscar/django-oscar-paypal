@@ -179,8 +179,7 @@ class PaymentProcessor:
 
     def void_authorized_order(self, authorization_id):
         request = AuthorizationsVoidRequest(authorization_id)
-        response = self.client.execute(request)
-        return response.result
+        self.client.execute(request)
 
     def refund_order(self, capture_id, amount, currency, preferred_response='minimal'):
         request = CapturesRefundRequest(capture_id)
