@@ -409,7 +409,6 @@ CAPTURE_ORDER_RESULT_DATA_REPRESENTATION = {
 }
 
 # Returned by `PaymentProcessor.refund_order` with request.prefer('return=minimal').
-# Is not used in tests for the moment - shown just as an example.
 REFUND_ORDER_DATA_MINIMAL = {
     'id': '0SM71185A67927728',
     'links': [
