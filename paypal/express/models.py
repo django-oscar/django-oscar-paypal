@@ -1,12 +1,10 @@
 import re
 
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 
 from paypal import base
 
 
-@python_2_unicode_compatible
 class ExpressTransaction(base.ResponseModel):
 
     # The PayPal method and version used
