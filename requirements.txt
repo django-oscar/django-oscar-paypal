@@ -6,7 +6,7 @@ tox==3.20.1
 pytest-django==4.1.0
 pytest-cov==2.10.1
 django-widget-tweaks==1.4.8
-sorl-thumbnail==12.6.3
+sorl-thumbnail==12.7.0
 
 # Development
 django-extensions==3.0.9
