@@ -9,7 +9,7 @@ django-widget-tweaks==1.4.8
 sorl-thumbnail==12.6.3
 
 # Development
-django-extensions==3.0.9
+django-extensions==3.1.0
 django-debug-toolbar==3.1.1
 flake8
 isort
