@@ -20,7 +20,7 @@ class ExpressCheckoutTransaction(models.Model):
     currency = models.CharField(max_length=8, null=True, blank=True)
 
     CREATED, SAVED, APPROVED, VOIDED, COMPLETED = 'CREATED', 'SAVED', 'APPROVED', 'VOIDED', 'COMPLETED'
-    status = models.CharField(max_length=8)
+    status = models.CharField(max_length=9)
 
     AUTHORIZE, CAPTURE = 'AUTHORIZE', 'CAPTURE'
     intent = models.CharField(max_length=9)
