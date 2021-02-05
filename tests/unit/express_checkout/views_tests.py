@@ -16,7 +16,8 @@ from tests.shipping.methods import SecondClassRecorded
 
 from .mocked_data import (
     AUTHORIZE_ORDER_RESULT_DATA_MINIMAL, CAPTURE_AUTHORIZATION_RESULT_DATA_MINIMAL, CAPTURE_ORDER_RESULT_DATA_MINIMAL,
-    CREATE_ORDER_RESULT_DATA_MINIMAL, GET_ORDER_AUTHORIZE_RESULT_DATA, GET_ORDER_RESULT_DATA)
+    CREATE_ORDER_RESULT_DATA_MINIMAL, GET_ORDER_AUTHORIZE_RESULT_DATA, GET_ORDER_RESULT_DATA,
+    GET_ORDER_RESULT_NO_SHIPPING_DATA, CAPTURE_ORDER_RESULT_NO_SHIPPING_DATA_MINIMAL)
 
 
 class BasketMixin:
@@ -201,6 +202,33 @@ class SubmitOrderTests(SubmitOrderMixin, TestCase):
                 assert self.txn.address_full_name == 'Sherlock Holmes'
                 assert self.txn.address is not None
 
+    def test_created_order_no_shipping(self):
+        for lines in self.basket.lines.all():
+            lines.product.product_class.requires_shipping = False
+            lines.product.product_class.save()
+
+        with patch('paypal.express_checkout.gateway.PaymentProcessor.get_order') as get_order:
+            with patch('paypal.express_checkout.gateway.PaymentProcessor.capture_order') as capture_order:
+
+                get_order.return_value = construct_object('Result', GET_ORDER_RESULT_NO_SHIPPING_DATA)
+                capture_order.return_value = construct_object('Result', CAPTURE_ORDER_RESULT_NO_SHIPPING_DATA_MINIMAL)
+
+                self.client.post(self.url, self.payload)
+
+                order = Order.objects.all().first()
+                assert order.total_incl_tax == D('19.99')
+                assert order.guest_email == 'sherlock.holmes@example.com'
+                assert order.shipping_address is None
+
+                self.txn.refresh_from_db()
+                assert self.txn.capture_id == '2D6171889X1782919'
+                assert self.txn.authorization_id is None
+                assert self.txn.refund_id is None
+                assert self.txn.payer_id == '0000000000001'
+                assert self.txn.email == 'sherlock.holmes@example.com'
+                assert self.txn.address_full_name == ''
+                assert self.txn.address == ''
+
     def test_paypal_error(self):
         with patch('paypal.express_checkout.gateway.PaymentProcessor.get_order') as get_order:
             with patch('paypal.express_checkout.gateway.PaymentProcessor.capture_order') as capture_order:
@@ -244,6 +272,38 @@ class SubmitOrderTests(SubmitOrderMixin, TestCase):
                 assert self.txn.email == 'sherlock.holmes@example.com'
                 assert self.txn.address_full_name == 'Sherlock Holmes'
                 assert self.txn.address is not None
+
+    @override_settings(PAYPAL_BUYER_PAYS_ON_PAYPAL=True)
+    def test_create_order_when_bayer_pays_on_paypal_no_shipping(self):
+        for lines in self.basket.lines.all():
+            lines.product.product_class.requires_shipping = False
+            lines.product.product_class.save()
+
+        url = reverse('express-checkout-handle-order', kwargs={'basket_id': self.basket.id})
+        query_string = urlencode({'PayerID': '0000000000001', 'token': '4MW805572N795704B'})
+        url_with_query_string = f'{url}?{query_string}'
+
+        with patch('paypal.express_checkout.gateway.PaymentProcessor.get_order') as get_order:
+            with patch('paypal.express_checkout.gateway.PaymentProcessor.capture_order') as capture_order:
+
+                get_order.return_value = construct_object('Result', GET_ORDER_RESULT_NO_SHIPPING_DATA)
+                capture_order.return_value = construct_object('Result', CAPTURE_ORDER_RESULT_NO_SHIPPING_DATA_MINIMAL)
+
+                self.client.get(url_with_query_string)
+
+                order = Order.objects.all().first()
+                assert order.total_incl_tax == D('19.99')
+                assert order.guest_email == 'sherlock.holmes@example.com'
+                assert order.shipping_address is None
+
+                self.txn.refresh_from_db()
+                assert self.txn.capture_id == '2D6171889X1782919'
+                assert self.txn.authorization_id is None
+                assert self.txn.refund_id is None
+                assert self.txn.payer_id == '0000000000001'
+                assert self.txn.email == 'sherlock.holmes@example.com'
+                assert self.txn.address_full_name == ''
+                assert self.txn.address == ''
 
 
 class SubmitOrderWithAuthorizationTests(SubmitOrderMixin, TestCase):
