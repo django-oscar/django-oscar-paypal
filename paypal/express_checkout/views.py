@@ -294,7 +294,7 @@ class SuccessResponseView(PaymentDetailsView):
         the data returned by PayPal.
         """
         ship_to_name = self.txn.address_full_name
-        if ship_to_name is None:
+        if not ship_to_name:
             return None
         first_name = last_name = ''
         parts = ship_to_name.split()
