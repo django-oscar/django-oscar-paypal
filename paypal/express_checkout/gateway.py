@@ -77,8 +77,24 @@ class PaymentProcessor:
         breakdown = {
             'item_total': {
                 'currency_code': currency,
-                'value': format_amount(basket.total_incl_tax),
+                'value': format_amount(basket.total_incl_tax_excl_discounts),
             },
+            'discount': {
+                'currency_code': currency,
+                'value': format_amount(sum([
+                    discount['discount']
+                    for discount
+                    in basket.offer_discounts + basket.voucher_discounts
+                ], D(0))),
+            },
+            'shipping_discount': {
+                'currency_code': currency,
+                'value': format_amount(sum([
+                    discount['discount']
+                    for discount
+                    in basket.shipping_discounts
+                ], D(0))),
+            }
         }
 
         if shipping_charge is not None:
