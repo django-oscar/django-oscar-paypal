@@ -48,9 +48,7 @@ Having problems or got a question?
 Tests
 -----
 
-.. image:: https://secure.travis-ci.org/django-oscar/django-oscar-paypal.png
-    :alt: Continuous integration status
-    :target: http://travis-ci.org/#!/django-oscar/django-oscar-paypal
+.. image:: https://github.com/django-oscar/django-oscar-paypal/workflows/Tests/badge.svg
 
 .. image:: http://codecov.io/github/django-oscar/django-oscar-paypal/coverage.svg?branch=master
     :alt: Coverage
