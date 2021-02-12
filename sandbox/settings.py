@@ -1,5 +1,7 @@
 import os
 
+from django.utils.translation import gettext_lazy as _
+
 # Django settings for oscar project.
 PROJECT_DIR = os.path.dirname(__file__)
 location = lambda x: os.path.join(os.path.dirname(os.path.realpath(__file__)), x)
@@ -19,8 +21,8 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': location('db.sqlite'),                      # Or path to database file if using sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3',     # Add 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': location('db.sqlite'),              # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -86,7 +88,7 @@ MEDIA_URL = '/media/'
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-#ADMIN_MEDIA_PREFIX = '/media/admin/'
+# ADMIN_MEDIA_PREFIX = '/media/admin/'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = location('public')
@@ -273,13 +275,12 @@ LOGIN_REDIRECT_URL = '/accounts/'
 APPEND_SLASH = True
 
 # Oscar settings
-from oscar.defaults import *
+from oscar.defaults import *    # noqa
 OSCAR_ALLOW_ANON_CHECKOUT = True
 
 OSCAR_SHOP_TAGLINE = 'PayPal'
 
 # Add Payflow dashboard stuff to settings
-from django.utils.translation import gettext_lazy as _
 OSCAR_DASHBOARD_NAVIGATION.append(
     {
         'label': _('PayPal'),
