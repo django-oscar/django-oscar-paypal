@@ -23,7 +23,7 @@ setup(
         'django-localflavor'
     ],
     extras_require={
-        'oscar': ['django-oscar>=2.0,<3.0']
+        'oscar': ['django-oscar>=2.0,<4.0']
     },
     # See http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
