@@ -1,0 +1,27 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: monthly
+    time: "11:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: django
+    versions:
+    - ">= 3.a, < 4"
+  - dependency-name: django-oscar
+    versions:
+    - "3.0"
+  - dependency-name: tox
+    versions:
+    - 3.21.3
+  - dependency-name: pytest-cov
+    versions:
+    - 2.11.1
+  - dependency-name: coverage
+    versions:
+    - "5.4"
+  - dependency-name: django-debug-toolbar
+    versions:
+    - "3.2"
