@@ -2,7 +2,7 @@
 django-oscar>=2.0,<3.0
 django-webtest==1.9.7
 tox>=3.20<4
-pytest-django==4.1.0
+pytest-django==4.3.0
 pytest-cov>=2.10<3
 django-widget-tweaks==1.4.8
 sorl-thumbnail
