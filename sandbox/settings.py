@@ -324,6 +324,10 @@ PAYPAL_API_SIGNATURE = 'A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU
 PAYPAL_CURRENCY = PAYPAL_PAYFLOW_CURRENCY = 'GBP'
 PAYPAL_PAYFLOW_DASHBOARD_FORMS = True
 
+# PayPal REST API credentials
+PAYPAL_CLIENT_ID = ''
+PAYPAL_CLIENT_SECRET = ''
+
 # Put your own sandbox settings into an integration.py modulde (that is ignored
 # by git).
 try:
