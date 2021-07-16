@@ -7,16 +7,18 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <ul class="breadcrumb">
-        <li>
-            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
-        </li>
-        <li>PayPal</li>
-        <li>
-            <a href="{% url 'express_checkout_dashboard:paypal-transaction-list' %}">{% trans "Express Checkout transactions" %}</a>
-        </li>
-        <li class="active">{{ txn.order_id }}</li>
-    </ul>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+            </li>
+            <li class="breadcrumb-item">PayPal</li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'express_checkout_dashboard:paypal-transaction-list' %}">{% trans "Express Checkout transactions" %}</a>
+            </li>
+            <li class="breadcrumb-item active">{{ txn.order_id }}</li>
+        </ol>
+    </nav>
 {% endblock %}
 
 {% block headertext %}
