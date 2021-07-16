@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block payment_details %}
-    <div class="well">
+    <div class="card card-body bg-light">
         <div class="sub-header">
             <h3>{% trans "PayPal Express" %}</h3>
         </div>
@@ -10,11 +10,11 @@
         <div style="overflow:auto"><a href="{% url 'express-checkout-direct-payment' %}" title="{% trans "Pay with PayPal" %}"><img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/checkout-logo-large.png" alt="Check out with PayPal" align="left" style="margin-right:7px;"></a>&nbsp;</div>
     </div>
 
-    <div class="well">
+    <div class="card card-body bg-light mt-4">
         <div class="sub-header">
             <h3>{% trans "PayPal PayFlow Pro" %}</h3>
         </div>
-        <form method="post" action="{% url 'checkout:preview' %}" class="form-stacked">
+        <form method="post" action="{% url 'checkout:preview' %}">
             {% csrf_token %}
             <h4>{% trans "Bankcard" %}</h4>
             {% include "oscar/partials/form_fields.html" with form=bankcard_form %}
