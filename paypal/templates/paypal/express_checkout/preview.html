@@ -13,8 +13,8 @@
         <div class="sub-header">
             <h2>{% trans "Payment" %}</h2>
         </div>
-        <div class="well well-success">
-            <h4>{% trans "PayPal" %}</h4>
+        <div class="card card-body bg-light">
+            <h3>{% trans "PayPal" %}</h3>
             <p>
                 {% blocktrans with amt=paypal_amount|currency email=paypal_user_email %}
                     {{ amt }} will be deducted from your PayPal account, registered
