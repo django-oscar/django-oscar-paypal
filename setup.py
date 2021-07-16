@@ -19,7 +19,7 @@ setup(
     install_requires=[
         'django>=2.2,<3.2',
         'paypal-checkout-serversdk>=1.0.1',
-        'requests>=1.0',
+        'requests>=2.26.0',
         'django-localflavor'
     ],
     extras_require={
