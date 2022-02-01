@@ -4,7 +4,7 @@ django-webtest==1.9.9
 tox>=3.20<4
 pytest-django==4.5.2
 pytest-cov>=2.10<3
-django-widget-tweaks==1.4.9
+django-widget-tweaks==1.4.12
 sorl-thumbnail
 coverage
 
