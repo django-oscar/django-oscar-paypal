@@ -1,5 +1,5 @@
 # Testing
-django-oscar>=2.0,<3.2
+django-oscar>=2.0,<3.3
 django-webtest==1.9.10
 tox>=3.20<4
 pytest-django==4.5.2
