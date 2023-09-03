@@ -328,7 +328,7 @@ PAYPAL_PAYFLOW_DASHBOARD_FORMS = True
 PAYPAL_CLIENT_ID = ''
 PAYPAL_CLIENT_SECRET = ''
 
-# Put your own sandbox settings into an integration.py modulde (that is ignored
+# Put your own sandbox settings into an integration.py module (that is ignored
 # by git).
 try:
     from integration import *  # noqa
