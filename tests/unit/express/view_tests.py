@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.urls import reverse
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from oscar.apps.basket.models import Basket
 from oscar.apps.order.models import Order
 from oscar.core.loading import get_classes
@@ -185,9 +185,9 @@ class PreviewOrderTests(MockedPayPalTests):
     def test_context(self):
         self.assertEqual(D('33.98'), self.response.context['paypal_amount'])
         self.assertEqual('Royal Mail Signed For™ 2nd Class',
-                         force_text(self.response.context['shipping_method'].name))
+                         force_str(self.response.context['shipping_method'].name))
         self.assertEqual('uk_rm_2ndrecorded',
-                         force_text(self.response.context['shipping_method'].code))
+                         force_str(self.response.context['shipping_method'].code))
 
     def test_keys_in_context(self):
         keys = ('shipping_address', 'shipping_method',
