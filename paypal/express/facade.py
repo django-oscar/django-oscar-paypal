@@ -1,5 +1,5 @@
 """
-Responsible for briding between Oscar and the PayPal gateway
+Responsible for bridging between Oscar and the PayPal gateway
 """
 from django.conf import settings
 from django.contrib.sites.models import Site

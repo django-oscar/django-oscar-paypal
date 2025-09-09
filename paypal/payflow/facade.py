@@ -161,7 +161,7 @@ def credit(order_number, pnref=None, amt=None):
     :pnref: The PNREF of the authorization transaction to use.  If not
             specified, the order number is used to retrieve the appropriate transaction.
     :amt: A custom amount to capture.  If not specified, the entire transaction
-          is refuneded.
+          is refunded.
     """
     if pnref is None:
         # No PNREF specified, look-up the auth/sale transaction for this order number

@@ -102,7 +102,7 @@ Express.
 Settings
 --------
 
-There's a smorgasboard of options that can be used, as there's many ways to
+There's a smorgasbord of options that can be used, as there's many ways to
 customised the Express Checkout experience.  Most of these are handled by simple
 settings.
 
