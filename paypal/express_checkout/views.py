@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 
 from django.conf import settings
 from django.contrib import messages
@@ -102,7 +103,7 @@ class PaypalRedirectView(CheckoutSessionMixin, RedirectView):
                 params['shipping_address'] = shipping_addr
                 params['shipping_method'] = shipping_method
 
-        if settings.DEBUG:
+        if settings.DEBUG or 'test' in sys.argv:
             # Determine the local server's hostname to use when in testing mode
             params['host'] = self.request.META['HTTP_HOST']
 

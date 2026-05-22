@@ -1,4 +1,5 @@
 import logging
+import sys
 from decimal import Decimal as D
 
 from django.conf import settings
@@ -122,7 +123,7 @@ class RedirectView(CheckoutSessionMixin, RedirectView):
                 user=user, basket=basket, request=self.request)
             params['shipping_methods'] = shipping_methods
 
-        if settings.DEBUG:
+        if settings.DEBUG or 'test' in sys.argv:
             # Determine the localserver's hostname to use when
             # in testing mode
             params['host'] = self.request.META['HTTP_HOST']

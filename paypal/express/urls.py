@@ -20,7 +20,7 @@ base_patterns = [
 
 
 buyer_pays_on_paypal_patterns = [
-    path('handle-order/(<int:basket_id>/', views.SuccessResponseView.as_view(preview=True),
+    path('handle-order/<int:basket_id>/', views.SuccessResponseView.as_view(preview=True),
          name='paypal-handle-order'),
 ]
 
